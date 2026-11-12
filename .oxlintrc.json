@@ -1,0 +1,152 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["oxc", "typescript", "unicorn"],
+  "categories": {
+    "correctness": "warn"
+  },
+  "env": {
+    "builtin": true
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
+  "ignorePatterns": [
+    "*.min.*",
+    "*.d.ts",
+    "build/**",
+    "coverage/**",
+    "tmp/**",
+    ".adonisjs/**",
+    "database/schema.ts",
+    "astryx-themes.ts"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "curly": "off",
+        "eqeqeq": ["error", "always"],
+        "no-array-constructor": "error",
+        "no-caller": "error",
+        "no-cond-assign": ["error", "except-parens"],
+        "no-constant-condition": "error",
+        "no-control-regex": "error",
+        "no-debugger": "error",
+        "no-duplicate-case": "error",
+        "no-eval": "error",
+        "no-ex-assign": "error",
+        "no-extra-boolean-cast": "error",
+        "no-fallthrough": "error",
+        "no-inner-declarations": "error",
+        "no-invalid-regexp": [
+          "error",
+          {
+            "allowConstructorFlags": ["u", "y"]
+          }
+        ],
+        "no-irregular-whitespace": "error",
+        "no-new-wrappers": "error",
+        "no-proto": "error",
+        "no-regex-spaces": "error",
+        "no-self-assign": "error",
+        "no-self-compare": "error",
+        "no-shadow": "error",
+        "no-sparse-arrays": "error",
+        "no-this-before-super": "error",
+        "no-unreachable": "error",
+        "no-unsafe-finally": "error",
+        "no-unsafe-negation": "error",
+        "no-with": "error",
+        "one-var": ["error", "never"],
+        "use-isnan": "error",
+        "valid-typeof": [
+          "error",
+          {
+            "requireStringLiterals": true
+          }
+        ],
+        "unicorn/prefer-module": "error",
+        "unicorn/prefer-node-protocol": "error",
+        "unicorn/filename-case": [
+          "error",
+          {
+            "case": "snakeCase"
+          }
+        ],
+        "unicorn/no-await-expression-member": "error",
+        "unicorn/no-instanceof-builtins": "error",
+        "unicorn/prefer-number-properties": "error",
+        "typescript/consistent-type-imports": [
+          "error",
+          {
+            "fixStyle": "inline-type-imports",
+            "disallowTypeAnnotations": false
+          }
+        ]
+      }
+    },
+    {
+      "files": ["inertia/**/*.{ts,tsx}"],
+      "plugins": ["react"],
+      "rules": {
+        "react/display-name": "error",
+        "react/jsx-key": "error",
+        "react/jsx-no-comment-textnodes": "error",
+        "react/jsx-no-duplicate-props": "error",
+        "react/jsx-no-target-blank": "error",
+        "react/jsx-no-undef": "error",
+        "react/no-danger-with-children": "error",
+        "react/no-direct-mutation-state": "error",
+        "react/no-find-dom-node": "error",
+        "react/no-is-mounted": "error",
+        "react/no-render-return-value": "error",
+        "react/no-string-refs": "error",
+        "react/no-unescaped-entities": "error",
+        "react/no-unknown-property": "error",
+        "react/require-render-return": "error",
+        "react/self-closing-comp": "error",
+        "react/rules-of-hooks": "error",
+        "react/static-components": "error",
+        "react/use-memo": "error",
+        "react/preserve-manual-memoization": "error",
+        "react/immutability": "error",
+        "react/globals": "error",
+        "react/refs": "error",
+        "react/set-state-in-effect": "error",
+        "react/error-boundaries": "error",
+        "react/purity": "error",
+        "react/set-state-in-render": "error",
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-curly-brace-presence": [
+          "error",
+          {
+            "props": "never",
+            "children": "never"
+          }
+        ],
+        "react/exhaustive-deps": "warn",
+        "react/incompatible-library": "warn",
+        "react/unsupported-syntax": "warn",
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@inertiajs/react",
+                "importNames": ["Link", "Form", "router", "useHttp"],
+                "message": "Use the type-safe version from @adonisjs/inertia/react."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["inertia/components/navigation/navigation_events.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ]
+}

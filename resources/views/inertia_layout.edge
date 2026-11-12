@@ -1,0 +1,26 @@
+{{--
+  The color mode the user picked with the theme toggle (`app_theme` cookie),
+  applied before any JavaScript runs so the page never flashes the wrong mode.
+  Without a choice, the browser follows the operating system.
+--}}
+@let(theme = request.plainCookie('app_theme', { encoded: false }))
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: {{ theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : 'light dark' }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title data-inertia>
+      AdonisJS
+    </title>
+
+    @viteReactRefresh()
+    @vite(['inertia/app.tsx'])
+    @inertiaHead()
+    @stack('dumper')
+  </head>
+
+  <body>
+    @inertia()
+  </body>
+
+</html>

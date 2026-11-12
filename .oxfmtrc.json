@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "trailingComma": "es5",
+  "semi": false,
+  "singleQuote": true,
+  "useTabs": false,
+  "quoteProps": "consistent",
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "printWidth": 100,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    ".adonisjs",
+    "node_modules",
+    "build",
+    "tmp",
+    "astryx-themes.ts",
+    "AGENTS.md",
+    "GEMINI.md",
+    ".claude/CLAUDE.md"
+  ]
+}
