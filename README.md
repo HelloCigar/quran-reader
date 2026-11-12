@@ -1,6 +1,6 @@
 <img src="assets/icon.svg" width="64" height="64" alt="">
 
-# adonis-react-starter
+# adonis-astryx-starter
 
 A full-stack starter: an [AdonisJS 7](https://adonisjs.com) backend serving a React frontend through [Inertia](https://inertiajs.com), with UI built from the [Astryx](https://github.com/meta/astryx) design system. It comes with session auth (sign up, log in, log out), a dashboard shell, light and dark mode, browser tests, and fast lint and format tooling.
 
