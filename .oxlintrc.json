@@ -171,6 +171,60 @@
       }
     },
     {
+      "files": ["**/*.ts"],
+      "rules": {
+        "flow/no-top-level-functions": "error",
+        "flow/exported-functions-are-factories": "error",
+        "flow/types-live-in-types-directory": "error"
+      }
+    },
+    {
+      "files": [
+        "**/*.d.ts",
+        "**/*.config.ts",
+        "**/bin/**",
+        "**/resources/**",
+        "**/inertia/**",
+        "**/tests/**"
+      ],
+      "rules": {
+        "flow/no-top-level-functions": "off",
+        "flow/exported-functions-are-factories": "off"
+      }
+    },
+    {
+      "files": ["**/mixins/**"],
+      "rules": {
+        "flow/exported-functions-are-factories": "off"
+      }
+    },
+    {
+      "files": [
+        "**/types/**",
+        "**/validators/**",
+        "**/values/**",
+        "**/*.d.ts",
+        "**/resources/**",
+        "**/inertia/**",
+        "**/tests/**"
+      ],
+      "rules": {
+        "flow/types-live-in-types-directory": "off"
+      }
+    },
+    {
+      "files": ["**/controllers/**/*.ts"],
+      "rules": {
+        "flow/no-private-controller-methods": "error"
+      }
+    },
+    {
+      "files": ["**/resources/**", "**/inertia/**"],
+      "rules": {
+        "flow/no-private-controller-methods": "off"
+      }
+    },
+    {
       "files": ["tests/**/*.ts"],
       "rules": {
         "flow/no-shared-mutable-test-state": "error",

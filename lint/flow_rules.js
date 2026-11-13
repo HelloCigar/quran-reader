@@ -3,7 +3,7 @@
  *
  * `astGrep()` returns ESLint flat config blocks; oxlint only needs the plugin
  * from the first block. Each rule's `files`/`ignores` scope is mirrored in the
- * "flow/*" overrides in .oxlintrc.json.
+ * "flow/*" overrides in .oxlintrc.json (all 8 rules).
  */
 import { astGrep } from '@adonisjs/eslint-ast-grep'
 
