@@ -10,8 +10,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title data-inertia>
-      AdonisJS
+      Quran Reader
     </title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {{--
+      Browser chrome color: the theme's --color-background-body, copied from
+      the palette (sand light 95 / dark 10) because a meta tag cannot read
+      tokens. Follows the same cookie choice as color-scheme above.
+    --}}
+    @if(theme === 'dark')
+      <meta name="theme-color" content="#1f1b14" />
+    @elseif(theme === 'light')
+      <meta name="theme-color" content="#f6f0e7" />
+    @else
+      <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f0e7" />
+      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f1b14" />
+    @end
 
     @viteReactRefresh()
     @vite(['inertia/app.tsx'])

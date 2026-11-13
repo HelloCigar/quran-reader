@@ -14,6 +14,18 @@ const routes = {
     tokens: [[0,"/"]],
     types: placeholder as Registry['home']['types'],
   },
+  'surahs.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/quran',
+    tokens: [[0,"quran"]],
+    types: placeholder as Registry['surahs.index']['types'],
+  },
+  'surahs.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/quran/:number',
+    tokens: [[0,"quran"],[1,"number"]],
+    types: placeholder as Registry['surahs.show']['types'],
+  },
   'new_account.create': {
     methods: ["GET","HEAD"],
     pattern: '/signup',
@@ -49,6 +61,30 @@ const routes = {
     pattern: '/logout',
     tokens: [[0,"logout"]],
     types: placeholder as Registry['session.destroy']['types'],
+  },
+  'bookmarks.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/bookmarks',
+    tokens: [[0,"bookmarks"]],
+    types: placeholder as Registry['bookmarks.index']['types'],
+  },
+  'bookmarks.store': {
+    methods: ["POST"],
+    pattern: '/bookmarks',
+    tokens: [[0,"bookmarks"]],
+    types: placeholder as Registry['bookmarks.store']['types'],
+  },
+  'bookmarks.update': {
+    methods: ["PUT","PATCH"],
+    pattern: '/bookmarks/:id',
+    tokens: [[0,"bookmarks"],[1,"id"]],
+    types: placeholder as Registry['bookmarks.update']['types'],
+  },
+  'bookmarks.destroy': {
+    methods: ["DELETE"],
+    pattern: '/bookmarks/:id',
+    tokens: [[0,"bookmarks"],[1,"id"]],
+    types: placeholder as Registry['bookmarks.destroy']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

@@ -15,7 +15,8 @@
     "lint": "vp lint -c .oxlintrc.json",
     "format": "vp fmt -c .oxfmtrc.json",
     "typecheck": "tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json",
-    "format:check": "vp fmt -c .oxfmtrc.json --check"
+    "format:check": "vp fmt -c .oxfmtrc.json --check",
+    "openapi": "openapi-ts"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
@@ -29,18 +30,24 @@
     "#middleware/*": "./app/middleware/*.js",
     "#transformers/*": "./app/transformers/*.js",
     "#validators/*": "./app/validators/*.js",
+    "#values/*": "./app/values/*.js",
     "#providers/*": "./providers/*.js",
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",
     "#database/*": "./database/*.js",
     "#tests/*": "./tests/*.js",
     "#start/*": "./start/*.js",
-    "#config/*": "./config/*.js"
+    "#config/*": "./config/*.js",
+    "#types/*": "./types/*.js",
+    "#integrations/*": "./app/integrations/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^8.5.2",
+    "@adonisjs/eslint-ast-grep": "^1.0.0",
     "@adonisjs/tsconfig": "^2.0.0",
+    "@adonisplus/flow": "^1.0.0",
     "@astryxdesign/cli": "^0.7.14",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@japa/assert": "^4.2.0",
     "@japa/browser-client": "^2.3.0",
     "@japa/plugin-adonisjs": "^5.2.0",
@@ -63,6 +70,7 @@
   },
   "dependencies": {
     "@adonisjs/auth": "^10.1.0",
+    "@adonisjs/cache": "^2.1.0",
     "@adonisjs/core": "^7.5.2",
     "@adonisjs/cors": "^3.0.0",
     "@adonisjs/inertia": "^5.0.1",
@@ -71,9 +79,11 @@
     "@adonisjs/shield": "^9.0.0",
     "@adonisjs/static": "^2.0.1",
     "@adonisjs/vite": "^6.0.2",
-    "@adonisplus/flow": "^0.5.1",
     "@astryxdesign/core": "^0.7.14",
     "@astryxdesign/theme-neutral": "^0.7.14",
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource/amiri": "^5.3.0",
     "@heroicons/react": "^2.2.0",
     "@inertiajs/core": "^3.7.1",
     "@inertiajs/react": "^3.7.1",

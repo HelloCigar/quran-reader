@@ -12,7 +12,7 @@ import { Icon } from '@astryxdesign/core/Icon'
 import { Link } from '@astryxdesign/core/Link'
 import { Text } from '@astryxdesign/core/Text'
 import { urlFor } from '~/client'
-import { AdonisMark } from '~/components/brand/logo'
+import { QuranMark } from '~/components/brand/logo'
 import ThemeToggle from '~/components/theme/theme_toggle'
 import FlashToasts from '~/components/feedback/flash_toasts'
 
@@ -51,7 +51,7 @@ const styles = stylex.create({
 /**
  * Frame for the sign-in and sign-up pages, from Astryx's `login-split`
  * template: a card with the form column (brand, the page's form, theme
- * toggle) beside a muted column about the starter kit.
+ * toggle) beside a muted column about what signing in adds.
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -66,11 +66,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Section variant="transparent" padding={0} height="100%">
             <VStack gap={4} height="100%">
               <HStack gap={2} vAlign="center" justify="between">
-                <Link href={urlFor('home')} label="AdonisJS home" color="primary">
+                <Link href={urlFor('home')} label="Quran Reader home" color="primary">
                   <HStack gap={2} vAlign="center">
-                    <Icon icon={AdonisMark} />
+                    <Icon icon={QuranMark} />
                     <Text type="body" weight="bold">
-                      AdonisJS
+                      Quran Reader
                     </Text>
                   </HStack>
                 </Link>
@@ -87,24 +87,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           <Card variant="muted" padding={8}>
             <VStack gap={6} justify="between" height="100%">
               <Text type="large" weight="medium" textWrap="balance">
-                Auth, kept intentionally minimal so you can build it your way.
+                Keep your place in the Quran.
               </Text>
-              <VStack gap={1}>
-                <Text type="body" weight="semibold">
-                  Looking for production-ready auth?
-                </Text>
-                <Text type="supporting" color="secondary">
-                  Feature packs are production-ready, full-stack components from the creator of
-                  AdonisJS.{' '}
-                  <Link
-                    href="https://plus.adonisjs.com/feature-packs"
-                    target="_blank"
-                    type="supporting"
-                  >
-                    Explore Feature packs
-                  </Link>
-                </Text>
-              </VStack>
+              <Text type="supporting" color="secondary">
+                Sign in to bookmark ayahs, add a note to each, and come back to them from any
+                device.
+              </Text>
             </VStack>
           </Card>
         </Grid>

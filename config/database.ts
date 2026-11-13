@@ -41,6 +41,10 @@ const dbConfig = defineConfig({
       schemaGeneration: {
         enabled: true,
         rulesPaths: ['./database/schema_rules.js'],
+        /**
+         * The cache L2 table belongs to @adonisjs/cache; nothing reads it through Lucid.
+         */
+        excludeTables: ['cache'],
       },
     },
 

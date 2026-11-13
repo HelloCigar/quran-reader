@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { HomeIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
+import { HomeIcon, BookmarkIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/react/24/outline'
 import { AppShell } from '@astryxdesign/core/AppShell'
 import { TopNav, TopNavItem } from '@astryxdesign/core/TopNav'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -15,7 +15,10 @@ import { useNavItems, type NavItem } from '~/components/navigation/nav'
  * Top-level app navigation. Add an entry here for every new area of your
  * app, and it shows up in the navigation bar with its active state handled.
  */
-const nav: NavItem[] = [{ label: 'Dashboard', route: 'dashboard', icon: HomeIcon }]
+const nav: NavItem[] = [
+  { label: 'Dashboard', route: 'dashboard', icon: HomeIcon },
+  { label: 'Bookmarks', route: 'bookmarks.index', icon: BookmarkIcon },
+]
 
 /**
  * The signed-in app frame (Astryx `AppShellTopNavOnly` block). Pages render

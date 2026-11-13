@@ -18,6 +18,12 @@ export const signupValidator = vine.create({
   email: email().unique({ table: 'users', column: 'email' }),
   password: password(),
   passwordConfirmation: password().sameAs('password'),
+  bookmark: vine
+    .object({
+      surah: vine.number().withoutDecimals().range([1, 114]),
+      ayah: vine.number().withoutDecimals().positive().ayahOfSurah('surah'),
+    })
+    .optional(),
 })
 
 /**
@@ -27,4 +33,10 @@ export const signupValidator = vine.create({
 export const loginValidator = vine.create({
   email: email(),
   password: vine.string(),
+  bookmark: vine
+    .object({
+      surah: vine.number().withoutDecimals().range([1, 114]),
+      ayah: vine.number().withoutDecimals().positive().ayahOfSurah('surah'),
+    })
+    .optional(),
 })

@@ -8,14 +8,19 @@ import { Link } from '@astryxdesign/core/Link'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import AuthLayout from '~/components/auth/auth_layout'
+import type { InertiaProps } from '~/types'
 
-export default function Signup() {
+type PageProps = InertiaProps<{ bookmark: { surah: number; ayah: number } | null }>
+
+export default function Signup({ bookmark }: PageProps) {
   const form = useRouteForm('new_account.store', {
     fullName: '',
     email: '',
     password: '',
     passwordConfirmation: '',
   })
+  // The carried bookmark isn't a text field, so it's added to the submitted data.
+  form.transform((data) => (bookmark ? { ...data, bookmark } : data))
 
   return (
     <VStack gap={4} hAlign="stretch" width="100%">
@@ -25,7 +30,9 @@ export default function Signup() {
           Create your account
         </Text>
         <Text type="body" color="secondary" size="sm">
-          Start building with the starter kit.
+          {bookmark
+            ? `Create an account to bookmark ${bookmark.surah}:${bookmark.ayah}`
+            : 'Bookmark ayahs and keep a note on each.'}
         </Text>
       </VStack>
 
@@ -74,7 +81,7 @@ export default function Signup() {
 
       <Text type="supporting" color="secondary">
         Already have an account?{' '}
-        <Link href={urlFor('session.create')} type="supporting">
+        <Link href={urlFor('session.create', [], { qs: { bookmark } })} type="supporting">
           Sign in
         </Link>
       </Text>

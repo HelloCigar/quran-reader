@@ -1,2 +1,6 @@
 .flow/docs/
 .claude/skills/flow-*
+.flow/lenses/
+.claude/agents/flow-*
+.agents/skills/flow-*
+.codex/agents/flow-*

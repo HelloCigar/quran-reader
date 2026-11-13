@@ -4,16 +4,18 @@ import { TopNavHeading } from '@astryxdesign/core/TopNav'
 import { urlFor } from '~/client'
 
 /**
- * The AdonisJS mark. Pass it to Astryx's `Icon` (or any `icon` slot) so it
- * takes its size and color from the design system.
+ * The Quran Reader mark: an eight-pointed star (two overlapping squares) with
+ * an open center. Pass it to Astryx's `Icon` (or any `icon` slot) so it takes
+ * its size and color from the design system. `public/favicon.svg` draws the
+ * same shape.
  */
-export function AdonisMark(props: SVGProps<SVGSVGElement>) {
+export function QuranMark(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 160 160" fill="none" aria-hidden="true" {...props}>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M0 80.0001C0 144.521 15.4786 160 79.9999 160 144.521 160 160 144.521 160 80.0001 160 15.4786 144.521 0 79.9999 0 15.4786 0 0 15.4786 0 80.0001zm32.2607 16.6191l25.0918-57.0266c4.2361-9.613 12.3825-14.8268 22.6474-14.8268 10.265 0 18.4113 5.2138 22.6481 14.8268l25.091 57.0266c1.141 2.77 2.118 6.3538 2.118 9.4498 0 14.175-9.939 24.114-24.114 24.114-4.828 0-8.6629-1.232-12.5444-2.479-3.9771-1.278-8.0036-2.572-13.1987-2.572-5.1349 0-9.2597 1.306-13.3154 2.589-3.9233 1.241-7.7814 2.462-12.4279 2.462-14.1752 0-24.1141-9.939-24.1141-24.114 0-3.096.9776-6.6798 2.1182-9.4498zm47.7392-47.0871L55.2344 105.581c7.332-3.422 15.8043-5.051 24.7655-5.051 8.6358 0 17.434 1.629 24.4401 5.051L79.9999 49.5321z"
+        d="M12 2.1 14.9 5H19v4.1l2.9 2.9-2.9 2.9V19h-4.1L12 21.9 9.1 19H5v-4.1L2.1 12 5 9.1V5h4.1L12 2.1zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
         fill="currentColor"
       />
     </svg>
@@ -21,15 +23,15 @@ export function AdonisMark(props: SVGProps<SVGSVGElement>) {
 }
 
 /**
- * The product heading for the top navigation bar: the AdonisJS mark and
+ * The product heading for the top navigation bar: the Quran Reader mark and
  * name, linking home.
  */
 export default function Logo() {
   return (
     <TopNavHeading
-      heading="AdonisJS"
+      heading="Quran Reader"
       headingHref={urlFor('home')}
-      logo={<NavIcon icon={<AdonisMark />} />}
+      logo={<NavIcon icon={<QuranMark />} />}
     />
   )
 }

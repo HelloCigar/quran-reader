@@ -15,8 +15,13 @@
     "build",
     "tmp",
     "astryx-themes.ts",
+    "app/integrations/alquran_cloud",
     "AGENTS.md",
     "GEMINI.md",
-    ".claude/CLAUDE.md"
+    ".claude/CLAUDE.md",
+    "src/themes/quran/quran.js",
+    "src/themes/quran/quran.css",
+    "src/themes/quran/*.d.ts",
+    "src/themes/quran/tokens"
   ]
 }
