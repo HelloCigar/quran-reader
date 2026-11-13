@@ -2,6 +2,7 @@ import { getSurah, getSurahByNumberEditionsByEditions } from '#integrations/alqu
 import QuranUnavailableException from '#exceptions/quran_unavailable_exception'
 import { quranCache } from '#start/cache'
 import type { Ayah, Surah, SurahSummary } from '#types/quran'
+import type { UpstreamAyah, UpstreamSurah } from '#types/alquran_cloud'
 
 /**
  * The Bismillah as it appears in the `quran-uthmani` edition at 1:1,
@@ -22,17 +23,6 @@ const CACHE_OPTIONS = {
   grace: '30 days',
   graceBackoff: '5 minutes',
 } as const
-
-type UpstreamSurah = {
-  number?: number
-  name?: string
-  englishName?: string
-  englishNameTranslation?: string
-  revelationType?: string
-  numberOfAyahs?: number
-}
-
-type UpstreamAyah = { numberInSurah?: number; text?: string }
 
 /**
  * Reads the Quran text (Uthmani Arabic and Saheeh International English).
