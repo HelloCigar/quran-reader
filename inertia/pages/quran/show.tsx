@@ -23,10 +23,11 @@ export default function Show({ surah, bismillah, ayahs, previous, next }: PagePr
   return (
     <Layout
       height="auto"
+      contentWidth={720}
       content={
         <LayoutContent padding={6}>
           <Head title={surah.name} />
-          <VStack gap={6} maxWidth={720} width="100%">
+          <VStack gap={6}>
             <SurahHeading surah={surah} />
             {bismillah && (
               <VStack dir="rtl" hAlign="center" data-testid="bismillah">

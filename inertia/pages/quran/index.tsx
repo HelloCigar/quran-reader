@@ -15,10 +15,11 @@ export default function Index({ surahs }: PageProps) {
   return (
     <Layout
       height="auto"
+      contentWidth={720}
       content={
         <LayoutContent padding={6}>
           <Head title="The Quran" />
-          <VStack gap={6} maxWidth={720} width="100%">
+          <VStack gap={6}>
             <Heading level={1}>The Quran</Heading>
             <List hasDividers edge="flush" aria-label="Surahs">
               {surahs.map((surah) => (
