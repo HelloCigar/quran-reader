@@ -15,7 +15,6 @@
     "build",
     "tmp",
     "astryx-themes.ts",
-    "app/integrations/alquran_cloud",
     "AGENTS.md",
     "GEMINI.md",
     ".claude/CLAUDE.md",

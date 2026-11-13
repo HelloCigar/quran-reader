@@ -78,7 +78,7 @@ test.group('Bookmarks index', (group) => {
 
     await page.assertPath('/bookmarks')
     const list = page.getByRole('list', { name: 'Bookmarks', exact: true })
-    for (const text of ['2:255 · Al-Baqara', 'آية 255', 'Ayah 2:255', 'Ayat al-Kursi']) {
+    for (const text of ['2:255 · Al-Baqarah', 'آية 255', 'Ayah 2:255', 'Ayat al-Kursi']) {
       await page.assertVisible(list.getByText(text, { exact: true }))
     }
   })
@@ -134,11 +134,11 @@ test.group('Bookmarks index', (group) => {
     await browserContext.loginAs(reader)
 
     const page = await visit(route('bookmarks.index'))
-    await page.getByRole('link', { name: '2:255 · Al-Baqara', exact: true }).click()
+    await page.getByRole('link', { name: '2:255 · Al-Baqarah', exact: true }).click()
 
     await page.assertPath('/quran/2')
     await page.assertUrlContains('#ayah-255')
-    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqara', exact: true }))
+    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
   })
 
   test('edits a note from the list', async ({ visit, route, swap, browserContext, db }) => {
@@ -189,8 +189,8 @@ test.group('Bookmarks index', (group) => {
     await page.getByRole('menuitem', { name: 'Remove', exact: true }).click()
 
     await page.assertPath('/bookmarks')
-    await page.assertNotExists(page.getByText('2:255 · Al-Baqara', { exact: true }))
-    await page.assertVisible(page.getByRole('link', { name: '1:1 · Al-Faatiha', exact: true }))
+    await page.assertNotExists(page.getByText('2:255 · Al-Baqarah', { exact: true }))
+    await page.assertVisible(page.getByRole('link', { name: '1:1 · Al-Fatihah', exact: true }))
     await db.assertMissing('bookmarks', { user_id: reader.id, surah_number: 2, ayah_number: 255 })
   })
 
@@ -243,7 +243,7 @@ test.group('Bookmarks index', (group) => {
     for (const text of ['2:255', 'Ayat al-Kursi', "The ayah text couldn't be loaded right now."]) {
       await page.assertVisible(page.getByText(text, { exact: true }))
     }
-    await page.assertNotExists(page.getByText('2:255 · Al-Baqara', { exact: true }))
+    await page.assertNotExists(page.getByText('2:255 · Al-Baqarah', { exact: true }))
   })
 
   test("never shows another reader's bookmarks", async ({ visit, route, swap, browserContext }) => {

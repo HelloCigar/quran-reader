@@ -8,7 +8,7 @@ import ArabicText from '~/components/quran/arabic_text'
 import BookmarkedMenu from '~/components/bookmarks/bookmarked_menu'
 
 /**
- * One bookmark in the bookmarks list: "2:255 · Al-Baqara" linking to the
+ * One bookmark in the bookmarks list: "2:255 · Al-Baqarah" linking to the
  * ayah, its Arabic and English (or a line saying the text couldn't be loaded),
  * and the note.
  */

@@ -1,46 +1,234 @@
 {
   "number": 1,
-  "arabicName": "سُورَةُ ٱلْفَاتِحَةِ",
-  "name": "Al-Faatiha",
-  "meaning": "The Opening",
+  "arabicName": "الفاتحة",
+  "name": "Al-Fatihah",
+  "meaning": "The Opener",
   "revelation": "Meccan",
   "ayahCount": 7,
   "bismillah": null,
   "ayahs": [
     {
       "number": 1,
-      "arabic": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
-      "english": "In the name of Allah, the Entirely Merciful, the Especially Merciful."
+      "arabic": "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
+      "english": "In the name of Allāh, the Entirely Merciful, the Especially Merciful.",
+      "words": [
+        {
+          "location": "1:1:1",
+          "arabic": "بِسْمِ",
+          "transliteration": "bis'mi",
+          "translation": "In (the) name"
+        },
+        {
+          "location": "1:1:2",
+          "arabic": "ٱللَّهِ",
+          "transliteration": "l-lahi",
+          "translation": "(of) Allah"
+        },
+        {
+          "location": "1:1:3",
+          "arabic": "ٱلرَّحْمَـٰنِ",
+          "transliteration": "l-raḥmāni",
+          "translation": "the Most Gracious"
+        },
+        {
+          "location": "1:1:4",
+          "arabic": "ٱلرَّحِيمِ",
+          "transliteration": "l-raḥīmi",
+          "translation": "the Most Merciful"
+        }
+      ]
     },
     {
       "number": 2,
-      "arabic": "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",
-      "english": "[All] praise is [due] to Allah, Lord of the worlds -"
+      "arabic": "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ",
+      "english": "[All] praise is [due] to Allāh, Lord of the worlds -",
+      "words": [
+        {
+          "location": "1:2:1",
+          "arabic": "ٱلْحَمْدُ",
+          "transliteration": "al-ḥamdu",
+          "translation": "All praises and thanks"
+        },
+        {
+          "location": "1:2:2",
+          "arabic": "لِلَّهِ",
+          "transliteration": "lillahi",
+          "translation": "(be) to Allah"
+        },
+        {
+          "location": "1:2:3",
+          "arabic": "رَبِّ",
+          "transliteration": "rabbi",
+          "translation": "the Lord"
+        },
+        {
+          "location": "1:2:4",
+          "arabic": "ٱلْعَـٰلَمِينَ",
+          "transliteration": "l-ʿālamīna",
+          "translation": "of the universe"
+        }
+      ]
     },
     {
       "number": 3,
-      "arabic": "ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
-      "english": "The Entirely Merciful, the Especially Merciful,"
+      "arabic": "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
+      "english": "The Entirely Merciful, the Especially Merciful,",
+      "words": [
+        {
+          "location": "1:3:1",
+          "arabic": "ٱلرَّحْمَـٰنِ",
+          "transliteration": "al-raḥmāni",
+          "translation": "The Most Gracious"
+        },
+        {
+          "location": "1:3:2",
+          "arabic": "ٱلرَّحِيمِ",
+          "transliteration": "l-raḥīmi",
+          "translation": "the Most Merciful"
+        }
+      ]
     },
     {
       "number": 4,
-      "arabic": "مَٰلِكِ يَوْمِ ٱلدِّينِ",
-      "english": "Sovereign of the Day of Recompense."
+      "arabic": "مَـٰلِكِ يَوْمِ ٱلدِّينِ",
+      "english": "Sovereign of the Day of Recompense.",
+      "words": [
+        {
+          "location": "1:4:1",
+          "arabic": "مَـٰلِكِ",
+          "transliteration": "māliki",
+          "translation": "(The) Master"
+        },
+        {
+          "location": "1:4:2",
+          "arabic": "يَوْمِ",
+          "transliteration": "yawmi",
+          "translation": "(of the) Day"
+        },
+        {
+          "location": "1:4:3",
+          "arabic": "ٱلدِّينِ",
+          "transliteration": "l-dīni",
+          "translation": "(of the) Judgment"
+        }
+      ]
     },
     {
       "number": 5,
       "arabic": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-      "english": "It is You we worship and You we ask for help."
+      "english": "It is You we worship and You we ask for help.",
+      "words": [
+        {
+          "location": "1:5:1",
+          "arabic": "إِيَّاكَ",
+          "transliteration": "iyyāka",
+          "translation": "You Alone"
+        },
+        {
+          "location": "1:5:2",
+          "arabic": "نَعْبُدُ",
+          "transliteration": "naʿbudu",
+          "translation": "we worship"
+        },
+        {
+          "location": "1:5:3",
+          "arabic": "وَإِيَّاكَ",
+          "transliteration": "wa-iyyāka",
+          "translation": "and You Alone"
+        },
+        {
+          "location": "1:5:4",
+          "arabic": "نَسْتَعِينُ",
+          "transliteration": "nastaʿīnu",
+          "translation": "we ask for help"
+        }
+      ]
     },
     {
       "number": 6,
       "arabic": "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
-      "english": "Guide us to the straight path -"
+      "english": "Guide us to the straight path -",
+      "words": [
+        {
+          "location": "1:6:1",
+          "arabic": "ٱهْدِنَا",
+          "transliteration": "ih'dinā",
+          "translation": "Guide us"
+        },
+        {
+          "location": "1:6:2",
+          "arabic": "ٱلصِّرَٰطَ",
+          "transliteration": "l-ṣirāṭa",
+          "translation": "(to) the path"
+        },
+        {
+          "location": "1:6:3",
+          "arabic": "ٱلْمُسْتَقِيمَ",
+          "transliteration": "l-mus'taqīma",
+          "translation": "the straight"
+        }
+      ]
     },
     {
       "number": 7,
       "arabic": "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ",
-      "english": "The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray."
+      "english": "The path of those upon whom You have bestowed favor, not of those who have earned [Your] anger or of those who are astray.",
+      "words": [
+        {
+          "location": "1:7:1",
+          "arabic": "صِرَٰطَ",
+          "transliteration": "ṣirāṭa",
+          "translation": "(The) path"
+        },
+        {
+          "location": "1:7:2",
+          "arabic": "ٱلَّذِينَ",
+          "transliteration": "alladhīna",
+          "translation": "(of) those"
+        },
+        {
+          "location": "1:7:3",
+          "arabic": "أَنْعَمْتَ",
+          "transliteration": "anʿamta",
+          "translation": "You have bestowed (Your) Favors"
+        },
+        {
+          "location": "1:7:4",
+          "arabic": "عَلَيْهِمْ",
+          "transliteration": "ʿalayhim",
+          "translation": "on them"
+        },
+        {
+          "location": "1:7:5",
+          "arabic": "غَيْرِ",
+          "transliteration": "ghayri",
+          "translation": "not (of)"
+        },
+        {
+          "location": "1:7:6",
+          "arabic": "ٱلْمَغْضُوبِ",
+          "transliteration": "l-maghḍūbi",
+          "translation": "those who earned (Your) wrath"
+        },
+        {
+          "location": "1:7:7",
+          "arabic": "عَلَيْهِمْ",
+          "transliteration": "ʿalayhim",
+          "translation": "on themselves"
+        },
+        {
+          "location": "1:7:8",
+          "arabic": "وَلَا",
+          "transliteration": "walā",
+          "translation": "and not"
+        },
+        {
+          "location": "1:7:9",
+          "arabic": "ٱلضَّآلِّينَ",
+          "transliteration": "l-ḍālīna",
+          "translation": "(of) those who go astray"
+        }
+      ]
     }
   ]
 }

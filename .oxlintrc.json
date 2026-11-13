@@ -26,7 +26,6 @@
     ".adonisjs/**",
     "database/schema.ts",
     "astryx-themes.ts",
-    "app/integrations/alquran_cloud/**",
     "src/themes/quran/quran.js",
     "src/themes/quran/quran.css",
     "src/themes/quran/tokens/**"
@@ -156,12 +155,6 @@
       "files": ["inertia/components/navigation/navigation_events.ts"],
       "rules": {
         "no-restricted-imports": "off"
-      }
-    },
-    {
-      "files": ["openapi-ts.config.ts"],
-      "rules": {
-        "unicorn/filename-case": "off"
       }
     },
     {

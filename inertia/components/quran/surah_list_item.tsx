@@ -4,7 +4,7 @@ import type { Data } from '@generated/data'
 import { urlFor } from '~/client'
 
 /**
- * One surah row in the surah list: "1 · Al-Faatiha", its meaning and its
+ * One surah row in the surah list: "1 · Al-Fatihah", its meaning and its
  * ayah count, linking to the surah.
  */
 export default function SurahListItem({ surah }: { surah: Data.Surah }) {

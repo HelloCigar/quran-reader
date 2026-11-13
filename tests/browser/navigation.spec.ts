@@ -42,7 +42,7 @@ test.group('Navigation', (group) => {
   test('opens external links in a new tab', async ({ visit, route }) => {
     const page = await visit(route('home'))
 
-    await page.assertExists('a[href="https://alquran.cloud"][target="_blank"]')
+    await page.assertExists('a[href="https://quran.foundation"][target="_blank"]')
   })
 
   test('shows the not found page for unknown URLs', async ({ visit, route }) => {

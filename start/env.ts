@@ -24,4 +24,9 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
+
+  // Quran Foundation (the source of the Quran text)
+  QURAN_FOUNDATION_CLIENT_ID: Env.schema.string(),
+  QURAN_FOUNDATION_CLIENT_SECRET: Env.schema.secret(),
+  QURAN_FOUNDATION_ENV: Env.schema.enum(['prelive', 'production'] as const),
 })

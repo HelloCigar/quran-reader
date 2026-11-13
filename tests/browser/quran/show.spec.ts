@@ -11,8 +11,8 @@ test.group('Quran surah reading', () => {
     const page = await visit(route('surahs.show', { number: 2 }))
 
     await page.assertPath('/quran/2')
-    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqara', exact: true }))
-    await page.assertVisible(page.getByText('سُورَةُ البَقَرَةِ', { exact: true }))
+    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
+    await page.assertVisible(page.getByText('البقرة', { exact: true }))
     await page.assertVisible(page.getByText('The Cow', { exact: true }))
     await page.assertVisible(page.getByText('Medinan · 286 ayahs', { exact: true }))
   })
@@ -36,7 +36,7 @@ test.group('Quran surah reading', () => {
 
   test('shows no separate Bismillah line on surah {number}')
     .with([
-      { number: 1, heading: 'Al-Faatiha' },
+      { number: 1, heading: 'Al-Fatihah' },
       { number: 9, heading: 'At-Tawba' },
     ])
     .run(async ({ visit, route, swap }, { number, heading }) => {
@@ -89,20 +89,20 @@ test.group('Quran surah reading', () => {
     await page.assertPath('/quran/1')
     await page.assertVisible(
       page.getByText(
-        'Quran text from Al Quran Cloud (alquran.cloud) · English translation: Saheeh International.',
+        'Quran text and word-by-word data from Quran Foundation (quran.foundation) · English translation: Saheeh International.',
         { exact: false }
       )
     )
-    await page.assertExists(page.getByRole('link', { name: 'Al Quran Cloud', exact: true }))
+    await page.assertExists(page.getByRole('link', { name: 'Quran Foundation', exact: true }))
   })
 
   test('opens the {direction} surah from the pager')
     .with([
       {
         direction: 'previous',
-        label: 'Previous surah: Al-Faatiha',
+        label: 'Previous surah: Al-Fatihah',
         number: 1,
-        heading: 'Al-Faatiha',
+        heading: 'Al-Fatihah',
       },
       { direction: 'next', label: 'Next surah: Aal-i-Imraan', number: 3, heading: 'Aal-i-Imraan' },
     ])
