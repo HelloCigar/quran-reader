@@ -8,11 +8,11 @@ test.group('Signup', (group) => {
   test('creates an account and lands on the dashboard', async ({ visit, route, assert }) => {
     const page = await visit(route('new_account.create'))
 
-    await page.getByLabel('Full name').fill('Ada Lovelace')
-    await page.getByLabel('Email').fill('ada@example.com')
+    await page.getByLabel('Full name', { exact: true }).fill('Ada Lovelace')
+    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
     await page.getByLabel('Password', { exact: true }).fill('secret-password')
-    await page.getByLabel('Confirm password').fill('secret-password')
-    await page.getByRole('button', { name: 'Create account' }).click()
+    await page.getByLabel('Confirm password', { exact: true }).fill('secret-password')
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
 
     await page.waitForURL(route('dashboard'))
     await page.assertTextContains('h1', 'Your dashboard is ready')
@@ -24,10 +24,10 @@ test.group('Signup', (group) => {
   test('shows validation errors next to the fields', async ({ visit, route, assert }) => {
     const page = await visit(route('new_account.create'))
 
-    await page.getByLabel('Email').fill('ada@example.com')
+    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
     await page.getByLabel('Password', { exact: true }).fill('short')
-    await page.getByLabel('Confirm password').fill('different')
-    await page.getByRole('button', { name: 'Create account' }).click()
+    await page.getByLabel('Confirm password', { exact: true }).fill('different')
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
 
     await page
       .getByLabel('Password', { exact: true })
@@ -45,12 +45,15 @@ test.group('Signup', (group) => {
     await User.create({ fullName: 'Ada', email: 'ada@example.com', password: 'secret-password' })
     const page = await visit(route('new_account.create'))
 
-    await page.getByLabel('Email').fill('ada@example.com')
+    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
     await page.getByLabel('Password', { exact: true }).fill('secret-password')
-    await page.getByLabel('Confirm password').fill('secret-password')
-    await page.getByRole('button', { name: 'Create account' }).click()
+    await page.getByLabel('Confirm password', { exact: true }).fill('secret-password')
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
 
-    await page.getByLabel('Email').and(page.locator('[aria-invalid="true"]')).waitFor()
+    await page
+      .getByLabel('Email', { exact: true })
+      .and(page.locator('[aria-invalid="true"]'))
+      .waitFor()
     await page.assertPath(route('new_account.create'))
     await page.assertTextContains('body', 'already been taken')
   })
@@ -58,7 +61,7 @@ test.group('Signup', (group) => {
   test('links to the login page', async ({ visit, route }) => {
     const page = await visit(route('new_account.create'))
 
-    await page.getByRole('link', { name: 'Sign in' }).click()
+    await page.getByRole('link', { name: 'Sign in', exact: true }).click()
 
     await page.waitForURL(route('session.create'))
     await page.assertTextContains('h1', 'Welcome back')

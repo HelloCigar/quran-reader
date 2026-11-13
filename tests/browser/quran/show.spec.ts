@@ -121,6 +121,7 @@ test.group('Quran surah reading', () => {
 
       await page.assertPath(`/quran/${number}`)
       await page.assertVisible(page.getByRole('link', { name: 'All surahs', exact: true }))
+      // oxlint-disable-next-line flow/playwright-locators-are-exact -- pattern is a RegExp, which exact does not apply to
       await page.assertNotExists(page.getByRole('link', { name: pattern }))
     })
 

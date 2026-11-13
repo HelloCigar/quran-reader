@@ -1,6 +1,12 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["oxc", "typescript", "unicorn"],
+  "jsPlugins": [
+    {
+      "name": "flow",
+      "specifier": "./lint/flow_rules.js"
+    }
+  ],
   "categories": {
     "correctness": "warn"
   },
@@ -153,6 +159,32 @@
       "files": ["openapi-ts.config.ts"],
       "rules": {
         "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "flow/no-shared-mutable-test-state": "error",
+        "flow/playwright-locators-are-exact": "error",
+        "flow/test-files-contain-tests": "error"
+      }
+    },
+    {
+      "files": ["tests/helpers/**/*.ts", "tests/bootstrap.ts"],
+      "rules": {
+        "flow/test-files-contain-tests": "off"
+      }
+    },
+    {
+      "files": ["tests/helpers/**/*.ts"],
+      "rules": {
+        "flow/test-helpers-contain-runtime-code": "error"
+      }
+    },
+    {
+      "files": ["tests/helpers/types.ts"],
+      "rules": {
+        "flow/test-helpers-contain-runtime-code": "off"
       }
     }
   ]

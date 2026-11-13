@@ -11,9 +11,9 @@ test.group('Login and logout', (group) => {
     await User.create({ fullName: 'Ada Lovelace', ...credentials })
     const page = await visit(route('session.create'))
 
-    await page.getByLabel('Email').fill(credentials.email)
-    await page.getByLabel('Password').fill(credentials.password)
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+    await page.getByLabel('Password', { exact: true }).fill(credentials.password)
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 
     await page.waitForURL(route('dashboard'))
     await page.assertTextContains('h1', 'Your dashboard is ready')
@@ -23,9 +23,9 @@ test.group('Login and logout', (group) => {
     await User.create({ fullName: 'Ada Lovelace', ...credentials })
     const page = await visit(route('session.create'))
 
-    await page.getByLabel('Email').fill(credentials.email)
-    await page.getByLabel('Password').fill('wrong-password')
-    await page.getByRole('button', { name: 'Sign in' }).click()
+    await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+    await page.getByLabel('Password', { exact: true }).fill('wrong-password')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 
     await page.assertTextContains('body', 'Invalid user credentials')
     await page.assertPath(route('session.create'))
@@ -36,7 +36,7 @@ test.group('Login and logout', (group) => {
     await browserContext.loginAs(user)
     const page = await visit(route('dashboard'))
 
-    await page.getByRole('button', { name: 'Log out' }).click()
+    await page.getByRole('button', { name: 'Log out', exact: true }).click()
 
     await page.waitForURL(route('session.create'))
     await page.assertTextContains('h1', 'Welcome back')
