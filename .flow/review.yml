@@ -1,3 +1,4 @@
+agent: claude
 maxFindings: 10
 maxParallel: 4
 lenses:
