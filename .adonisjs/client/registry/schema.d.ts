@@ -21,6 +21,32 @@ export interface Registry {
       rawResponse: ExtractRawResponse<unknown>
     }
   }
+  'surahs.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/quran'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['index']>>>
+    }
+  }
+  'surahs.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/quran/:number'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { number: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['show']>>>
+    }
+  }
   'new_account.create': {
     methods: ["GET","HEAD"]
     pattern: '/signup'

@@ -8,7 +8,7 @@ import { Button } from '@astryxdesign/core/Button'
 import { urlFor } from '~/client'
 
 /**
- * The body of the 404 and 500 pages: the status, a short explanation and a
+ * The body of the 404, 500 and 503 pages: the status, a short explanation and a
  * way back home, centered in the page.
  */
 export default function ErrorPage({
@@ -16,7 +16,7 @@ export default function ErrorPage({
   title,
   description,
 }: {
-  status: 404 | 500
+  status: 404 | 500 | 503
   title: string
   description: string
 }) {

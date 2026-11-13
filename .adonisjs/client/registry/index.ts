@@ -14,6 +14,18 @@ const routes = {
     tokens: [[0,"/"]],
     types: placeholder as Registry['home']['types'],
   },
+  'surahs.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/quran',
+    tokens: [[0,"quran"]],
+    types: placeholder as Registry['surahs.index']['types'],
+  },
+  'surahs.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/quran/:number',
+    tokens: [[0,"quran"],[1,"number"]],
+    types: placeholder as Registry['surahs.show']['types'],
+  },
   'new_account.create': {
     methods: ["GET","HEAD"],
     pattern: '/signup',

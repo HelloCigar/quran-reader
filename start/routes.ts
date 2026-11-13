@@ -13,6 +13,12 @@ import router from '@adonisjs/core/services/router'
 
 router.on('/').renderInertia('marketing/home', {}).as('home')
 
+router.get('/quran', [controllers.Surahs, 'index'])
+router.get('/quran/:number', [controllers.Surahs, 'show']).where('number', {
+  match: /^(?:[1-9]|[1-9]\d|10\d|11[0-4])$/,
+  cast: (value) => Number(value),
+})
+
 router
   .group(() => {
     router.get('signup', [controllers.NewAccount, 'create'])

@@ -31,6 +31,7 @@ export default defineConfig({
     () => import('@adonisjs/session/commands'),
     () => import('@adonisjs/inertia/commands'),
     () => import('@adonisplus/flow/commands'),
+    () => import('@adonisjs/cache/commands'),
   ],
 
   /*
@@ -64,6 +65,7 @@ export default defineConfig({
       file: () => import('@adonisplus/flow/flow_dashboard_provider'),
       environment: ['web'],
     },
+    () => import('@adonisjs/cache/cache_provider'),
   ],
 
   /*

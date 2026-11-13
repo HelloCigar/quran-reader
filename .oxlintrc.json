@@ -19,7 +19,8 @@
     "tmp/**",
     ".adonisjs/**",
     "database/schema.ts",
-    "astryx-themes.ts"
+    "astryx-themes.ts",
+    "app/integrations/alquran_cloud/**"
   ],
   "overrides": [
     {
@@ -146,6 +147,12 @@
       "files": ["inertia/components/navigation/navigation_events.ts"],
       "rules": {
         "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["openapi-ts.config.ts"],
+      "rules": {
+        "unicorn/filename-case": "off"
       }
     }
   ]

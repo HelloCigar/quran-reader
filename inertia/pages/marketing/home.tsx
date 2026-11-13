@@ -69,6 +69,7 @@ export default function Home() {
                   variant="primary"
                   endContent={<Icon icon={ArrowRightIcon} size="sm" color="inherit" />}
                 />
+                <Button label="Read the Quran" href={urlFor('surahs.index')} variant="secondary" />
                 <Button
                   label="Read the docs"
                   href="https://docs.adonisjs.com"
