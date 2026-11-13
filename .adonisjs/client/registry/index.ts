@@ -62,6 +62,30 @@ const routes = {
     tokens: [[0,"logout"]],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'bookmarks.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/bookmarks',
+    tokens: [[0,"bookmarks"]],
+    types: placeholder as Registry['bookmarks.index']['types'],
+  },
+  'bookmarks.store': {
+    methods: ["POST"],
+    pattern: '/bookmarks',
+    tokens: [[0,"bookmarks"]],
+    types: placeholder as Registry['bookmarks.store']['types'],
+  },
+  'bookmarks.update': {
+    methods: ["PUT","PATCH"],
+    pattern: '/bookmarks/:id',
+    tokens: [[0,"bookmarks"],[1,"id"]],
+    types: placeholder as Registry['bookmarks.update']['types'],
+  },
+  'bookmarks.destroy': {
+    methods: ["DELETE"],
+    pattern: '/bookmarks/:id',
+    tokens: [[0,"bookmarks"],[1,"id"]],
+    types: placeholder as Registry['bookmarks.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

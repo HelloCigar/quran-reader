@@ -1,4 +1,6 @@
 import { test } from '@japa/runner'
+import testUtils from '@adonisjs/core/services/test_utils'
+import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 
@@ -96,8 +98,13 @@ test.group('Quran surah reading', () => {
 
   test('opens the {direction} surah from the pager')
     .with([
-      { direction: 'previous', label: '← Al-Faatiha', number: 1, heading: 'Al-Faatiha' },
-      { direction: 'next', label: 'Aal-i-Imraan →', number: 3, heading: 'Aal-i-Imraan' },
+      {
+        direction: 'previous',
+        label: 'Previous surah: Al-Faatiha',
+        number: 1,
+        heading: 'Al-Faatiha',
+      },
+      { direction: 'next', label: 'Next surah: Aal-i-Imraan', number: 3, heading: 'Aal-i-Imraan' },
     ])
     .run(async ({ visit, route, swap }, { label, number, heading }) => {
       swap(QuranTextService, new FakeQuranTextService())
@@ -111,8 +118,8 @@ test.group('Quran surah reading', () => {
 
   test('offers no {direction} link on surah {number}')
     .with([
-      { direction: 'previous', number: 1, pattern: /^←/ },
-      { direction: 'next', number: 114, pattern: /→$/ },
+      { direction: 'previous', number: 1, pattern: /^Previous surah/ },
+      { direction: 'next', number: 114, pattern: /^Next surah/ },
     ])
     .run(async ({ visit, route, swap }, { number, pattern }) => {
       swap(QuranTextService, new FakeQuranTextService())
@@ -154,5 +161,58 @@ test.group('Quran surah reading', () => {
       })
     )
     await page.assertNotExists(page.getByRole('list', { name: 'Ayahs', exact: true }))
+  })
+})
+
+test.group('Quran surah reading bookmarks', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('offers a bookmark action on every ayah to a signed-out reader', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 1 }))
+
+    await page.assertPath('/quran/1')
+    for (const ayah of [1, 2, 3, 4, 5, 6, 7]) {
+      await page.assertVisible(page.getByRole('link', { name: `Bookmark 1:${ayah}`, exact: true }))
+      await page.assertNotExists(
+        page.getByRole('button', { name: `Bookmarked 1:${ayah}`, exact: true })
+      )
+    }
+  })
+
+  test('marks the ayahs the signed-in reader has bookmarked', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+    await reader.related('bookmarks').create({ surahNumber: 1, ayahNumber: 2, note: null })
+    await reader.related('bookmarks').create({ surahNumber: 1, ayahNumber: 5, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('surahs.show', { number: 1 }))
+
+    await page.assertPath('/quran/1')
+    for (const ayah of [2, 5]) {
+      await page.assertVisible(
+        page.getByRole('button', { name: `Bookmarked 1:${ayah}`, exact: true })
+      )
+    }
+    for (const ayah of [1, 3, 4, 6, 7]) {
+      await page.assertVisible(
+        page.getByRole('button', { name: `Bookmark 1:${ayah}`, exact: true })
+      )
+    }
   })
 })

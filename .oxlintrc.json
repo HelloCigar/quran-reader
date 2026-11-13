@@ -26,7 +26,10 @@
     ".adonisjs/**",
     "database/schema.ts",
     "astryx-themes.ts",
-    "app/integrations/alquran_cloud/**"
+    "app/integrations/alquran_cloud/**",
+    "src/themes/quran/quran.js",
+    "src/themes/quran/quran.css",
+    "src/themes/quran/tokens/**"
   ],
   "overrides": [
     {
@@ -157,6 +160,12 @@
     },
     {
       "files": ["openapi-ts.config.ts"],
+      "rules": {
+        "unicorn/filename-case": "off"
+      }
+    },
+    {
+      "files": ["src/themes/**"],
       "rules": {
         "unicorn/filename-case": "off"
       }

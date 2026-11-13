@@ -2,3 +2,9 @@ tasks:
   - name: quran-reader
     description: A really simple public Quran reader — surah list, then each surah in Arabic with Saheeh International English.
     track: brief
+  - name: ayah-bookmarks
+    description: Signed-in readers bookmark ayahs with an optional note and revisit them from a bookmarks list.
+    track: brief
+  - name: app-theme
+    description: A custom Quran theme for the whole app — deep green on warm sand, Fraunces headings, Amiri for the Arabic.
+    track: task

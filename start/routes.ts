@@ -35,3 +35,9 @@ router
     router.post('logout', [controllers.Session, 'destroy'])
   })
   .use(middleware.auth())
+
+router
+  .resource('bookmarks', controllers.Bookmarks)
+  .only(['index', 'store', 'update', 'destroy'])
+  .where('id', router.matchers.number())
+  .use('*', middleware.auth())

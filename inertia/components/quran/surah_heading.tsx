@@ -1,6 +1,7 @@
 import { VStack } from '@astryxdesign/core/VStack'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
+import ArabicText from '~/components/quran/arabic_text'
 import type { Data } from '@generated/data'
 
 /**
@@ -11,9 +12,7 @@ export default function SurahHeading({ surah }: { surah: Data.Surah.Variants['fo
   return (
     <VStack gap={2}>
       <Heading level={1}>{surah.name}</Heading>
-      <VStack dir="rtl">
-        <Text type="large">{surah.arabicName}</Text>
-      </VStack>
+      <ArabicText>{surah.arabicName}</ArabicText>
       <Text type="body" color="secondary">
         {surah.meaning}
       </Text>

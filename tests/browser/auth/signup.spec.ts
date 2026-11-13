@@ -1,6 +1,8 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
+import QuranTextService from '#services/quran_text_service'
+import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 
 test.group('Signup', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -65,5 +67,32 @@ test.group('Signup', (group) => {
 
     await page.waitForURL(route('session.create'))
     await page.assertTextContains('h1', 'Welcome back')
+  })
+})
+
+test.group('Signup with a carried bookmark', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('signing up from a carried bookmark completes it and asks for a note', async ({
+    visit,
+    route,
+    swap,
+    db,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 1 }))
+    await page.getByRole('link', { name: 'Bookmark 1:3', exact: true }).click()
+    await page.getByRole('link', { name: 'Create an account', exact: true }).click()
+    await page.getByLabel('Full name', { exact: true }).fill('Grace Hopper')
+    await page.getByLabel('Email', { exact: true }).fill('grace@example.com')
+    await page.getByLabel('Password', { exact: true }).fill('secret-password')
+    await page.getByLabel('Confirm password', { exact: true }).fill('secret-password')
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
+
+    await page.assertPath('/quran/1')
+    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 1:3', exact: true }))
+    await db.assertHas('bookmarks', { surah_number: 1, ayah_number: 3, note: null }, 1)
+    await db.assertHas('users', { email: 'grace@example.com' }, 1)
   })
 })

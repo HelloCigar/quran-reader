@@ -3,15 +3,19 @@ import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { VStack } from '@astryxdesign/core/VStack'
 import { Heading } from '@astryxdesign/core/Heading'
 import { List } from '@astryxdesign/core/List'
+import { Button } from '@astryxdesign/core/Button'
+import { Icon } from '@astryxdesign/core/Icon'
+import { BookmarkIcon } from '@heroicons/react/24/outline'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
+import { urlFor } from '~/client'
 import MarketingLayout from '~/components/marketing/marketing_layout'
 import SurahListItem from '~/components/quran/surah_list_item'
 import QuranCredit from '~/components/quran/quran_credit'
 
 type PageProps = InertiaProps<{ surahs: Data.Surah[] }>
 
-export default function Index({ surahs }: PageProps) {
+export default function Index({ surahs, user }: PageProps) {
   return (
     <Layout
       height="auto"
@@ -20,7 +24,17 @@ export default function Index({ surahs }: PageProps) {
         <LayoutContent padding={6}>
           <Head title="The Quran" />
           <VStack gap={6}>
-            <Heading level={1}>The Quran</Heading>
+            <VStack gap={3} hAlign="start">
+              <Heading level={1}>The Quran</Heading>
+              {user && (
+                <Button
+                  label="Your bookmarks"
+                  variant="secondary"
+                  icon={<Icon icon={BookmarkIcon} />}
+                  href={urlFor('bookmarks.index')}
+                />
+              )}
+            </VStack>
             <List hasDividers edge="flush" aria-label="Surahs">
               {surahs.map((surah) => (
                 <SurahListItem key={surah.number} surah={surah} />

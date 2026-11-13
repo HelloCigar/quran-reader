@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!--
+    The Quran Reader mark (same shape as QuranMark in inertia/components/brand/logo.tsx).
+    A favicon cannot read theme tokens, so the accent is copied from the palette:
+    light = palette.emerald.light[45], dark = palette.emerald.dark[65]
+    (src/themes/quran/tokens/quran.palette.ts).
+  -->
+  <style>
+    path { fill: #076c4f; }
+    @media (prefers-color-scheme: dark) { path { fill: #60b091; } }
+  </style>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.1 14.9 5H19v4.1l2.9 2.9-2.9 2.9V19h-4.1L12 21.9 9.1 19H5v-4.1L2.1 12 5 9.1V5h4.1L12 2.1zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+</svg>

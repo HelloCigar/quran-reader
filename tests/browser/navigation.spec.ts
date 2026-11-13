@@ -6,7 +6,7 @@ test.group('Navigation', (group) => {
 
   test('guests can go from the home page to signup and login', async ({ visit, route }) => {
     const page = await visit(route('home'))
-    await page.assertTextContains('h1', 'Welcome to the power of a full-stack React app')
+    await page.assertTextContains('h1', 'Read the Quran in Arabic and English')
 
     await page
       .getByRole('navigation', { name: 'Main navigation', exact: true })
@@ -15,7 +15,7 @@ test.group('Navigation', (group) => {
     await page.waitForURL(route('new_account.create'))
     await page.assertTextContains('h1', 'Create your account')
 
-    await page.getByRole('link', { name: 'AdonisJS home', exact: true }).click()
+    await page.getByRole('link', { name: 'Quran Reader home', exact: true }).click()
     await page.waitForURL(route('home'))
 
     await page
@@ -42,7 +42,7 @@ test.group('Navigation', (group) => {
   test('opens external links in a new tab', async ({ visit, route }) => {
     const page = await visit(route('home'))
 
-    await page.assertExists('a[href="https://docs.adonisjs.com"][target="_blank"]')
+    await page.assertExists('a[href="https://alquran.cloud"][target="_blank"]')
   })
 
   test('shows the not found page for unknown URLs', async ({ visit, route }) => {

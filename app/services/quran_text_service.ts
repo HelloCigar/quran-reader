@@ -91,6 +91,27 @@ export default class QuranTextService {
   }
 
   /**
+   * Each distinct surah, read at most once and in parallel through `readSurah`
+   * (so cache hits and grace behave as on the reading page). A surah whose text
+   * is unavailable maps to `null`; any other error is rethrown.
+   */
+  async readSurahsIfAvailable(numbers: number[]): Promise<Map<number, Surah | null>> {
+    const distinct = [...new Set(numbers)]
+    const entries = await Promise.all(
+      distinct.map(async (number): Promise<[number, Surah | null]> => {
+        try {
+          return [number, await this.readSurah(number)]
+        } catch (error) {
+          if (error instanceof QuranUnavailableException) return [number, null]
+          throw error
+        }
+      })
+    )
+
+    return new Map(entries)
+  }
+
+  /**
    * Cache-aside read. Any failure, including BentoCache wrapping a factory
    * error, surfaces as QuranUnavailableException.
    */

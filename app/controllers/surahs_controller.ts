@@ -5,6 +5,9 @@ import type { HttpContext } from '@adonisjs/core/http'
 import QuranTextService from '#services/quran_text_service'
 import SurahTransformer from '#transformers/surah_transformer'
 import AyahTransformer from '#transformers/ayah_transformer'
+import BookmarkTransformer from '#transformers/bookmark_transformer'
+import { showSurahValidator } from '#validators/surah'
+import type Bookmark from '#models/bookmark'
 
 @inject()
 export default class SurahsController {
@@ -22,14 +25,21 @@ export default class SurahsController {
     })
   }
 
-  async show({ inertia, params }: HttpContext) {
+  async show({ inertia, params, request, auth }: HttpContext) {
+    const { note } = await request.validateUsing(showSurahValidator)
     const number: number = params.number
-    const [surah, surahs] = await Promise.all([
+    const noBookmarks: Bookmark[] = []
+    const [surah, surahs, bookmarks] = await Promise.all([
       this.#quranText.readSurah(number),
       this.#quranText.listSurahs(),
+      auth.user
+        ? auth.user.related('bookmarks').query().where('surah_number', number)
+        : noBookmarks,
     ])
     const previous = surahs[number - 2] ?? null
     const next = surahs[number] ?? null
+    const noteFor =
+      note !== undefined && bookmarks.some((bookmark) => bookmark.ayahNumber === note) ? note : null
 
     return inertia.render('quran/show', {
       surah: SurahTransformer.transform(surah).useVariant('forReading'),
@@ -37,6 +47,8 @@ export default class SurahsController {
       ayahs: AyahTransformer.transform(surah.ayahs, surah.number),
       previous: previous ? SurahTransformer.transform(previous) : null,
       next: next ? SurahTransformer.transform(next) : null,
+      bookmarks: BookmarkTransformer.transform(bookmarks),
+      noteFor,
     })
   }
 }

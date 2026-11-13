@@ -7,6 +7,33 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class BookmarkSchema extends BaseModel {
+  static $columns = [
+    'ayahNumber',
+    'createdAt',
+    'id',
+    'note',
+    'surahNumber',
+    'updatedAt',
+    'userId',
+  ] as const
+  $columns = BookmarkSchema.$columns
+  @column()
+  declare ayahNumber: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare note: string | null
+  @column()
+  declare surahNumber: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'fullName', 'id', 'password', 'updatedAt'] as const
   $columns = UserSchema.$columns

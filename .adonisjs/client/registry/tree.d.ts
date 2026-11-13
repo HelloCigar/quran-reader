@@ -17,4 +17,10 @@ export interface ApiDefinition {
     destroy: typeof routes['session.destroy']
   }
   dashboard: typeof routes['dashboard']
+  bookmarks: {
+    index: typeof routes['bookmarks.index']
+    store: typeof routes['bookmarks.store']
+    update: typeof routes['bookmarks.update']
+    destroy: typeof routes['bookmarks.destroy']
+  }
 }

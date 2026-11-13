@@ -1,0 +1,42 @@
+import { useState } from 'react'
+import { useRouter } from '@adonisjs/inertia/react'
+import type { Data } from '@generated/data'
+import { focusBookmarkTrigger } from '~/components/bookmarks/bookmarked_menu'
+
+/**
+ * Removes a bookmark. One without a note goes at once; one with a note waits
+ * for the reader to confirm, because the note is lost with it. Keeping it puts
+ * focus back on its menu. Render `RemoveBookmarkDialog` with `pending`,
+ * `confirm` and `cancel`.
+ */
+export function useRemoveBookmark() {
+  const router = useRouter()
+  const [pending, setPending] = useState<Data.Bookmark | null>(null)
+
+  function destroy(bookmark: Data.Bookmark) {
+    router.delete(
+      { route: 'bookmarks.destroy', routeParams: { id: bookmark.id } },
+      { preserveScroll: true, preserveState: true }
+    )
+  }
+
+  function remove(bookmark: Data.Bookmark) {
+    if (bookmark.note === null) {
+      destroy(bookmark)
+    } else {
+      setPending(bookmark)
+    }
+  }
+
+  function confirm() {
+    if (pending) destroy(pending)
+    setPending(null)
+  }
+
+  function cancel() {
+    if (pending) focusBookmarkTrigger(pending.id)
+    setPending(null)
+  }
+
+  return { remove, pending, confirm, cancel }
+}
