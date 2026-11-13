@@ -30,7 +30,6 @@ export default defineConfig({
     () => import('@adonisjs/lucid/commands'),
     () => import('@adonisjs/session/commands'),
     () => import('@adonisjs/inertia/commands'),
-    () => import('@adonisplus/flow/commands'),
     () => import('@adonisjs/cache/commands'),
   ],
 
@@ -61,10 +60,6 @@ export default defineConfig({
     () => import('@adonisjs/inertia/inertia_provider'),
     () => import('@adonisjs/auth/auth_provider'),
     () => import('#providers/api_provider'),
-    {
-      file: () => import('@adonisplus/flow/flow_dashboard_provider'),
-      environment: ['web'],
-    },
     () => import('@adonisjs/cache/cache_provider'),
   ],
 
