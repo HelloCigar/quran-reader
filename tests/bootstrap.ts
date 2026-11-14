@@ -4,6 +4,7 @@ import type { Config } from '@japa/runner/types'
 import { pluginAdonisJS } from '@japa/plugin-adonisjs'
 import { dbAssertions } from '@adonisjs/lucid/plugins/db'
 import testUtils from '@adonisjs/core/services/test_utils'
+import { chromium } from 'playwright'
 import { browserClient } from '@japa/browser-client'
 import { authBrowserClient } from '@adonisjs/auth/plugins/browser_client'
 import { sessionBrowserClient } from '@adonisjs/session/plugins/browser_client'
@@ -20,7 +21,13 @@ export const plugins: Config['plugins'] = [
   assert(),
   pluginAdonisJS(app),
   dbAssertions(app),
-  browserClient({ runInSuites: ['browser'] }),
+  browserClient({
+    runInSuites: ['browser'],
+    // Audio starts only from a click, as in Safari: each audio element stays
+    // locked until play() is called while a click's activation is still live.
+    launcher: (options) =>
+      chromium.launch({ ...options, args: ['--autoplay-policy=user-gesture-required'] }),
+  }),
   sessionBrowserClient(app),
   authBrowserClient(app),
 ]

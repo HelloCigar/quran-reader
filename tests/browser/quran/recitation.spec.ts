@@ -5,6 +5,12 @@ import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 import FakeRecitationService from '#tests/helpers/quran/fake_recitation_service'
 
 /**
+ * Longer than the 5 seconds a click lets a page start audio (Chromium's
+ * transient user activation), so audio started only after the load is blocked.
+ */
+const SLOWER_THAN_A_CLICK_MS = 7000
+
+/**
  * The fake Recitation of An-Nasr (110) hears each Word for 1 second after a
  * 0.6 second lead-in, unless a test sets `wordMs`.
  */
@@ -224,6 +230,54 @@ test.group('Quran Recitation', () => {
 
     await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:3:4', exact: true }))
     await page.assertVisible(page.getByRole('button', { name: 'Play Recitation', exact: true }))
+  })
+
+  test('starts on the first Play when the Recitation loads after the click has expired', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API, the Recitation answering
+    // after the browser's 5-second window for starting audio from a click.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ delayMs: SLOWER_THAN_A_CLICK_MS }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    // Wait on the network, not the page: Playwright's page checks count as user
+    // gestures and would keep the click's activation alive while it loads.
+    const loaded = page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'recitation',
+      { timeout: SLOWER_THAN_A_CLICK_MS + 5000 }
+    )
+    await page.getByRole('button', { name: 'Play Recitation', exact: true }).click()
+    await loaded
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:1:1', exact: true }))
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
+  })
+
+  test('plays from the chosen Ayah on the first press when the Recitation loads after the click has expired', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API, the Recitation answering
+    // after the browser's 5-second window for starting audio from a click.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ delayMs: SLOWER_THAN_A_CLICK_MS }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    // Wait on the network, not the page: Playwright's page checks count as user
+    // gestures and would keep the click's activation alive while it loads.
+    const loaded = page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'recitation',
+      { timeout: SLOWER_THAN_A_CLICK_MS + 5000 }
+    )
+    await page.getByRole('button', { name: 'Play from 110:3', exact: true }).click()
+    await loaded
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:3:1', exact: true }))
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
   })
 
   test('tries again when Play is pressed after the Recitation was unavailable', async ({

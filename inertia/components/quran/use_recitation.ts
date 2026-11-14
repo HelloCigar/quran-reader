@@ -12,6 +12,15 @@ export type ShownWord = { location: string; by: 'recitation' | 'reader' } | null
 type TimedWord = { location: string; ayah: number; startMs: number }
 
 /**
+ * 10 ms of silence, played during the click on Play while the Recitation
+ * loads. Browsers that let audio start only from a click (Safari, Firefox)
+ * unlock the audio element once it plays during one, so the Surah's file can
+ * still start after a load that outlasts the click.
+ */
+const SILENCE =
+  'data:audio/wav;base64,UklGRnQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YVAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA=='
+
+/**
  * Plays a Surah's Recitation and keeps the open Word popover on the Recited
  * Word. The Recitation is loaded by a partial reload on the first Play.
  *
@@ -140,6 +149,12 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
         return
       }
 
+      // Unlocks the audio element during this click (see SILENCE). Starting the
+      // Surah's file replaces the silence and rejects this play().
+      const element = audio()
+      element.src = SILENCE
+      element.play().catch(() => {})
+
       /**
        * Loads the Recitation, then starts it unless the reader paused while it
        * loaded. Every attempt ends here, so a failed, cancelled or repeated
@@ -169,12 +184,14 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
         }
       )
     },
-    [recitation, recitedAyah, router, showToast, start]
+    [audio, recitation, recitedAyah, router, showToast, start]
   )
 
   useEffect(() => {
     const element = audio()
     const onEnded = () => {
+      // The silence played while the Recitation loads is not the end of the Surah.
+      if (element.src === SILENCE) return
       setIsPlaying(false)
       setShown(null)
       setRecitedAyah(null)
