@@ -28,6 +28,8 @@ const SILENCE =
  *   last Recited Word.
  * - Opening or closing a popover by hand pauses the Recitation; Play resumes
  *   where it paused.
+ * - Opening a Word's popover by hand plays that Word alone, from its start to
+ *   its end, on an audio element of its own, so the Recitation keeps its place.
  * - At the end of the Surah it stops and closes the popover.
  *
  * `firstAyahInView` names the Ayah the first Play starts from when no Ayah is
@@ -40,10 +42,15 @@ export function useRecitation(
   const router = useRouter()
   const showToast = useToast()
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  /** Plays one Word on its own, apart from the Recitation. */
+  const wordAudioRef = useRef<HTMLAudioElement | null>(null)
+  /** Stops the Word playing on its own, if one is. */
+  const stopWordRef = useRef<(() => void) | null>(null)
   /** Where playback last started from: Words before it are not recited. */
   const originMsRef = useRef(0)
-  /** The Ayah to start from once the Recitation has loaded. */
-  const pendingRef = useRef<number | null>(null)
+  /** What to play once the Recitation has loaded: from an Ayah, or one Word. */
+  const pendingRef = useRef<((loaded: Data.Recitation) => void) | null>(null)
+  const isLoadingRef = useRef(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [shown, setShown] = useState<ShownWord>(null)
@@ -110,8 +117,61 @@ export function useRecitation(
     return audioRef.current
   }, [])
 
+  const wordAudio = useCallback(() => {
+    if (!wordAudioRef.current) {
+      wordAudioRef.current = new Audio()
+      wordAudioRef.current.preload = 'auto'
+    }
+    return wordAudioRef.current
+  }, [])
+
+  const stopWord = useCallback(() => {
+    stopWordRef.current?.()
+    stopWordRef.current = null
+  }, [])
+
+  /**
+   * Plays the Word at `location` alone: from its start, pausing at its end. A
+   * Word with no timing plays nothing.
+   */
+  const playWord = useCallback(
+    (loaded: Data.Recitation, location: string) => {
+      stopWord()
+      const word = loaded.ayahs
+        .flatMap((ayah) => ayah.words)
+        .find((timed) => timed.location === location)
+      if (!word) return
+
+      const element = wordAudio()
+      if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
+      element.currentTime = word.startMs / 1000
+
+      let frame = 0
+      const watch = () => {
+        if (element.paused) return
+        if (element.currentTime * 1000 >= word.endMs) {
+          element.pause()
+          return
+        }
+        frame = requestAnimationFrame(watch)
+      }
+      element.play().then(
+        () => {
+          frame = requestAnimationFrame(watch)
+        },
+        () => {}
+      )
+      stopWordRef.current = () => {
+        cancelAnimationFrame(frame)
+        element.pause()
+      }
+    },
+    [stopWord, wordAudio]
+  )
+
   const start = useCallback(
     (loaded: Data.Recitation, fromAyah: number | null) => {
+      stopWord()
       const element = audio()
       if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
 
@@ -129,7 +189,50 @@ export function useRecitation(
         () => setIsPlaying(false)
       )
     },
-    [audio]
+    [audio, stopWord]
+  )
+
+  /**
+   * Loads the Recitation, then plays whatever `pendingRef` holds by then:
+   * pausing empties it, and a later request replaces it. `element` is the audio
+   * element that will play: it plays a moment of silence during this click (see
+   * SILENCE). Every attempt ends here, so a failed, cancelled or repeated
+   * unavailable load never leaves Play stuck loading.
+   */
+  const load = useCallback(
+    (element: HTMLAudioElement, then: (loaded: Data.Recitation) => void) => {
+      element.src = SILENCE
+      element.play().catch(() => {})
+      pendingRef.current = then
+      // One load at a time: the one in flight plays the latest request.
+      if (isLoadingRef.current) return
+
+      isLoadingRef.current = true
+      setIsLoading(true)
+      router.visit(
+        { href: window.location.href },
+        {
+          only: ['recitation'],
+          preserveState: true,
+          preserveScroll: true,
+          replace: true,
+          onSuccess: (page) => {
+            const loaded = (page.props as { recitation?: Data.Recitation | null }).recitation
+            if (!loaded) {
+              showToast({ body: 'Recitation is unavailable right now.', type: 'error' })
+              return
+            }
+            pendingRef.current?.(loaded)
+          },
+          onFinish: () => {
+            pendingRef.current = null
+            isLoadingRef.current = false
+            setIsLoading(false)
+          },
+        }
+      )
+    },
+    [router, showToast]
   )
 
   /**
@@ -155,42 +258,10 @@ export function useRecitation(
         return
       }
 
-      // Unlocks the audio element during this click (see SILENCE). Starting the
-      // Surah's file replaces the silence and rejects this play().
-      const element = audio()
-      element.src = SILENCE
-      element.play().catch(() => {})
-
-      /**
-       * Loads the Recitation, then starts it unless the reader paused while it
-       * loaded. Every attempt ends here, so a failed, cancelled or repeated
-       * unavailable load never leaves Play stuck loading.
-       */
-      pendingRef.current = from ?? 1
-      setIsLoading(true)
-      router.visit(
-        { href: window.location.href },
-        {
-          only: ['recitation'],
-          preserveState: true,
-          preserveScroll: true,
-          replace: true,
-          onSuccess: (page) => {
-            const loaded = (page.props as { recitation?: Data.Recitation | null }).recitation
-            if (!loaded) {
-              showToast({ body: 'Recitation is unavailable right now.', type: 'error' })
-              return
-            }
-            if (pendingRef.current !== null) start(loaded, pendingRef.current)
-          },
-          onFinish: () => {
-            pendingRef.current = null
-            setIsLoading(false)
-          },
-        }
-      )
+      // Starting the Surah's file replaces the silence and rejects its play().
+      load(audio(), (loaded) => start(loaded, from ?? 1))
     },
-    [audio, firstAyahInView, recitation, recitedAyah, router, showToast, start]
+    [audio, firstAyahInView, load, recitation, recitedAyah, start]
   )
 
   useEffect(() => {
@@ -207,19 +278,27 @@ export function useRecitation(
     return () => {
       element.removeEventListener('ended', onEnded)
       element.pause()
+      stopWord()
     }
-  }, [audio])
+  }, [audio, stopWord])
 
   /**
    * The reader opens or closes a Word's popover by hand: the Recitation
-   * pauses.
+   * pauses, and an opened Word plays alone. The first such Word loads the
+   * Recitation; once it is known to be unavailable, Words open silently.
    */
   const openByReader = useCallback(
     (location: string, isOpen: boolean) => {
       pause()
+      stopWord()
       setShown(isOpen ? { location, by: 'reader' } : null)
+      if (!isOpen) return
+      if (recitation) playWord(recitation, location)
+      else if (recitation === undefined) {
+        load(wordAudio(), (loaded) => playWord(loaded, location))
+      }
     },
-    [pause]
+    [load, pause, playWord, recitation, stopWord, wordAudio]
   )
 
   return {
