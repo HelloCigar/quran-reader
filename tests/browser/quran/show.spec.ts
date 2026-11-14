@@ -30,14 +30,14 @@ test.group('Quran surah reading', () => {
     await page.assertVisible(page.getByTestId('bismillah'))
     await page.assertText(
       '[data-testid="bismillah"]',
-      '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650'
+      '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0640\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650'
     )
   })
 
   test('shows no separate Bismillah line on surah {number}')
     .with([
       { number: 1, heading: 'Al-Fatihah' },
-      { number: 9, heading: 'At-Tawba' },
+      { number: 9, heading: 'At-Tawbah' },
     ])
     .run(async ({ visit, route, swap }, { number, heading }) => {
       swap(QuranTextService, new FakeQuranTextService())
@@ -59,12 +59,12 @@ test.group('Quran surah reading', () => {
     await page.assertVisible(ayahs.getByText('1:2', { exact: true }))
     await page.assertVisible(
       ayahs.getByText(
-        '\u0671\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F \u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0671\u0644\u0652\u0639\u064E\u0670\u0644\u064E\u0645\u0650\u064A\u0646\u064E',
+        '\u0671\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F \u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0671\u0644\u0652\u0639\u064E\u0640\u0670\u0644\u064E\u0645\u0650\u064A\u0646\u064E',
         { exact: true }
       )
     )
     await page.assertVisible(
-      ayahs.getByText('[All] praise is [due] to Allah, Lord of the worlds -', { exact: true })
+      ayahs.getByText('[All] praise is [due] to Allāh, Lord of the worlds -', { exact: true })
     )
   })
 
@@ -104,7 +104,7 @@ test.group('Quran surah reading', () => {
         number: 1,
         heading: 'Al-Fatihah',
       },
-      { direction: 'next', label: 'Next surah: Aal-i-Imraan', number: 3, heading: 'Aal-i-Imraan' },
+      { direction: 'next', label: "Next surah: Ali 'Imran", number: 3, heading: "Ali 'Imran" },
     ])
     .run(async ({ visit, route, swap }, { label, number, heading }) => {
       swap(QuranTextService, new FakeQuranTextService())
