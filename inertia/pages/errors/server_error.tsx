@@ -1,5 +1,5 @@
 import ErrorPage from '~/components/errors/error_page'
-import MarketingLayout from '~/components/marketing/marketing_layout'
+import AppLayout from '~/components/app/app_layout'
 
 export default function ServerError() {
   return (
@@ -11,4 +11,4 @@ export default function ServerError() {
   )
 }
 
-ServerError.layout = [MarketingLayout]
+ServerError.layout = [AppLayout]

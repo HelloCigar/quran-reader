@@ -9,7 +9,7 @@ import { BookmarkIcon } from '@heroicons/react/24/outline'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
 import { urlFor } from '~/client'
-import MarketingLayout from '~/components/marketing/marketing_layout'
+import AppLayout from '~/components/app/app_layout'
 import SurahListItem from '~/components/quran/surah_list_item'
 import QuranCredit from '~/components/quran/quran_credit'
 
@@ -48,4 +48,4 @@ export default function Index({ surahs, user }: PageProps) {
   )
 }
 
-Index.layout = [MarketingLayout]
+Index.layout = [AppLayout]

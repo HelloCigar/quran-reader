@@ -1,5 +1,8 @@
 import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
+import User from '#models/user'
+import QuranTextService from '#services/quran_text_service'
+import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 
 test.group('Navigation', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -24,6 +27,74 @@ test.group('Navigation', (group) => {
       .click()
     await page.waitForURL(route('session.create'))
     await page.assertTextContains('h1', 'Welcome back')
+  })
+
+  test('sends a signed-in reader from the home page to the dashboard', async ({
+    visit,
+    route,
+    browserContext,
+  }) => {
+    const reader = await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('home'))
+
+    await page.assertPath(route('dashboard'))
+  })
+
+  test("shows a signed-in reader the reader's areas while reading", async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true })
+
+    await page.assertVisible(nav.getByRole('link', { name: 'Dashboard', exact: true }))
+    await page.assertVisible(nav.getByRole('button', { name: 'Log out', exact: true }))
+    await nav.getByRole('link', { name: 'Bookmarks', exact: true }).click()
+    await page.assertPath(route('bookmarks.index'))
+  })
+
+  test('marks Quran as the current area while reading a surah', async ({ visit, route, swap }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+
+    await page.assertExists(
+      page
+        .getByRole('navigation', { name: 'Main navigation', exact: true })
+        .locator('a[aria-current="page"]', { hasText: 'Quran' })
+    )
+  })
+
+  test('shows a signed-out reader sign-in actions instead of the reader areas', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true })
+
+    await page.assertNotExists(nav.getByRole('link', { name: 'Dashboard', exact: true }))
+    await page.assertNotExists(nav.getByRole('link', { name: 'Bookmarks', exact: true }))
+    await nav.getByRole('link', { name: 'Sign in', exact: true }).click()
+    await page.assertPath(route('session.create'))
   })
 
   test('navigates between pages without a full reload', async ({ visit, route, assert }) => {

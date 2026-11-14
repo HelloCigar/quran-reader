@@ -63,8 +63,7 @@ test.group('Login and logout', (group) => {
 
     const page = await visit(route('session.create'))
 
-    await page.assertPath(route('home'))
-    await page.getByRole('link', { name: 'Dashboard', exact: true }).waitFor()
+    await page.assertPath(route('dashboard'))
   })
 })
 
