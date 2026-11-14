@@ -14,7 +14,7 @@
 import { DateTime } from 'luxon'
 import vine, { SimpleMessagesProvider, VineDate, VineNumber, VineString } from '@vinejs/vine'
 import { SURAH_AYAH_COUNTS } from '#values/surah_ayah_counts'
-import AyahReference from '#values/ayah_reference'
+import AyahReference from '#ayah_reference/ayah_reference'
 
 declare module '@vinejs/vine/types' {
   interface VineGlobalTransforms {

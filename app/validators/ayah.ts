@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import AyahReference from '#values/ayah_reference'
+import AyahReference from '#ayah_reference/ayah_reference'
 
 /**
  * GET /quran/ayah. `reference` is the Ayah Reference the reader typed, such
