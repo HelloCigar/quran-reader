@@ -26,3 +26,24 @@ export type RawChapter = {
   verses_count: number
   translated_name: { language_name: 'english'; name: string }
 }
+
+/**
+ * One Ayah's timings within a Surah's audio file. Each segment is
+ * `[word position, start ms, end ms]`.
+ */
+export type RawAudioTimestamp = {
+  verse_key: string
+  timestamp_from: number
+  timestamp_to: number
+  duration: number
+  segments: number[][]
+}
+
+export type RawAudioFile = {
+  id: number
+  chapter_id: number
+  file_size: number
+  format: string
+  audio_url: string | null
+  timestamps: RawAudioTimestamp[]
+}

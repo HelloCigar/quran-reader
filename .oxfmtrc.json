@@ -17,6 +17,7 @@
     "astryx-themes.ts",
     "AGENTS.md",
     "GEMINI.md",
+    "CLAUDE.md",
     ".claude/CLAUDE.md",
     "src/themes/quran/quran.js",
     "src/themes/quran/quran.css",

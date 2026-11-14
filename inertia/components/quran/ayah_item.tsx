@@ -1,5 +1,9 @@
 import { Fragment } from 'react'
+import { PlayIcon } from '@heroicons/react/24/outline'
 import { ListItem } from '@astryxdesign/core/List'
+import { HStack } from '@astryxdesign/core/HStack'
+import { Button } from '@astryxdesign/core/Button'
+import { Icon } from '@astryxdesign/core/Icon'
 import { VStack } from '@astryxdesign/core/VStack'
 import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
@@ -10,7 +14,7 @@ import AyahBookmarkAction from '~/components/bookmarks/ayah_bookmark_action'
 /**
  * One ayah: its reference ("2:255"), the Arabic as its Words (each opens its
  * meaning) and the ayah-end marker, reading right to left, and the English
- * translation beneath it, with its bookmark action.
+ * translation beneath it, with its "play from this Ayah" and bookmark actions.
  * `#ayah-<number>` anchors it.
  */
 export default function AyahItem({
@@ -19,12 +23,14 @@ export default function AyahItem({
   bookmark,
   onEditNote,
   onRemove,
+  onPlayFrom,
 }: {
   surahNumber: number
   ayah: Data.Ayah
   bookmark: Data.Bookmark | null
   onEditNote: (bookmark: Data.Bookmark) => void
   onRemove: (bookmark: Data.Bookmark) => void
+  onPlayFrom: (ayah: number) => void
 }) {
   return (
     <ListItem
@@ -53,13 +59,22 @@ export default function AyahItem({
         </VStack>
       }
       endContent={
-        <AyahBookmarkAction
-          surah={surahNumber}
-          ayah={ayah.number}
-          bookmark={bookmark}
-          onEditNote={onEditNote}
-          onRemove={onRemove}
-        />
+        <HStack gap={1} vAlign="center">
+          <Button
+            label={`Play from ${ayah.reference}`}
+            variant="ghost"
+            isIconOnly
+            icon={<Icon icon={PlayIcon} />}
+            onClick={() => onPlayFrom(ayah.number)}
+          />
+          <AyahBookmarkAction
+            surah={surahNumber}
+            ayah={ayah.number}
+            bookmark={bookmark}
+            onEditNote={onEditNote}
+            onRemove={onRemove}
+          />
+        </HStack>
       }
     />
   )
