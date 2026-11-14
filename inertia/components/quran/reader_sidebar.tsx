@@ -13,11 +13,13 @@ import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
+import { useReaderPreference } from '~/components/quran/use_reader_preference'
 
 type Surah = Data.Surah.Variants['forNavigation']
 
-/** Surah: choosing a Surah opens it. Verse: its Ayahs are listed beside it. */
-type Mode = 'surah' | 'verse'
+/** Surah: just the Surahs. Verse: the open Surah's Ayahs beside them. */
+const MODES = ['verse', 'surah'] as const
+type Mode = (typeof MODES)[number]
 
 const styles = stylex.create({
   /** The Ayah column, and the Verse box above it, take a fixed share. */
@@ -38,10 +40,10 @@ function searchable(text: string) {
 
 /**
  * The reading page's way around the Quran: a Surah | Verse switch, a Search
- * Surah box, and the Surahs with the one being read marked. In Surah mode
- * choosing a Surah opens it. In Verse mode it lists that Surah's Ayahs in a
- * second column, which scrolls on its own; the Verse box filters them, and
- * Enter there opens that Ayah or shows why it can't.
+ * Surah box, and the Surahs with the one being read marked; choosing one
+ * opens it. Verse mode also lists the open Surah's Ayahs in a second column,
+ * which scrolls on its own; the Verse box filters them, and Enter there opens
+ * that Ayah or shows why it can't. The switch is remembered.
  */
 export default function ReaderSidebar({
   surahs,
@@ -53,12 +55,11 @@ export default function ReaderSidebar({
   /** Shows a close button, for the sidebar in a drawer. */
   onClose?: () => void
 }) {
-  const [mode, setMode] = useState<Mode>('verse')
-  const [chosen, setChosen] = useState(current)
+  const [mode, setMode] = useReaderPreference('sidebar-mode', MODES, 'verse')
   const [query, setQuery] = useState('')
   const [verse, setVerse] = useState('')
   const surahListRef = useRef<HTMLUListElement>(null)
-  const chosenSurah = surahs.find((surah) => surah.number === chosen) ?? surahs[0]
+  const openSurah = surahs.find((surah) => surah.number === current) ?? surahs[0]
   const form = useRouteForm(
     'ayahs.show',
     { reference: '' },
@@ -79,10 +80,10 @@ export default function ReaderSidebar({
     )
   }, [surahs, deferredQuery])
   const shownAyahs = useMemo(() => {
-    const ayahs = Array.from({ length: chosenSurah.ayahCount }, (_, index) => index + 1)
+    const ayahs = Array.from({ length: openSurah.ayahCount }, (_, index) => index + 1)
     const term = verse.trim()
     return term === '' ? ayahs : ayahs.filter((ayah) => String(ayah).startsWith(term))
-  }, [chosenSurah, verse])
+  }, [openSurah, verse])
 
   useEffect(() => {
     surahListRef.current
@@ -92,7 +93,7 @@ export default function ReaderSidebar({
 
   function goToVerse(event: FormEvent) {
     event.preventDefault()
-    form.transform(() => ({ reference: `${chosenSurah.number}:${verse.trim()}` }))
+    form.transform(() => ({ reference: `${openSurah.number}:${verse.trim()}` }))
     form.submit()
   }
 
@@ -158,28 +159,24 @@ export default function ReaderSidebar({
               <Text type="supporting">No surah matches &ldquo;{query}&rdquo;.</Text>
             ) : (
               <List ref={surahListRef} density="compact" aria-label="Surahs">
-                {shownSurahs.map((surah) => {
-                  const opens = mode === 'surah'
-                  return (
-                    <ListItem
-                      key={surah.number}
-                      startContent={
-                        <Text
-                          type="body"
-                          color="secondary"
-                          hasTabularNumbers
-                          xstyle={styles.surahNumber}
-                        >
-                          {surah.number}
-                        </Text>
-                      }
-                      label={surah.name}
-                      href={opens ? urlFor('surahs.show', { number: surah.number }) : undefined}
-                      onClick={opens ? undefined : () => setChosen(surah.number)}
-                      isSelected={surah.number === (opens ? current : chosen)}
-                    />
-                  )
-                })}
+                {shownSurahs.map((surah) => (
+                  <ListItem
+                    key={surah.number}
+                    startContent={
+                      <Text
+                        type="body"
+                        color="secondary"
+                        hasTabularNumbers
+                        xstyle={styles.surahNumber}
+                      >
+                        {surah.number}
+                      </Text>
+                    }
+                    label={surah.name}
+                    href={urlFor('surahs.show', { number: surah.number })}
+                    isSelected={surah.number === current}
+                  />
+                ))}
               </List>
             )}
           </StackItem>
@@ -188,12 +185,12 @@ export default function ReaderSidebar({
               {shownAyahs.length === 0 ? (
                 <Text type="supporting">No such ayah.</Text>
               ) : (
-                <List density="compact" aria-label={`Ayahs of ${chosenSurah.name}`}>
+                <List density="compact" aria-label={`Ayahs of ${openSurah.name}`}>
                   {shownAyahs.map((ayah) => (
                     <ListItem
                       key={ayah}
                       label={String(ayah)}
-                      href={urlFor('surahs.show', { number: chosenSurah.number }, { qs: { ayah } })}
+                      href={urlFor('surahs.show', { number: openSurah.number }, { qs: { ayah } })}
                     />
                   ))}
                 </List>

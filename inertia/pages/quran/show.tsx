@@ -14,7 +14,7 @@ import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
 import { useMediaQuery } from '@astryxdesign/core/hooks'
 import { Drawer } from '@astryxdesign/core/Drawer'
-import { Button } from '@astryxdesign/core/Button'
+import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Bars3Icon } from '@heroicons/react/20/solid'
 import { VStack } from '@astryxdesign/core/VStack'
@@ -37,6 +37,7 @@ import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
+import { useReaderPreference } from '~/components/quran/use_reader_preference'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -55,6 +56,9 @@ const RECITATION_LOAD_AHEAD = 5
  * for it to count as in view; an Ayah showing less has been scrolled past.
  */
 const IN_VIEW_MIN = 24
+
+/** Whether the sidebar shows beside the Ayahs on a wide screen. */
+const SIDEBAR = ['shown', 'hidden'] as const
 
 /** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
 const AYAH_HASH = /^#ayah-(\d+)$/
@@ -97,12 +101,15 @@ export default function Show({
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
   /**
-   * Responsive contract. Wide: the sidebar is a start panel beside the Ayahs.
-   * Narrow (phones, up to 768px): the panel is dropped so the Ayahs keep the
-   * width, and a "Surahs" button opens the same sidebar in a drawer.
+   * Responsive contract. Wide: the sidebar is a start panel beside the Ayahs,
+   * which the reader can hide (remembered). Narrow (phones, up to 768px): the
+   * panel is dropped so the Ayahs keep the width, and the same sidebar opens
+   * in a drawer. Either way the toggle sits in the footer, out of the text.
    */
   const isNarrow = useMediaQuery('(max-width: 768px)')
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [sidebar, setSidebar] = useReaderPreference('sidebar', SIDEBAR, 'shown')
+  const hasPanel = !isNarrow && sidebar === 'shown'
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -224,9 +231,9 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={isNarrow ? 720 : 1100}
+        contentWidth={hasPanel ? 1100 : 720}
         start={
-          !isNarrow && (
+          hasPanel && (
             <LayoutPanel
               hasDivider
               width={380}
@@ -251,17 +258,6 @@ export default function Show({
               loading={LOADING}
             >
               <VStack gap={6}>
-                {isNarrow && (
-                  <HStack>
-                    <Button
-                      label="Surahs"
-                      variant="secondary"
-                      size="sm"
-                      icon={<Icon icon={Bars3Icon} />}
-                      onClick={() => setIsDrawerOpen(true)}
-                    />
-                  </HStack>
-                )}
                 {hasFirstAyah && <SurahHeading surah={surah} />}
                 {hasFirstAyah && bismillah && (
                   <ArabicText align="center" data-testid="bismillah">
@@ -316,6 +312,17 @@ export default function Show({
         footer={
           <RecitationPlayer
             footerRef={playerRef}
+            startContent={
+              <IconButton
+                label={hasPanel ? 'Hide Surahs' : 'Show Surahs'}
+                variant="ghost"
+                icon={<Icon icon={Bars3Icon} />}
+                onClick={() => {
+                  if (isNarrow) setIsDrawerOpen(true)
+                  else setSidebar(hasPanel ? 'hidden' : 'shown')
+                }}
+              />
+            }
             isPlaying={player.isPlaying}
             isLoading={player.isLoading}
             recitedReference={

@@ -48,7 +48,7 @@ test.group('Quran reader sidebar', (group) => {
     await page.assertNotExists(page.getByRole('textbox', { name: 'Verse', exact: true }))
   })
 
-  test('lists the ayahs of the surah the reader chooses in Verse mode', async ({
+  test('opens the surah the reader chooses in Verse mode, with its ayahs', async ({
     visit,
     route,
     swap,
@@ -61,9 +61,37 @@ test.group('Quran reader sidebar', (group) => {
       .getByText("Ali 'Imran", { exact: true })
       .click()
 
+    await page.waitForURL('**/quran/3')
     const ayahs = page.getByRole('list', { name: "Ayahs of Ali 'Imran", exact: true })
     await page.assertElementsCount(ayahs.getByRole('listitem'), 200)
-    await page.assertPath('/quran/2')
+  })
+
+  test('keeps Surah mode when the reader opens another surah', async ({ visit, route, swap }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page.getByRole('radio', { name: 'Surah', exact: true }).click()
+    await page
+      .getByRole('list', { name: 'Surahs', exact: true })
+      .getByText("Ali 'Imran", { exact: true })
+      .click()
+    await page.waitForURL('**/quran/3')
+
+    await page.assertVisible(page.getByRole('heading', { name: "Ali 'Imran", exact: true }))
+    await page.assertNotExists(page.getByRole('textbox', { name: 'Verse', exact: true }))
+  })
+
+  test('hides the sidebar until the reader shows it again', async ({ visit, route, swap }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page.getByRole('button', { name: 'Hide Surahs', exact: true }).click()
+    await page.assertNotExists(page.getByRole('navigation', { name: 'Quran', exact: true }))
+
+    await page.reload()
+    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('navigation', { name: 'Quran', exact: true }))
   })
 
   test('opens the ayah the reader chooses', async ({ visit, route, swap }) => {
@@ -82,15 +110,11 @@ test.group('Quran reader sidebar', (group) => {
   test('goes to the ayah typed in the Verse box', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 
-    const page = await visit(route('surahs.show', { number: 1 }))
-    await page
-      .getByRole('list', { name: 'Surahs', exact: true })
-      .getByText('Al-Baqarah', { exact: true })
-      .click()
+    const page = await visit(route('surahs.show', { number: 2 }))
     await page.getByRole('textbox', { name: 'Verse', exact: true }).fill('255')
     await page.getByRole('textbox', { name: 'Verse', exact: true }).press('Enter')
 
-    await page.waitForURL((url) => url.pathname === '/quran/2')
+    await page.waitForURL((url) => url.searchParams.get('ayah') === '255')
     await waitForAyahInView(page, 255)
   })
 
@@ -137,7 +161,7 @@ test.group('Quran reader sidebar', (group) => {
     await page.setViewportSize(PHONE)
 
     await page.assertNotExists(page.getByRole('list', { name: 'Surahs', exact: true }))
-    await page.getByRole('button', { name: 'Surahs', exact: true }).click()
+    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
 
     const drawer = page.getByRole('dialog', { name: 'Quran', exact: true })
     await page.assertVisible(drawer.getByRole('list', { name: 'Surahs', exact: true }))
@@ -150,7 +174,7 @@ test.group('Quran reader sidebar', (group) => {
 
     const page = await visit(route('surahs.show', { number: 2 }))
     await page.setViewportSize(PHONE)
-    await page.getByRole('button', { name: 'Surahs', exact: true }).click()
+    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
     const drawer = page.getByRole('dialog', { name: 'Quran', exact: true })
     await drawer.getByRole('radio', { name: 'Surah', exact: true }).click()
     await drawer.getByText("Ali 'Imran", { exact: true }).click()
