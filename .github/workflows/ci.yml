@@ -24,7 +24,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
 
       - name: Create .env
-        run: cp .env.example .env && node ace generate:key
+        # Tests never call Quran Foundation, so placeholder credentials are enough.
+        run: |
+          cp .env.example .env
+          sed -i 's/^QURAN_FOUNDATION_CLIENT_ID=$/QURAN_FOUNDATION_CLIENT_ID=ci/; s/^QURAN_FOUNDATION_CLIENT_SECRET=$/QURAN_FOUNDATION_CLIENT_SECRET=ci/' .env
+          node ace generate:key
 
       - name: Typecheck
         run: npm run typecheck

@@ -8,7 +8,7 @@ import { urlFor } from '~/client'
 
 /**
  * The end of a surah: the previous and next surahs on one row, with the surah
- * list beneath. Al-Faatiha has no previous surah and An-Naas has no next. Each
+ * list beneath. Al-Fatihah has no previous surah and An-Nas has no next. Each
  * button shows the surah's name; its accessible name says which way it goes.
  */
 export default function SurahPager({

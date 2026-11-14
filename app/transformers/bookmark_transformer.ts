@@ -26,7 +26,7 @@ export default class BookmarkTransformer extends BaseTransformer<Bookmark> {
   }
 
   /**
-   * The bookmarks list: a "2:255 · Al-Baqara" title, or just the reference
+   * The bookmarks list: a "2:255 · Al-Baqarah" title, or just the reference
    * when the surah's text is unavailable, and the ayah's text or `null`.
    */
   async forList() {

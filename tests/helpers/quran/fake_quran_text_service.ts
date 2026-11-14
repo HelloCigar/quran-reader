@@ -4,13 +4,13 @@ import QuranUnavailableException from '#exceptions/quran_unavailable_exception'
 import type { Surah, SurahSummary } from '#types/quran'
 
 /**
- * The Uthmani Bismillah, as the real service lifts it out of ayah 1.
+ * The Uthmani Bismillah, as the real service gives it (Quran Foundation's 1:1).
  *
  * Written as escapes because the source puts shadda before the short vowel
  * (not NFC order), and any re-normalization would stop it matching.
  */
 const BISMILLAH =
-  '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650'
+  '\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0640\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650'
 
 function readFixture<T>(name: string): T {
   const url = new URL(`../../fixtures/quran/${name}`, import.meta.url)
@@ -50,6 +50,20 @@ export default class FakeQuranTextService extends QuranTextService {
         number: index + 1,
         arabic: `آية ${index + 1}`,
         english: `Ayah ${number}:${index + 1}`,
+        words: [
+          {
+            location: `${number}:${index + 1}:1`,
+            arabic: 'آية',
+            transliteration: 'āya',
+            translation: 'sign',
+          },
+          {
+            location: `${number}:${index + 1}:2`,
+            arabic: `${index + 1}`,
+            transliteration: `${index + 1}`,
+            translation: `${index + 1}`,
+          },
+        ],
       })),
     }
   }

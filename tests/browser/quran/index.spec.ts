@@ -29,9 +29,9 @@ test.group('Quran surah list', () => {
     const row = page
       .getByRole('list', { name: 'Surahs', exact: true })
       .getByRole('listitem')
-      .filter({ has: page.getByText('1 · Al-Faatiha', { exact: true }) })
-    await page.assertVisible(row.getByText('1 · Al-Faatiha', { exact: true }))
-    await page.assertVisible(row.getByText('The Opening', { exact: true }))
+      .filter({ has: page.getByText('1 · Al-Fatihah', { exact: true }) })
+    await page.assertVisible(row.getByText('1 · Al-Fatihah', { exact: true }))
+    await page.assertVisible(row.getByText('The Opener', { exact: true }))
     await page.assertVisible(row.getByText('7 ayahs', { exact: true }))
   })
 
@@ -42,11 +42,11 @@ test.group('Quran surah list', () => {
     await page
       .getByRole('list', { name: 'Surahs', exact: true })
       .getByRole('link')
-      .filter({ hasText: '2 · Al-Baqara' })
+      .filter({ hasText: '2 · Al-Baqarah' })
       .click()
 
     await page.assertPath(route('surahs.show', { number: 2 }))
-    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqara', exact: true }))
+    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
   })
 
   test("shows the unavailable message when the surah list can't be loaded", async ({

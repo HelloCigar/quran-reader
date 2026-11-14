@@ -2,17 +2,17 @@ import { Text } from '@astryxdesign/core/Text'
 import { Link } from '@astryxdesign/core/Link'
 
 /**
- * The credit the text source's terms require on every page that shows Quran
- * text: the source and the translation.
+ * The credit on every page that shows Quran text: the source and the
+ * translation.
  */
 export default function QuranCredit() {
   return (
     <Text type="supporting" as="p">
-      Quran text from{' '}
-      <Link href="https://alquran.cloud" target="_blank">
-        Al Quran Cloud
+      Quran text and word-by-word data from{' '}
+      <Link href="https://quran.foundation" target="_blank">
+        Quran Foundation
       </Link>{' '}
-      (alquran.cloud) · English translation: Saheeh International.
+      (quran.foundation) · English translation: Saheeh International.
     </Text>
   )
 }

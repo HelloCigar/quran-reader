@@ -15,8 +15,7 @@
     "lint": "vp lint -c .oxlintrc.json",
     "format": "vp fmt -c .oxfmtrc.json",
     "typecheck": "tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json",
-    "format:check": "vp fmt -c .oxfmtrc.json --check",
-    "openapi": "openapi-ts"
+    "format:check": "vp fmt -c .oxfmtrc.json --check"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
@@ -38,8 +37,7 @@
     "#tests/*": "./tests/*.js",
     "#start/*": "./start/*.js",
     "#config/*": "./config/*.js",
-    "#types/*": "./types/*.js",
-    "#integrations/*": "./app/integrations/*.js"
+    "#types/*": "./types/*.js"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^8.5.2",
@@ -47,7 +45,6 @@
     "@adonisjs/tsconfig": "^2.0.0",
     "@adonisplus/flow": "^1.0.0",
     "@astryxdesign/cli": "^0.7.14",
-    "@hey-api/openapi-ts": "^0.99.0",
     "@japa/assert": "^4.2.0",
     "@japa/browser-client": "^2.3.0",
     "@japa/plugin-adonisjs": "^5.2.0",
@@ -87,6 +84,7 @@
     "@heroicons/react": "^2.2.0",
     "@inertiajs/core": "^3.7.1",
     "@inertiajs/react": "^3.7.1",
+    "@quranjs/api": "^3.17.2",
     "@stylexjs/stylex": "^0.19.2",
     "@tuyau/core": "^1.2.2",
     "@vinejs/vine": "^4.4.0",
