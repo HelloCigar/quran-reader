@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import { VStack } from '@astryxdesign/core/VStack'
 import { Text } from '@astryxdesign/core/Text'
 
 /**
- * Quran Arabic, exactly as given: right to left, in the theme's `arabic` text
+ * Quran Arabic, exactly as given (text, or an Ayah's Words): right to left, in the theme's `arabic` text
  * style, and marked `lang="ar"` so screen readers pronounce it as Arabic
  * (WCAG 3.1.2). Use it for every piece of Arabic the app shows.
  */
@@ -11,7 +12,7 @@ export default function ArabicText({
   align = 'start',
   'data-testid': testId,
 }: {
-  'children': string
+  'children': ReactNode
   'align'?: 'start' | 'center'
   'data-testid'?: string
 }) {

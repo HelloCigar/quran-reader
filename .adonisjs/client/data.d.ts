@@ -10,6 +10,7 @@ import type AyahTransformer from '#transformers/ayah_transformer'
 import type BookmarkTransformer from '#transformers/bookmark_transformer'
 import type SurahTransformer from '#transformers/surah_transformer'
 import type UserTransformer from '#transformers/user_transformer'
+import type WordTransformer from '#transformers/word_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
 export namespace Data {
@@ -28,6 +29,10 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
+  }
+  export type Word = InferData<WordTransformer>
+  export namespace Word {
+    export type Variants = InferVariants<WordTransformer>
   }
   export type SharedProps = InferSharedProps<InertiaMiddleware>
   export type FlashMessages = InferFlashData<InertiaMiddleware>
