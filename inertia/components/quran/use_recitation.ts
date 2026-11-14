@@ -146,25 +146,35 @@ export function useRecitation(
       if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
       element.currentTime = word.startMs / 1000
 
+      /**
+       * Animation frames stop the Word on time, but a hidden page or a locked
+       * phone suspends them while the audio plays on. `timeupdate` keeps
+       * firing there (a few times a second), so the Word still stops near its
+       * end instead of running on through the Surah.
+       */
+      const { endMs } = word
       let frame = 0
+      const check = () => {
+        if (element.currentTime * 1000 >= endMs) stop()
+      }
+      const stop = () => {
+        cancelAnimationFrame(frame)
+        element.removeEventListener('timeupdate', check)
+        element.pause()
+      }
       const watch = () => {
         if (element.paused) return
-        if (element.currentTime * 1000 >= word.endMs) {
-          element.pause()
-          return
-        }
-        frame = requestAnimationFrame(watch)
+        check()
+        if (!element.paused) frame = requestAnimationFrame(watch)
       }
+      element.addEventListener('timeupdate', check)
       element.play().then(
         () => {
           frame = requestAnimationFrame(watch)
         },
         () => {}
       )
-      stopWordRef.current = () => {
-        cancelAnimationFrame(frame)
-        element.pause()
-      }
+      stopWordRef.current = stop
     },
     [stopWord, wordAudio]
   )
