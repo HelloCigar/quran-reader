@@ -44,6 +44,13 @@ export default function Show({
     () => new Map(bookmarks.map((bookmark) => [bookmark.ayahNumber, bookmark])),
     [bookmarks]
   )
+  /**
+   * `noteFor` only says which note to open when the page loads. Visits that
+   * keep this page's state (saving a note, removing a bookmark, loading the
+   * Recitation) keep the same `noteFor`; following it would reopen a note the
+   * reader closed.
+   */
+  // react-doctor-disable-next-line no-derived-useState
   const [noteAyah, setNoteAyah] = useState<number | null>(noteFor)
   const removal = useRemoveBookmark()
   const noteBookmark = noteAyah === null ? null : (bookmarksByAyah.get(noteAyah) ?? null)

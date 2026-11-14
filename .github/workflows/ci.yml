@@ -18,10 +18,15 @@ jobs:
           registry-url: https://plus.adonisjs.com/registry/
           scope: '@adonisplus'
 
+      # Only the download needs the registry token. Install scripts run in a
+      # separate step, where the token is not set.
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
+
+      - name: Run install scripts
+        run: npm rebuild
 
       - name: Create .env
         # Tests never call Quran Foundation, so placeholder credentials are enough.

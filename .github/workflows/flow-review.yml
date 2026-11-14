@@ -18,9 +18,11 @@ jobs:
           node-version: 24
           registry-url: https://plus.adonisjs.com/registry/
           scope: '@adonisplus'
-      - run: npm ci
+      # Only the download needs the registry token; install scripts run after.
+      - run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
+      - run: npm rebuild
       - run: npx @adonisplus/flow install --ci
       - uses: adonisjs-plus/flow-review-action@v0.6.0
         with:
