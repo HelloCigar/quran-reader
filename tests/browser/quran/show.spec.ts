@@ -85,6 +85,19 @@ test.group('Quran surah reading', () => {
     )
   })
 
+  test('opens a long surah at the ayah its link points to', async ({ visit, route, swap }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}#ayah-250`)
+
+    await page.assertVisible(page.getByText('2:250', { exact: true }))
+    // Japa's browser client has no in-viewport assertion: wait until the ayah's top is on screen.
+    await page.waitForFunction(`(() => {
+      const top = document.getElementById('ayah-250')?.getBoundingClientRect().top
+      return top !== undefined && top >= 0 && top < window.innerHeight
+    })()`)
+  })
+
   test('credits the text source and the translation', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 

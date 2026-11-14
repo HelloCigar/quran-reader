@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import { colorVars, radiusVars, spacingVars } from '@astryxdesign/core/theme/tokens.stylex'
 import { Button } from '@astryxdesign/core/Button'
 import { Popover } from '@astryxdesign/core/Popover'
@@ -7,7 +7,7 @@ import { VStack } from '@astryxdesign/core/VStack'
 import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
 import ArabicText from '~/components/quran/arabic_text'
-import { useWordPopovers } from '~/components/quran/word_popovers'
+import { useWordPopover } from '~/components/quran/word_popovers'
 
 export const wordStyles = stylex.create({
   /** A Word reads as part of the Arabic line, not as a button. */
@@ -45,9 +45,9 @@ export const wordStyles = stylex.create({
  * without taking focus, and its Transliteration is highlighted.
  */
 export default function WordButton({ word }: { word: Data.Word }) {
-  const { shown, onOpenChange } = useWordPopovers()
-  const isOpen = shown?.location === word.location
-  const isRecited = isOpen && shown.by === 'recitation'
+  const { openedBy, onOpenChange } = useWordPopover(word.location)
+  const isOpen = openedBy !== null
+  const isRecited = openedBy === 'recitation'
   const anchorRef = useRef<HTMLButtonElement>(null)
 
   /**
@@ -63,30 +63,7 @@ export default function WordButton({ word }: { word: Data.Word }) {
   }, [isRecited])
 
   return (
-    <Popover
-      label={`Word ${word.location}`}
-      placement="below"
-      alignment="center"
-      isOpen={isOpen}
-      onOpenChange={(open) => {
-        // The popover reports its controlled opening too; only a change is the reader's.
-        if (open !== isOpen) onOpenChange(word.location, open)
-      }}
-      hasAutoFocus={!isRecited}
-      isModal={!isRecited}
-      hasLightDismiss={!isRecited}
-      content={
-        <VStack gap={1}>
-          <ArabicText>{word.arabic}</ArabicText>
-          <Text type="body" color="secondary" xstyle={isRecited && wordStyles.recited}>
-            {word.transliteration}
-          </Text>
-          <Text type="body" color="primary">
-            {word.translation}
-          </Text>
-        </VStack>
-      }
-    >
+    <>
       <Button
         ref={anchorRef}
         variant="ghost"
@@ -94,11 +71,42 @@ export default function WordButton({ word }: { word: Data.Word }) {
         aria-expanded={isOpen}
         data-word-location={word.location}
         xstyle={[wordStyles.word, isOpen && wordStyles.selected]}
+        // While open, the popover handles clicks on its anchor.
+        onClick={isOpen ? undefined : () => onOpenChange(word.location, true)}
       >
         <Text type="inherit" color="inherit">
           {word.arabic}
         </Text>
       </Button>
-    </Popover>
+      {/* Only the open Word mounts a popover: a long Surah has thousands of Words. */}
+      {isOpen && (
+        <Popover
+          // Astryx types the anchor as never null; it is set before the Word can open.
+          anchorRef={anchorRef as RefObject<HTMLElement>}
+          label={`Word ${word.location}`}
+          placement="below"
+          alignment="center"
+          isOpen
+          onOpenChange={(open) => {
+            // The popover reports its controlled opening too; only a close is the reader's.
+            if (!open) onOpenChange(word.location, false)
+          }}
+          hasAutoFocus={!isRecited}
+          isModal={!isRecited}
+          hasLightDismiss={!isRecited}
+          content={
+            <VStack gap={1}>
+              <ArabicText>{word.arabic}</ArabicText>
+              <Text type="body" color="secondary" xstyle={isRecited && wordStyles.recited}>
+                {word.transliteration}
+              </Text>
+              <Text type="body" color="primary">
+                {word.translation}
+              </Text>
+            </VStack>
+          }
+        />
+      )}
+    </>
   )
 }

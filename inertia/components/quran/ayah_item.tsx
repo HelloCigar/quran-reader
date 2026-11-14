@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, memo } from 'react'
 import { PlayIcon } from '@heroicons/react/24/outline'
 import { ListItem } from '@astryxdesign/core/List'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -16,8 +16,11 @@ import AyahBookmarkAction from '~/components/bookmarks/ayah_bookmark_action'
  * meaning) and the ayah-end marker, reading right to left, and the English
  * translation beneath it, with its "play from this Ayah" and bookmark actions.
  * `#ayah-<number>` anchors it.
+ *
+ * Memoized, with stable callbacks from the page: a long Surah re-renders no
+ * Ayah when the open Word or the Recited Ayah changes.
  */
-export default function AyahItem({
+export default memo(function AyahItem({
   surahNumber,
   ayah,
   bookmark,
@@ -78,4 +81,4 @@ export default function AyahItem({
       }
     />
   )
-}
+})

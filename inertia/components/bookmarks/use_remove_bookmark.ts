@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useRouter } from '@adonisjs/inertia/react'
 import type { Data } from '@generated/data'
 import { focusBookmarkTrigger } from '~/components/bookmarks/bookmarked_menu'
@@ -11,22 +11,31 @@ import { focusBookmarkTrigger } from '~/components/bookmarks/bookmarked_menu'
  */
 export function useRemoveBookmark() {
   const router = useRouter()
+  /** `useRouter` returns a new router on every render; `remove` reads the latest. */
+  const routerRef = useRef(router)
+  useLayoutEffect(() => {
+    routerRef.current = router
+  })
   const [pending, setPending] = useState<Data.Bookmark | null>(null)
 
-  function destroy(bookmark: Data.Bookmark) {
-    router.delete(
+  const destroy = useCallback((bookmark: Data.Bookmark) => {
+    routerRef.current.delete(
       { route: 'bookmarks.destroy', routeParams: { id: bookmark.id } },
       { preserveScroll: true, preserveState: true }
     )
-  }
+  }, [])
 
-  function remove(bookmark: Data.Bookmark) {
-    if (bookmark.note === null) {
-      destroy(bookmark)
-    } else {
-      setPending(bookmark)
-    }
-  }
+  /** Stable, so a memoized row that takes it does not re-render. */
+  const remove = useCallback(
+    (bookmark: Data.Bookmark) => {
+      if (bookmark.note === null) {
+        destroy(bookmark)
+      } else {
+        setPending(bookmark)
+      }
+    },
+    [destroy]
+  )
 
   function confirm() {
     if (pending) destroy(pending)
