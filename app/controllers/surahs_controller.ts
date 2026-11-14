@@ -3,18 +3,23 @@ import type { HttpContext } from '@adonisjs/core/http'
 // @inject() reads the constructor's emitted type metadata, so this must stay a runtime import.
 // oxlint-disable-next-line typescript/consistent-type-imports
 import QuranTextService from '#services/quran_text_service'
+// oxlint-disable-next-line typescript/consistent-type-imports
+import RecitationService from '#services/recitation_service'
 import SurahTransformer from '#transformers/surah_transformer'
 import AyahTransformer from '#transformers/ayah_transformer'
 import BookmarkTransformer from '#transformers/bookmark_transformer'
+import RecitationTransformer from '#transformers/recitation_transformer'
 import { showSurahValidator } from '#validators/surah'
 import type Bookmark from '#models/bookmark'
 
 @inject()
 export default class SurahsController {
   #quranText: QuranTextService
+  #recitations: RecitationService
 
-  constructor(quranText: QuranTextService) {
+  constructor(quranText: QuranTextService, recitations: RecitationService) {
     this.#quranText = quranText
+    this.#recitations = recitations
   }
 
   async index({ inertia }: HttpContext) {
@@ -49,6 +54,14 @@ export default class SurahsController {
       next: next ? SurahTransformer.transform(next) : null,
       bookmarks: BookmarkTransformer.transform(bookmarks),
       noteFor,
+      /**
+       * Loaded by a partial reload on the first Play. `null` when the
+       * Recitation is unavailable; reading still works.
+       */
+      recitation: inertia.optional(async () => {
+        const recitation = await this.#recitations.readRecitation(surah)
+        return recitation ? RecitationTransformer.transform(recitation) : null
+      }),
     })
   }
 }

@@ -41,5 +41,13 @@ _Avoid_: Romanization, pronunciation
 ## Listening
 
 **Recitation**:
-A reciter's audio of the Quran, played while the Word being recited is highlighted.
+A Reciter's audio of the Quran. It plays from a chosen Ayah through to the end of the Surah, and the Recited Word's meaning is shown as it goes.
 _Avoid_: Dictation, audio, playback
+
+**Reciter**:
+The person whose voice a Recitation is.
+_Avoid_: Qari, narrator, voice
+
+**Recited Word**:
+The Word being heard at the current moment of a Recitation.
+_Avoid_: Current word, active word, playing word

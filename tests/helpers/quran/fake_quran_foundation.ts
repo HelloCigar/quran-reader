@@ -1,11 +1,12 @@
-import type { RawChapter, RawVerse, RawWord } from '#tests/helpers/types'
+import type { RawAudioFile, RawChapter, RawVerse, RawWord } from '#tests/helpers/types'
 
 /**
  * An in-memory Quran Foundation Content API. `install()` routes `fetch` to it
  * for one test, so the real QuranTextService and `@quranjs/api` SDK run
  * against it: the token endpoint, the chapter list, one chapter, and verses by
- * chapter with `page` and `per_page`. It starts with all 114 surahs, each ayah
- * two Words long; tests change the raw responses to reach each case.
+ * chapter with `page` and `per_page`, and each surah's audio file with its
+ * timings. It starts with all 114 surahs, each ayah two Words long and each
+ * Word heard for one second; tests change the raw responses to reach each case.
  */
 export default class FakeQuranFoundation {
   chapters: RawChapter[] = Array.from({ length: 114 }, (_, index) =>
@@ -13,6 +14,39 @@ export default class FakeQuranFoundation {
   )
 
   #verses = new Map<number, RawVerse[]>()
+  #audioFiles = new Map<number, RawAudioFile>()
+
+  /**
+   * The raw audio file of a surah, built on first use: each ayah's two Words
+   * heard one second each, one after another.
+   */
+  audioFile(surah: number): RawAudioFile {
+    const existing = this.#audioFiles.get(surah)
+    if (existing) return existing
+
+    const built: RawAudioFile = {
+      id: surah,
+      chapter_id: surah,
+      file_size: 1000,
+      format: 'mp3',
+      audio_url: `https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/${surah}.mp3`,
+      timestamps: this.verses(surah).map(({ verse_key }, index) => {
+        const from = index * 2000
+        return {
+          verse_key,
+          timestamp_from: from,
+          timestamp_to: from + 2000,
+          duration: 2000,
+          segments: [
+            [1, from, from + 1000],
+            [2, from + 1000, from + 2000],
+          ],
+        }
+      }),
+    }
+    this.#audioFiles.set(surah, built)
+    return built
+  }
 
   /**
    * The raw verses of a surah, built on first use from its `verses_count`.
@@ -56,6 +90,11 @@ export default class FakeQuranFoundation {
 
     if (url.pathname.endsWith('/chapters')) {
       return Response.json({ chapters: this.chapters })
+    }
+
+    const recitation = url.pathname.match(/\/chapter_recitations\/\d+\/(\d+)$/)
+    if (recitation) {
+      return Response.json({ audio_file: this.audioFile(Number(recitation[1])) })
     }
 
     const byChapter = url.pathname.match(/\/verses\/by_chapter\/(\d+)$/)
