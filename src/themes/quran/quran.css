@@ -548,6 +548,10 @@
     --astryx-section-padding: var(--spacing-3);
   }
 
+  .astryx-layout-content {
+    max-height: 100%;
+  }
+
   .astryx-text[data-color="primary"] { color: var(--color-text-primary); }
 
   .astryx-heading[data-color="primary"] { color: var(--color-text-primary); }

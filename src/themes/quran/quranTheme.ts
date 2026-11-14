@@ -219,5 +219,10 @@ export const quranTheme = defineTheme({
     'file-input': { 'mode:dropzone': { '--color-text-secondary': liftedSecondaryText } },
     'citation': { 'variant:number': { '--color-text-secondary': liftedSecondaryText } },
     'segmented-control-item': { base: { '--color-text-secondary': liftedSecondaryText } },
+
+    // Inertia's infinite scroll finds the element that scrolls by its CSS, and
+    // counts an `overflow: auto` one only when its height is bounded. A content
+    // region already fills its layout, so this bounds it without moving it.
+    'layout-content': { base: { maxHeight: '100%' } },
   },
 })

@@ -32,7 +32,8 @@ export default function NoteDialog({
         route="bookmarks.update"
         routeParams={{ id: bookmark.id }}
         errorBag="note"
-        options={{ preserveScroll: true, preserveState: true }}
+        // Only the bookmarks change, so the Ayahs loaded so far stay.
+        options={{ preserveScroll: true, preserveState: true, only: ['bookmarks'] }}
         onSuccess={close}
       >
         {({ errors, processing }) => (

@@ -26,7 +26,11 @@ export default function BookmarkListItem({
       align="start"
       label={
         <Link
-          href={`${urlFor('surahs.show', { number: bookmark.surahNumber })}#ayah-${bookmark.ayahNumber}`}
+          href={urlFor(
+            'surahs.show',
+            { number: bookmark.surahNumber },
+            { qs: { ayah: bookmark.ayahNumber } }
+          )}
         >
           {bookmark.title}
         </Link>

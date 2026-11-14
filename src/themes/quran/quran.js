@@ -444,6 +444,11 @@ export const quranTheme = {
       "base": {
         "padding": "var(--spacing-3)"
       }
+    },
+    "layout-content": {
+      "base": {
+        "maxHeight": "100%"
+      }
     }
   },
   __onDark: {

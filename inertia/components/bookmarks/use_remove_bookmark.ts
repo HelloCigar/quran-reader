@@ -21,7 +21,8 @@ export function useRemoveBookmark() {
   const destroy = useCallback((bookmark: Data.Bookmark) => {
     routerRef.current.delete(
       { route: 'bookmarks.destroy', routeParams: { id: bookmark.id } },
-      { preserveScroll: true, preserveState: true }
+      // Only the bookmarks change, so the Ayahs loaded so far stay.
+      { preserveScroll: true, preserveState: true, only: ['bookmarks'] }
     )
   }, [])
 
