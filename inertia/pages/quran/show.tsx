@@ -12,7 +12,6 @@ import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
-import { useMediaQuery } from '@astryxdesign/core/hooks'
 import { Drawer } from '@astryxdesign/core/Drawer'
 import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
@@ -37,7 +36,7 @@ import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
-import { useReaderPreference } from '~/components/quran/use_reader_preference'
+import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -56,9 +55,6 @@ const RECITATION_LOAD_AHEAD = 5
  * for it to count as in view; an Ayah showing less has been scrolled past.
  */
 const IN_VIEW_MIN = 24
-
-/** Whether the sidebar shows beside the Ayahs on a wide screen. */
-const SIDEBAR = ['shown', 'hidden'] as const
 
 /** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
 const AYAH_HASH = /^#ayah-(\d+)$/
@@ -81,6 +77,8 @@ type PageProps = InertiaProps<{
   next: Data.Surah | null
   /** Every Surah, for the sidebar. */
   surahs: Data.Surah.Variants['forNavigation'][]
+  /** The reader's sidebar choices, from their cookies. */
+  sidebar: { isShown: boolean; mode: 'surah' | 'verse' }
   bookmarks: Data.Bookmark[]
   noteFor: number | null
   /** Loaded on the first Play; `null` when the Recitation is unavailable. */
@@ -94,22 +92,14 @@ export default function Show({
   previous,
   next,
   surahs,
+  sidebar: sidebarChoices,
   bookmarks,
   noteFor,
   openedAt,
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
-  /**
-   * Responsive contract. Wide: the sidebar is a start panel beside the Ayahs,
-   * which the reader can hide (remembered). Narrow (phones, up to 768px): the
-   * panel is dropped so the Ayahs keep the width, and the same sidebar opens
-   * in a drawer. Either way the toggle sits in the footer, out of the text.
-   */
-  const isNarrow = useMediaQuery('(max-width: 768px)')
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [sidebar, setSidebar] = useReaderPreference('sidebar', SIDEBAR, 'shown')
-  const hasPanel = !isNarrow && sidebar === 'shown'
+  const sidebar = useReaderSidebar(sidebarChoices.isShown)
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -231,9 +221,9 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={hasPanel ? 1100 : 720}
+        contentWidth={sidebar.hasPanel ? 1100 : 720}
         start={
-          hasPanel && (
+          sidebar.hasPanel && (
             <LayoutPanel
               hasDivider
               width={380}
@@ -242,7 +232,11 @@ export default function Show({
               role="navigation"
               label="Quran"
             >
-              <ReaderSidebar surahs={surahs} current={surah.number} />
+              <ReaderSidebar
+                surahs={surahs}
+                current={surah.number}
+                initialMode={sidebarChoices.mode}
+              />
             </LayoutPanel>
           )
         }
@@ -294,8 +288,8 @@ export default function Show({
               onCancel={removal.cancel}
             />
             <Drawer
-              isOpen={isNarrow && isDrawerOpen}
-              onOpenChange={setIsDrawerOpen}
+              isOpen={sidebar.isDrawerOpen}
+              onOpenChange={sidebar.setDrawerOpen}
               side="start"
               width={420}
               experimental={{ isFullWidthOnMobile: true }}
@@ -304,7 +298,8 @@ export default function Show({
               <ReaderSidebar
                 surahs={surahs}
                 current={surah.number}
-                onClose={() => setIsDrawerOpen(false)}
+                initialMode={sidebarChoices.mode}
+                onClose={sidebar.closeDrawer}
               />
             </Drawer>
           </LayoutContent>
@@ -314,13 +309,10 @@ export default function Show({
             footerRef={playerRef}
             startContent={
               <IconButton
-                label={hasPanel ? 'Hide Surahs' : 'Show Surahs'}
+                label={sidebar.toggleLabel}
                 variant="ghost"
                 icon={<Icon icon={Bars3Icon} />}
-                onClick={() => {
-                  if (isNarrow) setIsDrawerOpen(true)
-                  else setSidebar(hasPanel ? 'hidden' : 'shown')
-                }}
+                onClick={sidebar.toggle}
               />
             }
             isPlaying={player.isPlaying}

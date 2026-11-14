@@ -4,6 +4,7 @@ import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 import { waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
+import { readerCookie } from '#tests/helpers/quran/reader_cookie'
 
 /** A phone's screen, narrower than the reader's sidebar breakpoint. */
 const PHONE = { width: 390, height: 844 }
@@ -92,6 +93,36 @@ test.group('Quran reader sidebar', (group) => {
     await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
 
     await page.assertVisible(page.getByRole('navigation', { name: 'Quran', exact: true }))
+  })
+
+  test('opens with the sidebar hidden for a reader who hid it', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    await browserContext.addCookies([readerCookie('reader_sidebar', 'hidden')])
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+
+    await page.assertVisible(page.getByRole('button', { name: 'Show Surahs', exact: true }))
+    await page.assertNotExists(page.getByRole('navigation', { name: 'Quran', exact: true }))
+  })
+
+  test('opens in Surah mode for a reader who chose it', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    await browserContext.addCookies([readerCookie('reader_sidebar_mode', 'surah')])
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+
+    await page.assertVisible(page.getByRole('list', { name: 'Surahs', exact: true }))
+    await page.assertNotExists(page.getByRole('textbox', { name: 'Verse', exact: true }))
   })
 
   test('opens the ayah the reader chooses', async ({ visit, route, swap }) => {

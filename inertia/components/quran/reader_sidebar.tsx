@@ -18,8 +18,7 @@ import { useReaderPreference } from '~/components/quran/use_reader_preference'
 type Surah = Data.Surah.Variants['forNavigation']
 
 /** Surah: just the Surahs. Verse: the open Surah's Ayahs beside them. */
-const MODES = ['verse', 'surah'] as const
-type Mode = (typeof MODES)[number]
+type Mode = 'verse' | 'surah'
 
 const styles = stylex.create({
   /** The Ayah column, and the Verse box above it, take a fixed share. */
@@ -48,14 +47,17 @@ function searchable(text: string) {
 export default function ReaderSidebar({
   surahs,
   current,
+  initialMode,
   onClose,
 }: {
   surahs: Surah[]
   current: number
+  /** Surah or Verse, as the reader last chose (kept in a cookie). */
+  initialMode: Mode
   /** Shows a close button, for the sidebar in a drawer. */
   onClose?: () => void
 }) {
-  const [mode, setMode] = useReaderPreference('sidebar-mode', MODES, 'verse')
+  const [mode, setMode] = useReaderPreference('reader_sidebar_mode', initialMode)
   const [query, setQuery] = useState('')
   const [verse, setVerse] = useState('')
   const surahListRef = useRef<HTMLUListElement>(null)
