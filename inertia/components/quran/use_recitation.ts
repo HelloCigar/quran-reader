@@ -96,13 +96,12 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
   }, [])
 
   const start = useCallback(
-    (fromAyah: number | null) => {
-      if (!recitation) return
+    (loaded: Data.Recitation, fromAyah: number | null) => {
       const element = audio()
-      if (element.src !== recitation.audioUrl) element.src = recitation.audioUrl
+      if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
 
       if (fromAyah !== null) {
-        const ayah = recitation.ayahs.find(({ number }) => number === fromAyah)
+        const ayah = loaded.ayahs.find(({ number }) => number === fromAyah)
         // A first Word can begin a little before its Ayah: start from whichever is first.
         const fromMs = Math.min(ayah?.startMs ?? 0, ayah?.words[0]?.startMs ?? Infinity)
         originMsRef.current = fromMs
@@ -115,10 +114,14 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
         () => setIsPlaying(false)
       )
     },
-    [audio, recitation]
+    [audio]
   )
 
+  /**
+   * Pauses the Recitation, and cancels a Play still waiting for it to load.
+   */
   const pause = useCallback(() => {
+    pendingRef.current = null
     audioRef.current?.pause()
     setIsPlaying(false)
   }, [])
@@ -133,36 +136,41 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
       const from = fromAyah ?? (hasStarted ? null : 1)
 
       if (recitation) {
-        start(from)
+        start(recitation, from)
         return
       }
 
+      /**
+       * Loads the Recitation, then starts it unless the reader paused while it
+       * loaded. Every attempt ends here, so a failed, cancelled or repeated
+       * unavailable load never leaves Play stuck loading.
+       */
       pendingRef.current = from ?? 1
       setIsLoading(true)
       router.visit(
         { href: window.location.href },
-        { only: ['recitation'], preserveState: true, preserveScroll: true, replace: true }
+        {
+          only: ['recitation'],
+          preserveState: true,
+          preserveScroll: true,
+          replace: true,
+          onSuccess: (page) => {
+            const loaded = (page.props as { recitation?: Data.Recitation | null }).recitation
+            if (!loaded) {
+              showToast({ body: 'Recitation is unavailable right now.', type: 'error' })
+              return
+            }
+            if (pendingRef.current !== null) start(loaded, pendingRef.current)
+          },
+          onFinish: () => {
+            pendingRef.current = null
+            setIsLoading(false)
+          },
+        }
       )
     },
-    [recitation, recitedAyah, router, start]
+    [recitation, recitedAyah, router, showToast, start]
   )
-
-  /**
-   * Starts the Recitation once the partial reload has brought it, or says it
-   * is unavailable.
-   */
-  useEffect(() => {
-    if (pendingRef.current === null || recitation === undefined) return
-    const from = pendingRef.current
-    pendingRef.current = null
-    setIsLoading(false)
-
-    if (recitation === null) {
-      showToast({ body: 'Recitation is unavailable right now.', type: 'error' })
-      return
-    }
-    start(from)
-  }, [recitation, showToast, start])
 
   useEffect(() => {
     const element = audio()

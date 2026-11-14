@@ -11,18 +11,17 @@ import { Text } from '@astryxdesign/core/Text'
  * the Ayah Reference of the Recited Word.
  */
 export default function RecitationPlayer({
-  surahNumber,
   isPlaying,
   isLoading,
-  recitedAyah,
+  recitedReference,
   onPlay,
   onPause,
   footerRef,
 }: {
-  surahNumber: number
   isPlaying: boolean
   isLoading: boolean
-  recitedAyah: number | null
+  /** The Ayah Reference of the Recited Word, e.g. `110:2`. */
+  recitedReference: string | null
   onPlay: () => void
   onPause: () => void
   footerRef: Ref<HTMLDivElement>
@@ -46,9 +45,9 @@ export default function RecitationPlayer({
             onClick={onPlay}
           />
         )}
-        {recitedAyah !== null && (
+        {recitedReference !== null && (
           <Text type="supporting" color="secondary" data-testid="recited-ayah">
-            {`${surahNumber}:${recitedAyah}`}
+            {recitedReference}
           </Text>
         )}
       </HStack>

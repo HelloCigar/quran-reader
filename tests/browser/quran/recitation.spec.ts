@@ -206,4 +206,44 @@ test.group('Quran Recitation', () => {
     await page.locator('[data-word-location="110:1:1"]').click()
     await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:1:1', exact: true }))
   })
+
+  test('does not start a Recitation that was still loading when the reader opened a Word', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API, the Recitation answering slowly.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ delayMs: 1500 }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    await page.getByRole('button', { name: 'Play Recitation', exact: true }).click()
+    await page.assertExists(page.locator('button[aria-busy="true"]'))
+    await page.locator('[data-word-location="110:3:4"]').click()
+    await page.assertNotExists(page.locator('button[aria-busy="true"]'))
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:3:4', exact: true }))
+    await page.assertVisible(page.getByRole('button', { name: 'Play Recitation', exact: true }))
+  })
+
+  test('tries again when Play is pressed after the Recitation was unavailable', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API, the Recitation answering slowly.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, FakeRecitationService.unavailable({ delayMs: 500 }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    const play = page.getByRole('button', { name: 'Play Recitation', exact: true })
+    await play.click()
+    await page.assertVisible(
+      page.getByText('Recitation is unavailable right now.', { exact: true })
+    )
+    await play.click()
+    await page.assertExists(page.locator('button[aria-busy="true"]'))
+
+    await page.assertNotExists(page.locator('button[aria-busy="true"]'))
+  })
 })

@@ -1,3 +1,4 @@
+import { setTimeout as delay } from 'node:timers/promises'
 import RecitationService from '#services/recitation_service'
 import type { AyahTiming, Recitation, Surah } from '#types/quran'
 
@@ -22,26 +23,31 @@ export default class FakeRecitationService extends RecitationService {
    * Foundation's timings, where a first Word can begin before its Ayah.
    */
   readonly ayahLagMs: number
+  /** How long Quran Foundation takes to answer, so a test can act while Play loads. */
+  readonly delayMs: number
 
   constructor({
     wordMs = 1000,
     untimed = [],
     ayahLagMs = 0,
-  }: { wordMs?: number; untimed?: string[]; ayahLagMs?: number } = {}) {
+    delayMs = 0,
+  }: { wordMs?: number; untimed?: string[]; ayahLagMs?: number; delayMs?: number } = {}) {
     super()
     this.wordMs = wordMs
     this.untimed = untimed
     this.ayahLagMs = ayahLagMs
+    this.delayMs = delayMs
   }
 
   /**
    * A fake whose Recitation can't be loaded, as when Quran Foundation is down.
    */
-  static unavailable() {
-    return new UnavailableRecitationService()
+  static unavailable({ delayMs = 0 }: { delayMs?: number } = {}) {
+    return new UnavailableRecitationService({ delayMs })
   }
 
   async readRecitation(surah: Surah): Promise<Recitation | null> {
+    await delay(this.delayMs)
     const before = surah.ayahs.map((_, index) =>
       surah.ayahs.slice(0, index).reduce((count, ayah) => count + ayah.words.length, 0)
     )
@@ -87,6 +93,7 @@ export default class FakeRecitationService extends RecitationService {
 
 class UnavailableRecitationService extends FakeRecitationService {
   async readRecitation(_surah: Surah): Promise<Recitation | null> {
+    await delay(this.delayMs)
     return null
   }
 }

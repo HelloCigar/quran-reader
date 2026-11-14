@@ -120,10 +120,11 @@ export default function Show({
         footer={
           <RecitationPlayer
             footerRef={playerRef}
-            surahNumber={surah.number}
             isPlaying={player.isPlaying}
             isLoading={player.isLoading}
-            recitedAyah={player.recitedAyah}
+            recitedReference={
+              ayahs.find(({ number }) => number === player.recitedAyah)?.reference ?? null
+            }
             onPlay={() => player.play()}
             onPause={player.pause}
           />
