@@ -16,7 +16,8 @@
     "format": "vp fmt -c .oxfmtrc.json",
     "typecheck": "tsc --noEmit && tsc --noEmit --project inertia/tsconfig.json",
     "format:check": "vp fmt -c .oxfmtrc.json --check",
-    "doctor": "npx react-doctor@latest"
+    "doctor": "npx react-doctor@latest",
+    "prepare": "vp hooks enable || exit 0"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
