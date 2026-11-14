@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Head } from '@inertiajs/react'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { VStack } from '@astryxdesign/core/VStack'
@@ -50,6 +50,17 @@ export default function Show({
   const player = useRecitation(recitation)
   const playerRef = useRef<HTMLDivElement>(null)
   const { shown, openByReader } = player
+  const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
+  /**
+   * `player.play` changes as the Recitation loads and moves between Ayahs.
+   * Ayahs get a stable function that calls the latest one, so they don't
+   * re-render with every change.
+   */
+  const playRef = useRef(player.play)
+  useLayoutEffect(() => {
+    playRef.current = player.play
+  })
+  const playFrom = useCallback((ayah: number) => playRef.current(ayah), [])
 
   /**
    * A click outside the popover the Recitation opened (but not on the player)
@@ -74,7 +85,7 @@ export default function Show({
   }, [noteFor])
 
   return (
-    <WordPopoversProvider value={{ shown, onOpenChange: openByReader }}>
+    <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
         contentWidth={720}
         content={
@@ -94,9 +105,9 @@ export default function Show({
                     surahNumber={surah.number}
                     ayah={ayah}
                     bookmark={bookmarksByAyah.get(ayah.number) ?? null}
-                    onEditNote={(bookmark) => setNoteAyah(bookmark.ayahNumber)}
+                    onEditNote={editNote}
                     onRemove={removal.remove}
-                    onPlayFrom={player.play}
+                    onPlayFrom={playFrom}
                   />
                 ))}
               </List>

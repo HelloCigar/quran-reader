@@ -31,6 +31,24 @@ test.group('Quran Words', () => {
     await page.assertVisible(popover.getByText('al-ḥamdu', { exact: true }))
   })
 
+  test('returns focus to the Word when its popover closes on Escape', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 1 }))
+    await page.locator('[data-word-location="1:2:1"]').press('Enter')
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 1:2:1', exact: true }))
+    await page.keyboard.press('Escape')
+    await page.assertNotExists(page.getByRole('dialog'))
+    await page.keyboard.press('Enter')
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 1:2:1', exact: true }))
+  })
+
   test('does not open the ayah-end marker', async ({ visit, route, swap }) => {
     // Stands in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())
