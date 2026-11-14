@@ -92,8 +92,8 @@ export const quranTheme = {
     "--_astryx-pre-tempo-duration-slow": "840ms",
     "--_astryx-pre-tempo-duration-slow-max": "1120ms",
     "--_astryx-motion-tempo": "1",
-    "--font-family-body": "\"Figtree Variable\", Figtree, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
-    "--font-family-heading": "\"Fraunces Variable\", Fraunces, Georgia, \"Times New Roman\", serif",
+    "--font-family-body": "\"Figtree Variable\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+    "--font-family-heading": "\"Fraunces Variable\", Georgia, \"Times New Roman\", serif",
     "--font-family-code": "ui-monospace, \"SF Mono\", Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
     "--color-syntax-keyword": "light-dark(#6b187c, #efa8ff)",
     "--color-syntax-string": "light-dark(#0b5615, #a4d6a3)",
@@ -497,11 +497,11 @@ export const quranTheme = {
       },
       "body": {
         "family": "Figtree Variable",
-        "fallbacks": "Figtree, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+        "fallbacks": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
       },
       "heading": {
         "family": "Fraunces Variable",
-        "fallbacks": "Fraunces, Georgia, \"Times New Roman\", serif",
+        "fallbacks": "Georgia, \"Times New Roman\", serif",
         "weights": {
           "3": "bold",
           "4": "bold"

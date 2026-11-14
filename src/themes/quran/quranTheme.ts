@@ -37,11 +37,11 @@ export const quranTheme = defineTheme({
     body: {
       family: 'Figtree Variable',
       fallbacks:
-        'Figtree, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     },
     heading: {
       family: 'Fraunces Variable',
-      fallbacks: 'Fraunces, Georgia, "Times New Roman", serif',
+      fallbacks: 'Georgia, "Times New Roman", serif',
       weights: { 3: 'bold', 4: 'bold' },
     },
     code: {
