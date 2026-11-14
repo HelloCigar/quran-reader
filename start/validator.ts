@@ -12,8 +12,9 @@
 */
 
 import { DateTime } from 'luxon'
-import vine, { SimpleMessagesProvider, VineDate, VineNumber } from '@vinejs/vine'
+import vine, { SimpleMessagesProvider, VineDate, VineNumber, VineString } from '@vinejs/vine'
 import { SURAH_AYAH_COUNTS } from '#values/surah_ayah_counts'
+import AyahReference from '#values/ayah_reference'
 
 declare module '@vinejs/vine/types' {
   interface VineGlobalTransforms {
@@ -50,7 +51,30 @@ VineNumber.macro('ayahOfSurah', function (this: VineNumber, surahField: string) 
   return this.use(ayahOfSurahRule({ surahField }))
 })
 
+/**
+ * `ayahReference()`: the string must be an Ayah Reference (`2:255`) of an Ayah
+ * in the Quran.
+ */
+const ayahReferenceRule = vine.createRule((value, _options, field) => {
+  if (typeof value !== 'string') return
+
+  if (!AyahReference.parse(value)) {
+    field.report('The {{ field }} field must be an ayah reference', 'ayahReference', field)
+  }
+})
+
+declare module '@vinejs/vine' {
+  interface VineString {
+    ayahReference(): this
+  }
+}
+
+VineString.macro('ayahReference', function (this: VineString) {
+  return this.use(ayahReferenceRule())
+})
+
 vine.messagesProvider = new SimpleMessagesProvider({
+  'ayahReference': 'Enter an ayah of the Quran, such as 2:255.',
   'note.maxLength': 'Notes can be at most 500 characters.',
   'ayahOfSurah': 'That ayah is not in this surah.',
 })

@@ -20,6 +20,12 @@ const routes = {
     tokens: [[0,"quran"]],
     types: placeholder as Registry['surahs.index']['types'],
   },
+  'ayahs.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/quran/ayah',
+    tokens: [[0,"quran"],[0,"ayah"]],
+    types: placeholder as Registry['ayahs.show']['types'],
+  },
   'surahs.show': {
     methods: ["GET","HEAD"],
     pattern: '/quran/:number',

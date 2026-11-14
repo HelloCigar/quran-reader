@@ -21,4 +21,11 @@ export default class SurahTransformer extends BaseTransformer<SurahSummary> {
       ...this.pick(this.resource, ['arabicName', 'revelation']),
     }
   }
+
+  /**
+   * A Surah in the reading page's list of Surahs.
+   */
+  async forNavigation() {
+    return this.pick(this.resource, ['number', 'name'])
+  }
 }

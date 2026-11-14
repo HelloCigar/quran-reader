@@ -34,6 +34,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/surahs_controller').default['index']>>>
     }
   }
+  'ayahs.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/quran/ayah'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: ExtractQueryForGet<InferInput<(typeof import('#validators/ayah').showAyahValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ayahs_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ayahs_controller').default['show']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/ayahs_controller').default['show']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'surahs.show': {
     methods: ["GET","HEAD"]
     pattern: '/quran/:number'

@@ -4,6 +4,7 @@
  */
 
 export const controllers = {
+  Ayahs: () => import('#controllers/ayahs_controller'),
   Bookmarks: () => import('#controllers/bookmarks_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   Session: () => import('#controllers/session_controller'),

@@ -70,6 +70,8 @@ export default class SurahsController {
       openedAt: block.openedAt,
       previous: previous ? SurahTransformer.transform(previous) : null,
       next: next ? SurahTransformer.transform(next) : null,
+      /** Every Surah, for the sidebar. */
+      surahs: SurahTransformer.transform(surahs).useVariant('forNavigation'),
       bookmarks: BookmarkTransformer.transform(bookmarks),
       noteFor,
       /**

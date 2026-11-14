@@ -11,7 +11,12 @@ import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
-import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
+import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
+import { useMediaQuery } from '@astryxdesign/core/hooks'
+import { Drawer, DrawerHeader } from '@astryxdesign/core/Drawer'
+import { Button } from '@astryxdesign/core/Button'
+import { Icon } from '@astryxdesign/core/Icon'
+import { Bars3Icon } from '@heroicons/react/20/solid'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -31,6 +36,7 @@ import RecitationPlayer from '~/components/quran/recitation_player'
 import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
+import ReaderSidebar from '~/components/quran/reader_sidebar'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -69,6 +75,8 @@ type PageProps = InertiaProps<{
   openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
+  /** Every Surah, for the sidebar. */
+  surahs: Data.Surah.Variants['forNavigation'][]
   bookmarks: Data.Bookmark[]
   noteFor: number | null
   /** Loaded on the first Play; `null` when the Recitation is unavailable. */
@@ -81,12 +89,20 @@ export default function Show({
   ayahs,
   previous,
   next,
+  surahs,
   bookmarks,
   noteFor,
   openedAt,
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
+  /**
+   * Responsive contract. Wide: the sidebar is a start panel beside the Ayahs.
+   * Narrow (phones, up to 768px): the panel is dropped so the Ayahs keep the
+   * width, and a "Surahs" button opens the same sidebar in a drawer.
+   */
+  const isNarrow = useMediaQuery('(max-width: 768px)')
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -208,7 +224,14 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={720}
+        contentWidth={isNarrow ? 720 : 1000}
+        start={
+          !isNarrow && (
+            <LayoutPanel hasDivider width={280} padding={4} role="navigation" label="Quran">
+              <ReaderSidebar surahs={surahs} current={surah.number} />
+            </LayoutPanel>
+          )
+        }
         content={
           <LayoutContent padding={6}>
             <Head title={surah.name} />
@@ -221,6 +244,17 @@ export default function Show({
               loading={LOADING}
             >
               <VStack gap={6}>
+                {isNarrow && (
+                  <HStack>
+                    <Button
+                      label="Surahs"
+                      variant="secondary"
+                      size="sm"
+                      icon={<Icon icon={Bars3Icon} />}
+                      onClick={() => setIsDrawerOpen(true)}
+                    />
+                  </HStack>
+                )}
                 {hasFirstAyah && <SurahHeading surah={surah} />}
                 {hasFirstAyah && bismillah && (
                   <ArabicText align="center" data-testid="bismillah">
@@ -256,6 +290,22 @@ export default function Show({
               onConfirm={removal.confirm}
               onCancel={removal.cancel}
             />
+            <Drawer
+              isOpen={isNarrow && isDrawerOpen}
+              onOpenChange={setIsDrawerOpen}
+              side="start"
+              width={320}
+              label="Quran"
+            >
+              <Layout
+                header={<DrawerHeader title="Quran" onOpenChange={setIsDrawerOpen} />}
+                content={
+                  <LayoutContent>
+                    <ReaderSidebar surahs={surahs} current={surah.number} />
+                  </LayoutContent>
+                }
+              />
+            </Drawer>
           </LayoutContent>
         }
         footer={

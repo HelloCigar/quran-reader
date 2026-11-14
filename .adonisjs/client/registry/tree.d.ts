@@ -7,6 +7,9 @@ export interface ApiDefinition {
     index: typeof routes['surahs.index']
     show: typeof routes['surahs.show']
   }
+  ayahs: {
+    show: typeof routes['ayahs.show']
+  }
   newAccount: {
     create: typeof routes['new_account.create']
     store: typeof routes['new_account.store']
