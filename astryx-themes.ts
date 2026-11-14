@@ -5,6 +5,7 @@
 
 import {quranTheme as _astryxTheme0} from "./src/themes/quran/quran.js";
 import "./src/themes/quran/quran.css";
+import "./src/themes/quran/quran.fonts.css";
 
 export const themes = {
   "quran": _astryxTheme0,

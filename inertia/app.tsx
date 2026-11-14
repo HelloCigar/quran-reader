@@ -1,10 +1,5 @@
 import '@astryxdesign/core/reset.css'
 import '@astryxdesign/core/astryx.css'
-// Self-hosted fonts named by the Quran theme (Astryx never loads font files).
-import '@fontsource-variable/figtree'
-import '@fontsource-variable/fraunces'
-import '@fontsource/amiri/400.css'
-import '@fontsource/amiri/700.css'
 import './stylex_dev'
 import { client } from './client'
 import { createRoot } from 'react-dom/client'
