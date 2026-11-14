@@ -3,6 +3,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { scrollAyahs, scrollToAyah, waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
 
 test.group('Quran surah reading', () => {
   test('shows the surah heading', async ({ visit, route, swap }) => {
@@ -72,30 +73,142 @@ test.group('Quran surah reading', () => {
     )
   })
 
-  test('shows every ayah of the surah', async ({ visit, route, swap }) => {
+  test('opens a long surah without its later ayahs', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 
     const page = await visit(route('surahs.show', { number: 2 }))
 
-    await page.assertPath('/quran/2')
+    await page.assertVisible(page.getByText('2:1', { exact: true }))
+    await page.assertNotExists(page.getByText('2:286', { exact: true }))
+    await page.assertNotExists(
+      page.getByRole('link', { name: "Next surah: Ali 'Imran", exact: true })
+    )
+  })
+
+  test('loads the rest of a long surah as the reader scrolls down', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await scrollToAyah(page, '2:286', 'down')
+
     await page.assertVisible(page.getByText('2:286', { exact: true }))
-    await page.assertElementsCount(
-      page.getByRole('list', { name: 'Ayahs', exact: true }).getByRole('listitem'),
-      286
+    await page.assertExists(page.getByText('2:1', { exact: true }))
+  })
+
+  test('shows the pager once the reader reaches the end of a long surah', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await scrollToAyah(page, '2:286', 'down')
+
+    await page.assertVisible(
+      page.getByRole('link', { name: "Next surah: Ali 'Imran", exact: true })
     )
   })
 
   test('opens a long surah at the ayah its link points to', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 
-    const page = await visit(`${route('surahs.show', { number: 2 })}#ayah-250`)
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=250`)
 
     await page.assertVisible(page.getByText('2:250', { exact: true }))
-    // Japa's browser client has no in-viewport assertion: wait until the ayah's top is on screen.
-    await page.waitForFunction(`(() => {
-      const top = document.getElementById('ayah-250')?.getBoundingClientRect().top
-      return top !== undefined && top >= 0 && top < window.innerHeight
-    })()`)
+    await waitForAyahInView(page, 250)
+    await page.assertNotExists(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
+  })
+
+  test('keeps the opened ayah in view as the ayahs before it load', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=250`)
+    await page.getByText('2:240', { exact: true }).waitFor({ state: 'attached' })
+
+    await waitForAyahInView(page, 250)
+  })
+
+  test('loads the start of a long surah as the reader scrolls up, then its heading', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=250`)
+    await scrollToAyah(page, '2:1', 'up')
+
+    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
+    await page.assertVisible(page.getByTestId('bismillah'))
+  })
+
+  test('opens the surah at its start when the linked ayah is past its end', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 1 })}?ayah=50`)
+
+    await page.assertVisible(page.getByRole('heading', { name: 'Al-Fatihah', exact: true }))
+    await page.assertVisible(page.getByText('1:1', { exact: true }))
+  })
+
+  test('names the block in view in the address bar as the reader scrolls', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await scrollToAyah(page, '2:61', 'down')
+
+    await page.waitForURL((url) => url.searchParams.has('ayah'))
+  })
+
+  test('drops the ayah from the address bar back at the start of the surah', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=61`)
+    await scrollToAyah(page, '2:1', 'up')
+    await scrollAyahs(page, 'up')
+
+    await page.waitForURL((url) => !url.searchParams.has('ayah'))
+  })
+
+  test('adds no history entry as the address bar follows the scroll', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.index'))
+    await page
+      .getByRole('list', { name: 'Surahs', exact: true })
+      .getByRole('link')
+      .filter({ hasText: '2 · Al-Baqarah' })
+      .click()
+    await scrollToAyah(page, '2:61', 'down')
+    await page.waitForURL((url) => url.searchParams.has('ayah'))
+    await page.goBack()
+
+    await page.assertPath(route('surahs.index'))
   })
 
   test('credits the text source and the translation', async ({ visit, route, swap }) => {
@@ -126,7 +239,7 @@ test.group('Quran surah reading', () => {
     .run(async ({ visit, route, swap }, { label, number, heading }) => {
       swap(QuranTextService, new FakeQuranTextService())
 
-      const page = await visit(route('surahs.show', { number: 2 }))
+      const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=286`)
       await page.getByRole('link', { name: label, exact: true }).click()
 
       await page.assertPath(route('surahs.show', { number }))
@@ -152,7 +265,7 @@ test.group('Quran surah reading', () => {
   test('returns to the surah list from a surah', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 
-    const page = await visit(route('surahs.show', { number: 2 }))
+    const page = await visit(route('surahs.show', { number: 1 }))
     await page.getByRole('link', { name: 'All surahs', exact: true }).click()
 
     await page.assertPath(route('surahs.index'))

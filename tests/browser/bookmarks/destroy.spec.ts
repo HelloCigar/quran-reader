@@ -3,6 +3,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { scrollToAyah } from '#tests/helpers/quran/scroll_to_ayah'
 
 test.group('Bookmarks destroy', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -93,5 +94,30 @@ test.group('Bookmarks destroy', (group) => {
       { user_id: reader.id, surah_number: 1, ayah_number: 3, note: 'Keep me' },
       1
     )
+  })
+
+  test('keeps the ayahs loaded so far when a bookmark further down is removed', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 50, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await scrollToAyah(page, '2:50', 'down')
+    await page.getByRole('button', { name: 'Bookmarked 2:50', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Remove', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('button', { name: 'Bookmark 2:50', exact: true }))
+    await page.assertExists(page.getByText('2:1', { exact: true }))
+    await page.assertExists(page.getByText('2:50', { exact: true }))
   })
 })

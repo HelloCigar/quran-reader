@@ -3,6 +3,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { scrollToAyah } from '#tests/helpers/quran/scroll_to_ayah'
 
 test.group('Bookmarks update', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -171,5 +172,33 @@ test.group('Bookmarks update', (group) => {
       })
     )
     await db.assertMissing('bookmarks', { user_id: reader.id, surah_number: 1, ayah_number: 3 })
+  })
+
+  test('keeps the ayahs loaded so far when a note further down is saved', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 50, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await scrollToAyah(page, '2:50', 'down')
+    await page.getByRole('button', { name: 'Bookmarked 2:50', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Edit note', exact: true }).click()
+    const dialog = page.getByRole('dialog', { name: 'Note on 2:50', exact: true })
+    await dialog.getByLabel('Note', { exact: true }).fill('Remember this')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+
+    await page.assertVisible(page.getByText('Note saved', { exact: true }))
+    await page.assertExists(page.getByText('2:1', { exact: true }))
+    await page.assertExists(page.getByText('2:50', { exact: true }))
   })
 })

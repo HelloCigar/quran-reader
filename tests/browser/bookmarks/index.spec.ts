@@ -4,6 +4,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
 
 test.group('Bookmarks index', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -137,8 +138,8 @@ test.group('Bookmarks index', (group) => {
     await page.getByRole('link', { name: '2:255 · Al-Baqarah', exact: true }).click()
 
     await page.assertPath('/quran/2')
-    await page.assertUrlContains('#ayah-255')
-    await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
+    await page.assertVisible(page.getByText('2:255', { exact: true }))
+    await waitForAyahInView(page, 255)
   })
 
   test('edits a note from the list', async ({ visit, route, swap, browserContext, db }) => {

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Head } from '@inertiajs/react'
+import { Head, InfiniteScroll } from '@inertiajs/react'
+import type { Scroll } from '@adonisjs/inertia/types'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
+import { HStack } from '@astryxdesign/core/HStack'
+import { Spinner } from '@astryxdesign/core/Spinner'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
 import MarketingLayout from '~/components/marketing/marketing_layout'
@@ -18,10 +21,26 @@ import RecitationPlayer from '~/components/quran/recitation_player'
 import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 
+/**
+ * How far (in px) beyond the screen's edge the next block starts loading, so
+ * a reader scrolling steadily rarely reaches the end of what's loaded.
+ */
+const LOAD_AHEAD = 1600
+
+/** Shown at the top or bottom while a block of Ayahs loads. */
+const LOADING = (
+  <HStack hAlign="center" padding={4}>
+    <Spinner aria-label="Loading ayahs" />
+  </HStack>
+)
+
 type PageProps = InertiaProps<{
   surah: Data.Surah.Variants['forReading']
   bismillah: string | null
-  ayahs: Data.Ayah[]
+  /** The loaded blocks of Ayahs; scrolling up or down loads the blocks around them. */
+  ayahs: Scroll<Data.Ayah>
+  /** The Ayah to scroll to when the page opens, if any. */
+  openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
   bookmarks: Data.Bookmark[]
@@ -38,8 +57,13 @@ export default function Show({
   next,
   bookmarks,
   noteFor,
+  openedAt,
   recitation,
 }: PageProps) {
+  const listRef = useRef<HTMLUListElement>(null)
+  const loaded = ayahs.data
+  const hasFirstAyah = loaded[0]?.number === 1
+  const hasLastAyah = loaded.at(-1)?.number === surah.ayahCount.raw
   const bookmarksByAyah = useMemo(
     () => new Map(bookmarks.map((bookmark) => [bookmark.ayahNumber, bookmark])),
     [bookmarks]
@@ -86,10 +110,10 @@ export default function Show({
   }, [shown, openByReader])
 
   useEffect(() => {
-    if (noteFor !== null) {
-      document.getElementById(`ayah-${noteFor}`)?.scrollIntoView({ block: 'center' })
+    if (openedAt !== null) {
+      document.getElementById(`ayah-${openedAt}`)?.scrollIntoView({ block: 'start' })
     }
-  }, [noteFor])
+  }, [openedAt])
 
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
@@ -98,29 +122,36 @@ export default function Show({
         content={
           <LayoutContent padding={6}>
             <Head title={surah.name} />
-            <VStack gap={6}>
-              <SurahHeading surah={surah} />
-              {bismillah && (
-                <ArabicText align="center" data-testid="bismillah">
-                  {bismillah}
-                </ArabicText>
-              )}
-              <List hasDividers edge="flush" aria-label="Ayahs">
-                {ayahs.map((ayah) => (
-                  <AyahItem
-                    key={ayah.number}
-                    surahNumber={surah.number}
-                    ayah={ayah}
-                    bookmark={bookmarksByAyah.get(ayah.number) ?? null}
-                    onEditNote={editNote}
-                    onRemove={removal.remove}
-                    onPlayFrom={playFrom}
-                  />
-                ))}
-              </List>
-              <SurahPager previous={previous} next={next} />
-              <QuranCredit />
-            </VStack>
+            <InfiniteScroll
+              data="ayahs"
+              itemsElement={listRef}
+              buffer={LOAD_AHEAD}
+              loading={LOADING}
+            >
+              <VStack gap={6}>
+                {hasFirstAyah && <SurahHeading surah={surah} />}
+                {hasFirstAyah && bismillah && (
+                  <ArabicText align="center" data-testid="bismillah">
+                    {bismillah}
+                  </ArabicText>
+                )}
+                <List ref={listRef} hasDividers edge="flush" aria-label="Ayahs">
+                  {loaded.map((ayah) => (
+                    <AyahItem
+                      key={ayah.number}
+                      surahNumber={surah.number}
+                      ayah={ayah}
+                      bookmark={bookmarksByAyah.get(ayah.number) ?? null}
+                      onEditNote={editNote}
+                      onRemove={removal.remove}
+                      onPlayFrom={playFrom}
+                    />
+                  ))}
+                </List>
+                {hasLastAyah && <SurahPager previous={previous} next={next} />}
+                {hasLastAyah && <QuranCredit />}
+              </VStack>
+            </InfiniteScroll>
             {noteBookmark && (
               <NoteDialog
                 key={noteBookmark.id}
@@ -141,7 +172,7 @@ export default function Show({
             isPlaying={player.isPlaying}
             isLoading={player.isLoading}
             recitedReference={
-              ayahs.find(({ number }) => number === player.recitedAyah)?.reference ?? null
+              loaded.find(({ number }) => number === player.recitedAyah)?.reference ?? null
             }
             onPlay={() => player.play()}
             onPause={player.pause}

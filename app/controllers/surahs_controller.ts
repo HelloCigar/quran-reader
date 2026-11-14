@@ -10,6 +10,7 @@ import AyahTransformer from '#transformers/ayah_transformer'
 import BookmarkTransformer from '#transformers/bookmark_transformer'
 import RecitationTransformer from '#transformers/recitation_transformer'
 import { showSurahValidator } from '#validators/surah'
+import AyahBlock from '#ayah_block/ayah_block'
 import type Bookmark from '#models/bookmark'
 
 @inject()
@@ -31,7 +32,7 @@ export default class SurahsController {
   }
 
   async show({ inertia, params, request, auth }: HttpContext) {
-    const { note } = await request.validateUsing(showSurahValidator)
+    const { ayah, note } = await request.validateUsing(showSurahValidator)
     const number: number = params.number
     const noBookmarks: Bookmark[] = []
     const [surah, surahs, bookmarks] = await Promise.all([
@@ -45,11 +46,28 @@ export default class SurahsController {
     const next = surahs[number] ?? null
     const noteFor =
       note !== undefined && bookmarks.some((bookmark) => bookmark.ayahNumber === note) ? note : null
+    /**
+     * A scroll up or down asks for the next block by a partial reload. Any
+     * other visit opens the Surah: at `ayah`, or else at the Ayah whose note
+     * opens.
+     */
+    const block = inertia.requestInfo().isPartialRequest
+      ? AyahBlock.holding(ayah, surah.ayahCount)
+      : AyahBlock.openingAt(ayah ?? noteFor ?? undefined, surah.ayahCount)
 
     return inertia.render('quran/show', {
       surah: SurahTransformer.transform(surah).useVariant('forReading'),
       bismillah: surah.bismillah,
-      ayahs: AyahTransformer.transform(surah.ayahs, surah.number),
+      /**
+       * One block of Ayahs, or two when the Surah opens near the start of a
+       * block. The page loads the blocks around them as the reader scrolls.
+       */
+      ayahs: inertia.scroll(
+        () => AyahTransformer.paginate(block.slice(surah.ayahs), {}, surah.number),
+        () => block.toScrollProps()
+      ),
+      /** The Ayah to scroll to when the page opens, if any. */
+      openedAt: block.openedAt,
       previous: previous ? SurahTransformer.transform(previous) : null,
       next: next ? SurahTransformer.transform(next) : null,
       bookmarks: BookmarkTransformer.transform(bookmarks),
