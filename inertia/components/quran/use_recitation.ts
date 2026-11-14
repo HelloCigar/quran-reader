@@ -29,8 +29,14 @@ const SILENCE =
  * - Opening or closing a popover by hand pauses the Recitation; Play resumes
  *   where it paused.
  * - At the end of the Surah it stops and closes the popover.
+ *
+ * `firstAyahInView` names the Ayah the first Play starts from when no Ayah is
+ * chosen, so a reader who opened the Surah at 2:255 isn't sent back to 2:1.
  */
-export function useRecitation(recitation: Data.Recitation | null | undefined) {
+export function useRecitation(
+  recitation: Data.Recitation | null | undefined,
+  firstAyahInView: () => number
+) {
   const router = useRouter()
   const showToast = useToast()
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -137,12 +143,12 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
 
   /**
    * Plays from the start of `fromAyah`, or resumes where it paused (from the
-   * first Ayah when it has not started).
+   * first Ayah in view when it has not started).
    */
   const play = useCallback(
     (fromAyah?: number) => {
       const hasStarted = Boolean(audioRef.current?.src) && recitedAyah !== null
-      const from = fromAyah ?? (hasStarted ? null : 1)
+      const from = fromAyah ?? (hasStarted ? null : firstAyahInView())
 
       if (recitation) {
         start(recitation, from)
@@ -184,7 +190,7 @@ export function useRecitation(recitation: Data.Recitation | null | undefined) {
         }
       )
     },
-    [audio, recitation, recitedAyah, router, showToast, start]
+    [audio, firstAyahInView, recitation, recitedAyah, router, showToast, start]
   )
 
   useEffect(() => {

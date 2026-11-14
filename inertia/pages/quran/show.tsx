@@ -10,6 +10,7 @@ import {
 import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
+import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
@@ -36,6 +37,18 @@ import { useNavigationEvent } from '~/components/navigation/navigation_events'
  * a reader scrolling steadily rarely reaches the end of what's loaded.
  */
 const LOAD_AHEAD = 1600
+
+/**
+ * How close (in Ayahs) the Recited Ayah gets to the last loaded Ayah before
+ * the next block loads, so the Recited Word is loaded before it is heard.
+ */
+const RECITATION_LOAD_AHEAD = 5
+
+/**
+ * How much of an Ayah (in px) has to show below the top of the Ayahs' region
+ * for it to count as in view; an Ayah showing less has been scrolled past.
+ */
+const IN_VIEW_MIN = 24
 
 /** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
 const AYAH_HASH = /^#ayah-(\d+)$/
@@ -74,6 +87,7 @@ export default function Show({
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
+  const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
    * that page is still being set, so a Bookmark saved as a block finished
@@ -104,7 +118,23 @@ export default function Show({
   const [noteAyah, setNoteAyah] = useState<number | null>(noteFor)
   const removal = useRemoveBookmark()
   const noteBookmark = noteAyah === null ? null : (bookmarksByAyah.get(noteAyah) ?? null)
-  const player = useRecitation(recitation)
+  /**
+   * The first Ayah the reader can see in the region the Ayahs scroll in.
+   */
+  const firstAyahInView = useCallback(() => {
+    const list = listRef.current
+    if (!list) return 1
+    let region = list.parentElement
+    while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
+      region = region.parentElement
+    }
+    const top = region?.getBoundingClientRect().top ?? 0
+    const items = Array.from(list.querySelectorAll<HTMLElement>('[id^="ayah-"]'))
+    const first =
+      items.find((item) => item.getBoundingClientRect().bottom > top + IN_VIEW_MIN) ?? items[0]
+    return first ? Number(first.id.slice('ayah-'.length)) : 1
+  }, [])
+  const player = useRecitation(recitation, firstAyahInView)
   const playerRef = useRef<HTMLDivElement>(null)
   const { shown, openByReader } = player
   const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
@@ -134,6 +164,18 @@ export default function Show({
     document.addEventListener('pointerdown', onPointerDown, true)
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
   }, [shown, openByReader])
+
+  /**
+   * A Recitation plays to the end of the Surah: as the Recited Ayah nears the
+   * last loaded Ayah, the next block loads, as it does when the reader
+   * scrolls down.
+   */
+  const lastLoaded = loaded.at(-1)?.number
+  const { recitedAyah } = player
+  useEffect(() => {
+    if (recitedAyah === null || lastLoaded === undefined) return
+    if (lastLoaded - recitedAyah < RECITATION_LOAD_AHEAD) scrollRef.current?.fetchNext()
+  }, [recitedAyah, lastLoaded])
 
   useEffect(() => {
     if (openedAt !== null) {
@@ -171,6 +213,7 @@ export default function Show({
           <LayoutContent padding={6}>
             <Head title={surah.name} />
             <InfiniteScroll
+              ref={scrollRef}
               data="ayahs"
               itemsElement={listRef}
               buffer={LOAD_AHEAD}
