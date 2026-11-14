@@ -15,5 +15,8 @@ export function useNavigationEvent<Name extends GlobalEventNames>(
 ) {
   const onEvent = useEffectEvent(callback)
 
-  useEffect(() => router.on(name, (event) => onEvent(event)), [name])
+  useEffect(() => {
+    const stopListening = router.on(name, (event) => onEvent(event))
+    return () => stopListening()
+  }, [name])
 }
