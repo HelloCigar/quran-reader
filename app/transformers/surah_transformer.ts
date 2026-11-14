@@ -23,9 +23,10 @@ export default class SurahTransformer extends BaseTransformer<SurahSummary> {
   }
 
   /**
-   * A Surah in the reading page's list of Surahs.
+   * A Surah in the reading page's sidebar: its row, and the Ayah numbers
+   * listed beside it.
    */
   async forNavigation() {
-    return this.pick(this.resource, ['number', 'name'])
+    return this.pick(this.resource, ['number', 'name', 'ayahCount'])
   }
 }

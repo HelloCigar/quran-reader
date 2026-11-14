@@ -13,7 +13,7 @@ import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
 import { useMediaQuery } from '@astryxdesign/core/hooks'
-import { Drawer, DrawerHeader } from '@astryxdesign/core/Drawer'
+import { Drawer } from '@astryxdesign/core/Drawer'
 import { Button } from '@astryxdesign/core/Button'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Bars3Icon } from '@heroicons/react/20/solid'
@@ -224,10 +224,17 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={isNarrow ? 720 : 1000}
+        contentWidth={isNarrow ? 720 : 1100}
         start={
           !isNarrow && (
-            <LayoutPanel hasDivider width={280} padding={4} role="navigation" label="Quran">
+            <LayoutPanel
+              hasDivider
+              width={380}
+              padding={4}
+              isScrollable={false}
+              role="navigation"
+              label="Quran"
+            >
               <ReaderSidebar surahs={surahs} current={surah.number} />
             </LayoutPanel>
           )
@@ -294,16 +301,14 @@ export default function Show({
               isOpen={isNarrow && isDrawerOpen}
               onOpenChange={setIsDrawerOpen}
               side="start"
-              width={320}
+              width={420}
+              experimental={{ isFullWidthOnMobile: true }}
               label="Quran"
             >
-              <Layout
-                header={<DrawerHeader title="Quran" onOpenChange={setIsDrawerOpen} />}
-                content={
-                  <LayoutContent>
-                    <ReaderSidebar surahs={surahs} current={surah.number} />
-                  </LayoutContent>
-                }
+              <ReaderSidebar
+                surahs={surahs}
+                current={surah.number}
+                onClose={() => setIsDrawerOpen(false)}
               />
             </Drawer>
           </LayoutContent>

@@ -1,40 +1,203 @@
-import { useEffect, useRef } from 'react'
+import * as stylex from '@stylexjs/stylex'
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { VStack } from '@astryxdesign/core/VStack'
+import { HStack } from '@astryxdesign/core/HStack'
+import { StackItem } from '@astryxdesign/core/Layout'
+import { SegmentedControl, SegmentedControlItem } from '@astryxdesign/core/SegmentedControl'
+import { IconButton } from '@astryxdesign/core/IconButton'
+import { Icon } from '@astryxdesign/core/Icon'
+import { TextInput } from '@astryxdesign/core/TextInput'
 import { List, ListItem } from '@astryxdesign/core/List'
+import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
 import { urlFor } from '~/client'
-import GoToAyahForm from '~/components/quran/go_to_ayah_form'
+import { useRouteForm } from '~/components/forms/use_route_form'
+
+type Surah = Data.Surah.Variants['forNavigation']
+
+/** Surah: choosing a Surah opens it. Verse: its Ayahs are listed beside it. */
+type Mode = 'surah' | 'verse'
+
+const styles = stylex.create({
+  /** The Ayah column, and the Verse box above it, take a fixed share. */
+  ayahColumn: {
+    flexBasis: '30%',
+    flexShrink: 0,
+  },
+  /** Room for "114", so the Surah names line up. */
+  surahNumber: {
+    minWidth: '3ch',
+  },
+})
+
+/** "Al-Baqarah" and "al baqarah" both match "baqara". */
+function searchable(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
 
 /**
- * The reading page's way around the Quran: "Go to Ayah", and every Surah with
- * the one being read marked and scrolled into view.
+ * The reading page's way around the Quran: a Surah | Verse switch, a Search
+ * Surah box, and the Surahs with the one being read marked. In Surah mode
+ * choosing a Surah opens it. In Verse mode it lists that Surah's Ayahs in a
+ * second column, which scrolls on its own; the Verse box filters them, and
+ * Enter there opens that Ayah or shows why it can't.
  */
 export default function ReaderSidebar({
   surahs,
   current,
+  onClose,
 }: {
-  surahs: Data.Surah.Variants['forNavigation'][]
+  surahs: Surah[]
   current: number
+  /** Shows a close button, for the sidebar in a drawer. */
+  onClose?: () => void
 }) {
-  const listRef = useRef<HTMLUListElement>(null)
+  const [mode, setMode] = useState<Mode>('verse')
+  const [chosen, setChosen] = useState(current)
+  const [query, setQuery] = useState('')
+  const [verse, setVerse] = useState('')
+  const surahListRef = useRef<HTMLUListElement>(null)
+  const chosenSurah = surahs.find((surah) => surah.number === chosen) ?? surahs[0]
+  const form = useRouteForm(
+    'ayahs.show',
+    { reference: '' },
+    { preserveState: 'errors', preserveScroll: 'errors' }
+  )
+  const verseError = form.errors.reference
+
+  const deferredQuery = useDeferredValue(query)
+  const shownSurahs = useMemo(() => {
+    const term = searchable(deferredQuery)
+    if (term === '') return surahs
+    return surahs.filter(
+      (surah) => String(surah.number).startsWith(term) || searchable(surah.name).includes(term)
+    )
+  }, [surahs, deferredQuery])
+  const shownAyahs = useMemo(() => {
+    const ayahs = Array.from({ length: chosenSurah.ayahCount }, (_, index) => index + 1)
+    const term = verse.trim()
+    return term === '' ? ayahs : ayahs.filter((ayah) => String(ayah).startsWith(term))
+  }, [chosenSurah, verse])
 
   useEffect(() => {
-    listRef.current?.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'center' })
+    surahListRef.current
+      ?.querySelector('[aria-current="true"]')
+      ?.scrollIntoView({ block: 'center' })
   }, [current])
 
+  function goToVerse(event: FormEvent) {
+    event.preventDefault()
+    form.transform(() => ({ reference: `${chosenSurah.number}:${verse.trim()}` }))
+    form.submit()
+  }
+
   return (
-    <VStack gap={4}>
-      <GoToAyahForm />
-      <List ref={listRef} density="compact" aria-label="Surahs">
-        {surahs.map((surah) => (
-          <ListItem
-            key={surah.number}
-            label={`${surah.number} · ${surah.name}`}
-            href={urlFor('surahs.show', { number: surah.number })}
-            isSelected={surah.number === current}
+    <VStack gap={4} height="100%">
+      <HStack gap={2} vAlign="center">
+        <StackItem size="fill">
+          <SegmentedControl
+            label="Find by"
+            value={mode}
+            onChange={(value) => setMode(value as Mode)}
+          >
+            <SegmentedControlItem value="surah" label="Surah" />
+            <SegmentedControlItem value="verse" label="Verse" />
+          </SegmentedControl>
+        </StackItem>
+        {onClose && (
+          <IconButton
+            label="Close"
+            variant="ghost"
+            icon={<Icon icon={XMarkIcon} />}
+            onClick={onClose}
           />
-        ))}
-      </List>
+        )}
+      </HStack>
+      <HStack gap={2} vAlign="start">
+        <StackItem size="fill">
+          <TextInput
+            type="search"
+            label="Search Surah"
+            isLabelHidden
+            placeholder="Search Surah"
+            autoComplete="off"
+            value={query}
+            onChange={setQuery}
+          />
+        </StackItem>
+        {mode === 'verse' && (
+          <StackItem xstyle={styles.ayahColumn}>
+            <form onSubmit={goToVerse}>
+              <TextInput
+                label="Verse"
+                isLabelHidden
+                placeholder="Verse"
+                autoComplete="off"
+                inputMode="numeric"
+                enterKeyHint="go"
+                value={verse}
+                onChange={(value) => {
+                  setVerse(value)
+                  if (verseError) form.clearErrors('reference')
+                }}
+                status={verseError ? { type: 'error', message: verseError } : undefined}
+              />
+            </form>
+          </StackItem>
+        )}
+      </HStack>
+      <StackItem size="fill">
+        <HStack gap={2} height="100%">
+          <StackItem size="fill" isScrollable aria-label="Surahs list">
+            {shownSurahs.length === 0 ? (
+              <Text type="supporting">No surah matches &ldquo;{query}&rdquo;.</Text>
+            ) : (
+              <List ref={surahListRef} density="compact" aria-label="Surahs">
+                {shownSurahs.map((surah) => {
+                  const opens = mode === 'surah'
+                  return (
+                    <ListItem
+                      key={surah.number}
+                      startContent={
+                        <Text
+                          type="body"
+                          color="secondary"
+                          hasTabularNumbers
+                          xstyle={styles.surahNumber}
+                        >
+                          {surah.number}
+                        </Text>
+                      }
+                      label={surah.name}
+                      href={opens ? urlFor('surahs.show', { number: surah.number }) : undefined}
+                      onClick={opens ? undefined : () => setChosen(surah.number)}
+                      isSelected={surah.number === (opens ? current : chosen)}
+                    />
+                  )
+                })}
+              </List>
+            )}
+          </StackItem>
+          {mode === 'verse' && (
+            <StackItem xstyle={styles.ayahColumn} isScrollable aria-label="Ayahs list">
+              {shownAyahs.length === 0 ? (
+                <Text type="supporting">No such ayah.</Text>
+              ) : (
+                <List density="compact" aria-label={`Ayahs of ${chosenSurah.name}`}>
+                  {shownAyahs.map((ayah) => (
+                    <ListItem
+                      key={ayah}
+                      label={String(ayah)}
+                      href={urlFor('surahs.show', { number: chosenSurah.number }, { qs: { ayah } })}
+                    />
+                  ))}
+                </List>
+              )}
+            </StackItem>
+          )}
+        </HStack>
+      </StackItem>
     </VStack>
   )
 }
