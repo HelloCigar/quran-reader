@@ -14,7 +14,8 @@ import AyahBookmarkAction from '~/components/bookmarks/ayah_bookmark_action'
 /**
  * One ayah: its reference ("2:255"), the Arabic as its Words (each opens its
  * meaning) and the ayah-end marker, reading right to left, and the English
- * translation beneath it, with its "play from this Ayah" and bookmark actions.
+ * translation beneath it. Its "play from this Ayah" and bookmark actions share
+ * the reference's row, so the text below takes the full width.
  * `#ayah-<number>` anchors it.
  *
  * Memoized, with stable callbacks from the page: a long Surah re-renders no
@@ -38,14 +39,31 @@ export default memo(function AyahItem({
   return (
     <ListItem
       id={`ayah-${ayah.number}`}
-      align="start"
       label={
-        <Text type="supporting" color="secondary">
-          {ayah.reference}
-        </Text>
+        <HStack hAlign="between" vAlign="center" gap={2}>
+          <Text type="supporting" color="secondary">
+            {ayah.reference}
+          </Text>
+          <HStack gap={1} vAlign="center">
+            <Button
+              label={`Play from ${ayah.reference}`}
+              variant="ghost"
+              isIconOnly
+              icon={<Icon icon={PlayIcon} />}
+              onClick={() => onPlayFrom(ayah.number)}
+            />
+            <AyahBookmarkAction
+              surah={surahNumber}
+              ayah={ayah.number}
+              bookmark={bookmark}
+              onEditNote={onEditNote}
+              onRemove={onRemove}
+            />
+          </HStack>
+        </HStack>
       }
       description={
-        <VStack gap={3}>
+        <VStack gap={4} paddingBlockStart={1}>
           <ArabicText>
             {ayah.words.map((word) => (
               <Fragment key={word.location}>
@@ -60,24 +78,6 @@ export default memo(function AyahItem({
             {ayah.english}
           </Text>
         </VStack>
-      }
-      endContent={
-        <HStack gap={1} vAlign="center">
-          <Button
-            label={`Play from ${ayah.reference}`}
-            variant="ghost"
-            isIconOnly
-            icon={<Icon icon={PlayIcon} />}
-            onClick={() => onPlayFrom(ayah.number)}
-          />
-          <AyahBookmarkAction
-            surah={surahNumber}
-            ayah={ayah.number}
-            bookmark={bookmark}
-            onEditNote={onEditNote}
-            onRemove={onRemove}
-          />
-        </HStack>
       }
     />
   )
