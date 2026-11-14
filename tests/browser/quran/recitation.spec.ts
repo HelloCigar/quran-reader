@@ -3,6 +3,7 @@ import QuranTextService from '#services/quran_text_service'
 import RecitationService from '#services/recitation_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 import FakeRecitationService from '#tests/helpers/quran/fake_recitation_service'
+import { waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
 
 /**
  * Longer than the 5 seconds a click lets a page start audio (Chromium's
@@ -53,6 +54,30 @@ test.group('Quran Recitation', () => {
 
     await page.assertText(page.getByTestId('recited-ayah'), '110:2')
     await page.assertVisible(page.getByRole('dialog', { name: /^Word 110:2:/ }))
+  })
+
+  test('carries on into the next block of a long Surah', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 400 }))
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page.getByRole('button', { name: 'Play from 2:18', exact: true }).click()
+
+    // Any Word of the next block (Ayahs 21-40): one Word lasts too briefly to wait for.
+    await page.assertVisible(page.getByRole('dialog', { name: /^Word 2:(2[1-9]|3\d|40):/ }))
+  })
+
+  test('starts the first Play at the first Ayah in view', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=255`)
+    await waitForAyahInView(page, 255)
+    await page.getByRole('button', { name: 'Play Recitation', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('dialog', { name: /^Word 2:255:/ }))
   })
 
   test('plays from the start of the chosen Ayah', async ({ visit, route, swap }) => {
