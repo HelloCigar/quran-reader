@@ -33,6 +33,7 @@
     "#validators/*": "./app/validators/*.js",
     "#values/*": "./app/values/*.js",
     "#ayah_block/*": "./app/ayah_block/*.js",
+    "#ayah_reference/*": "./app/ayah_reference/*.js",
     "#providers/*": "./providers/*.js",
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",

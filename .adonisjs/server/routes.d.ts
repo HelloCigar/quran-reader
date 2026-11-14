@@ -6,6 +6,7 @@ export type ScannedRoutes = {
   ALL: {
     'home': { paramsTuple?: []; params?: {} }
     'surahs.index': { paramsTuple?: []; params?: {} }
+    'ayahs.show': { paramsTuple?: []; params?: {} }
     'surahs.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'new_account.create': { paramsTuple?: []; params?: {} }
     'new_account.store': { paramsTuple?: []; params?: {} }
@@ -21,6 +22,7 @@ export type ScannedRoutes = {
   GET: {
     'home': { paramsTuple?: []; params?: {} }
     'surahs.index': { paramsTuple?: []; params?: {} }
+    'ayahs.show': { paramsTuple?: []; params?: {} }
     'surahs.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -30,6 +32,7 @@ export type ScannedRoutes = {
   HEAD: {
     'home': { paramsTuple?: []; params?: {} }
     'surahs.index': { paramsTuple?: []; params?: {} }
+    'ayahs.show': { paramsTuple?: []; params?: {} }
     'surahs.show': { paramsTuple: [ParamValue]; params: {'number': ParamValue} }
     'new_account.create': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }

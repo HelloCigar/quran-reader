@@ -21,7 +21,7 @@ Routing and links:
 
 - Link with Astryx components and `urlFor('route.name')` from `~/client`: `<Link href={urlFor('dashboard')}>`, `<Button href={...}>`, `<TopNavItem href={...}>`. `LinkProvider` (in `inertia/components/app_providers.tsx`) renders them through the AdonisJS `Link`, so they navigate with Inertia.
 - Never import `Link`, `Form`, `router` or `useHttp` from `@inertiajs/react`; use `@adonisjs/inertia/react` (enforced by lint). For navigation events (`start`, `finish`, ...) use `useNavigationEvent` (`inertia/components/navigation/navigation_events.ts`), the one file allowed to touch Inertia's `router`.
-- Forms: `useRouteForm('route.name', initialValues)` (`inertia/components/forms/use_route_form.ts`) types the data from the route's validator and submits to the route's URL and method. Wrap the fields in a plain `<form onSubmit={form.submit}>` and Astryx `FormLayout`, and spread `form.field('name')` onto each `TextInput` for its value, change handler and server validation error.
+- Forms: `useRouteForm('route.name', initialValues)` (`inertia/components/forms/use_route_form.ts`) types the data from the route's validator and submits to the route's URL and method; a GET route gets the fields as its query string. Wrap the fields in a plain `<form onSubmit={form.submit}>` and Astryx `FormLayout`, and spread `form.field('name')` onto each `TextInput` for its value, change handler and server validation error.
 - Nav menus: list `NavItem`s and resolve them with `useNavItems` (`inertia/components/navigation/nav.ts`).
 
 Styling:

@@ -12,6 +12,9 @@ import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
+import { IconButton } from '@astryxdesign/core/IconButton'
+import { Icon } from '@astryxdesign/core/Icon'
+import { Bars3Icon } from '@heroicons/react/20/solid'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -31,6 +34,8 @@ import RecitationPlayer from '~/components/quran/recitation_player'
 import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
+import ReaderLayout from '~/components/quran/reader_layout'
+import { useReaderSidebarToggle, type SidebarMode } from '~/components/quran/use_reader_sidebar'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -69,6 +74,10 @@ type PageProps = InertiaProps<{
   openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
+  /** Every Surah, for the sidebar `ReaderLayout` renders. */
+  surahs: Data.Surah.Variants['forNavigation'][]
+  /** The reader's sidebar choices, from their cookies, for `ReaderLayout`. */
+  sidebar: { isShown: boolean; mode: SidebarMode }
   bookmarks: Data.Bookmark[]
   noteFor: number | null
   /** Loaded on the first Play; `null` when the Recitation is unavailable. */
@@ -87,6 +96,7 @@ export default function Show({
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
+  const sidebarToggle = useReaderSidebarToggle()
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -261,6 +271,16 @@ export default function Show({
         footer={
           <RecitationPlayer
             footerRef={playerRef}
+            startContent={
+              sidebarToggle && (
+                <IconButton
+                  label={sidebarToggle.label}
+                  variant="ghost"
+                  icon={<Icon icon={Bars3Icon} />}
+                  onClick={sidebarToggle.onToggle}
+                />
+              )
+            }
             isPlaying={player.isPlaying}
             isLoading={player.isLoading}
             recitedReference={
@@ -275,4 +295,4 @@ export default function Show({
   )
 }
 
-Show.layout = [AppLayout]
+Show.layout = [AppLayout, ReaderLayout]

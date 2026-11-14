@@ -1,4 +1,4 @@
-import { type Ref } from 'react'
+import { type ReactNode, type Ref } from 'react'
 import { PauseIcon, PlayIcon } from '@heroicons/react/20/solid'
 import { LayoutFooter } from '@astryxdesign/core/Layout'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -7,8 +7,9 @@ import { Icon } from '@astryxdesign/core/Icon'
 import { Text } from '@astryxdesign/core/Text'
 
 /**
- * The bar pinned to the bottom of a Surah: Play/Pause for the Recitation and
- * the Ayah Reference of the Recited Word.
+ * The bar pinned to the bottom of a Surah: `startContent` (the sidebar
+ * toggle), Play/Pause for the Recitation and the Ayah Reference of the
+ * Recited Word.
  */
 export default function RecitationPlayer({
   isPlaying,
@@ -17,6 +18,7 @@ export default function RecitationPlayer({
   onPlay,
   onPause,
   footerRef,
+  startContent,
 }: {
   isPlaying: boolean
   isLoading: boolean
@@ -25,10 +27,12 @@ export default function RecitationPlayer({
   onPlay: () => void
   onPause: () => void
   footerRef: Ref<HTMLDivElement>
+  startContent?: ReactNode
 }) {
   return (
     <LayoutFooter ref={footerRef} label="Recitation" hasDivider>
       <HStack gap={3} vAlign="center">
+        {startContent}
         {isPlaying ? (
           <Button
             label="Pause Recitation"
