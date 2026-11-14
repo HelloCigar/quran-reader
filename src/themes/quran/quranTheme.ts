@@ -1,6 +1,6 @@
 import { defineTheme } from '@astryxdesign/core/theme'
 import { neutralTheme } from '@astryxdesign/theme-neutral'
-import { palette, white } from './tokens/quran.palette.js'
+import { palette, white } from './tokens/quran.palette.ts'
 
 /**
  * Quran Reader theme: deep green on warm sand, Fraunces headings, and Amiri
