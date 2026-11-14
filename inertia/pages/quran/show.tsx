@@ -11,8 +11,7 @@ import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
-import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
-import { Drawer } from '@astryxdesign/core/Drawer'
+import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Bars3Icon } from '@heroicons/react/20/solid'
@@ -35,8 +34,8 @@ import RecitationPlayer from '~/components/quran/recitation_player'
 import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
-import ReaderSidebar from '~/components/quran/reader_sidebar'
-import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
+import ReaderLayout from '~/components/quran/reader_layout'
+import { useReaderSidebarToggle, type SidebarMode } from '~/components/quran/use_reader_sidebar'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -75,10 +74,10 @@ type PageProps = InertiaProps<{
   openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
-  /** Every Surah, for the sidebar. */
+  /** Every Surah, for the sidebar `ReaderLayout` renders. */
   surahs: Data.Surah.Variants['forNavigation'][]
-  /** The reader's sidebar choices, from their cookies. */
-  sidebar: { isShown: boolean; mode: 'surah' | 'verse' }
+  /** The reader's sidebar choices, from their cookies, for `ReaderLayout`. */
+  sidebar: { isShown: boolean; mode: SidebarMode }
   bookmarks: Data.Bookmark[]
   noteFor: number | null
   /** Loaded on the first Play; `null` when the Recitation is unavailable. */
@@ -91,15 +90,13 @@ export default function Show({
   ayahs,
   previous,
   next,
-  surahs,
-  sidebar: sidebarChoices,
   bookmarks,
   noteFor,
   openedAt,
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
-  const sidebar = useReaderSidebar(sidebarChoices.isShown)
+  const sidebarToggle = useReaderSidebarToggle()
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -221,25 +218,7 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={sidebar.hasPanel ? 1100 : 720}
-        start={
-          sidebar.hasPanel && (
-            <LayoutPanel
-              hasDivider
-              width={380}
-              padding={4}
-              isScrollable={false}
-              role="navigation"
-              label="Quran"
-            >
-              <ReaderSidebar
-                surahs={surahs}
-                current={surah.number}
-                initialMode={sidebarChoices.mode}
-              />
-            </LayoutPanel>
-          )
-        }
+        contentWidth={720}
         content={
           <LayoutContent padding={6}>
             <Head title={surah.name} />
@@ -287,33 +266,20 @@ export default function Show({
               onConfirm={removal.confirm}
               onCancel={removal.cancel}
             />
-            <Drawer
-              isOpen={sidebar.isDrawerOpen}
-              onOpenChange={sidebar.setDrawerOpen}
-              side="start"
-              width={420}
-              experimental={{ isFullWidthOnMobile: true }}
-              label="Quran"
-            >
-              <ReaderSidebar
-                surahs={surahs}
-                current={surah.number}
-                initialMode={sidebarChoices.mode}
-                onClose={sidebar.closeDrawer}
-              />
-            </Drawer>
           </LayoutContent>
         }
         footer={
           <RecitationPlayer
             footerRef={playerRef}
             startContent={
-              <IconButton
-                label={sidebar.toggleLabel}
-                variant="ghost"
-                icon={<Icon icon={Bars3Icon} />}
-                onClick={sidebar.toggle}
-              />
+              sidebarToggle && (
+                <IconButton
+                  label={sidebarToggle.label}
+                  variant="ghost"
+                  icon={<Icon icon={Bars3Icon} />}
+                  onClick={sidebarToggle.onToggle}
+                />
+              )
             }
             isPlaying={player.isPlaying}
             isLoading={player.isLoading}
@@ -329,4 +295,4 @@ export default function Show({
   )
 }
 
-Show.layout = [AppLayout]
+Show.layout = [AppLayout, ReaderLayout]

@@ -215,6 +215,31 @@ test.group('Quran reader sidebar', (group) => {
     await page.assertNotVisible(drawer)
   })
 
+  test('keeps the drawer open on a phone to choose an ayah of the surah chosen in Verse mode', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page.setViewportSize(PHONE)
+    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
+    const drawer = page.getByRole('dialog', { name: 'Quran', exact: true })
+    await drawer.getByText("Ali 'Imran", { exact: true }).click()
+    await page.waitForURL('**/quran/3')
+
+    const ayahs = drawer.getByRole('list', { name: "Ayahs of Ali 'Imran", exact: true })
+    await page.assertVisible(ayahs)
+    await ayahs.getByText('5', { exact: true }).click()
+
+    await page.waitForURL(
+      (url) => url.pathname === '/quran/3' && url.searchParams.get('ayah') === '5'
+    )
+    await waitForAyahInView(page, 5)
+    await page.assertNotVisible(drawer)
+  })
+
   test('has no sidebar on the {name} page')
     .with([
       { name: 'dashboard', path: '/dashboard' },

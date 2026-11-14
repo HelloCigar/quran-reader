@@ -13,12 +13,9 @@ import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
-import { useReaderPreference } from '~/components/quran/use_reader_preference'
+import type { SidebarMode } from '~/components/quran/use_reader_sidebar'
 
 type Surah = Data.Surah.Variants['forNavigation']
-
-/** Surah: just the Surahs. Verse: the open Surah's Ayahs beside them. */
-type Mode = 'verse' | 'surah'
 
 const styles = stylex.create({
   /** The Ayah column, and the Verse box above it, take a fixed share. */
@@ -42,24 +39,31 @@ function searchable(text: string) {
  * Surah box, and the Surahs with the one being read marked; choosing one
  * opens it. Verse mode also lists the open Surah's Ayahs in a second column,
  * which scrolls on its own; the Verse box filters them, and Enter there opens
- * that Ayah or shows why it can't. The switch is remembered.
+ * that Ayah or shows why it can't. `ReaderLayout` owns the mode, which the
+ * panel and the drawer share.
  */
 export default function ReaderSidebar({
   surahs,
   current,
-  initialMode,
+  mode,
+  onModeChange,
   onClose,
 }: {
   surahs: Surah[]
   current: number
-  /** Surah or Verse, as the reader last chose (kept in a cookie). */
-  initialMode: Mode
+  mode: SidebarMode
+  onModeChange: (mode: SidebarMode) => void
   /** Shows a close button, for the sidebar in a drawer. */
   onClose?: () => void
 }) {
-  const [mode, setMode] = useReaderPreference('reader_sidebar_mode', initialMode)
   const [query, setQuery] = useState('')
   const [verse, setVerse] = useState('')
+  /** The Verse box filters the open Surah's Ayahs, so it clears when another opens. */
+  const [verseOf, setVerseOf] = useState(current)
+  if (verseOf !== current) {
+    setVerseOf(current)
+    setVerse('')
+  }
   const surahListRef = useRef<HTMLUListElement>(null)
   const openSurah = surahs.find((surah) => surah.number === current) ?? surahs[0]
   const form = useRouteForm(
@@ -106,7 +110,7 @@ export default function ReaderSidebar({
           <SegmentedControl
             label="Find by"
             value={mode}
-            onChange={(value) => setMode(value as Mode)}
+            onChange={(value) => onModeChange(value as SidebarMode)}
           >
             <SegmentedControlItem value="surah" label="Surah" />
             <SegmentedControlItem value="verse" label="Verse" />
