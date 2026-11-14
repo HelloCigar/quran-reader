@@ -20,6 +20,7 @@ import { useRemoveBookmark } from '~/components/bookmarks/use_remove_bookmark'
 import RecitationPlayer from '~/components/quran/recitation_player'
 import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
+import { useNavigationEvent } from '~/components/navigation/navigation_events'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -61,6 +62,19 @@ export default function Show({
   recitation,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
+  /**
+   * Inertia drops a visit's page when a client-side URL change lands while
+   * that page is still being set, so a Bookmark saved as a block finished
+   * loading never showed. The address bar stops following the scroll while
+   * a visit (anything but a block or Recitation load) is in flight.
+   */
+  const [isVisiting, setIsVisiting] = useState(false)
+  useNavigationEvent('start', (event) => {
+    if (!event.detail.visit.async) setIsVisiting(true)
+  })
+  useNavigationEvent('finish', (event) => {
+    if (!event.detail.visit.async) setIsVisiting(false)
+  })
   const loaded = ayahs.data
   const hasFirstAyah = loaded[0]?.number === 1
   const hasLastAyah = loaded.at(-1)?.number === surah.ayahCount.raw
@@ -126,6 +140,7 @@ export default function Show({
               data="ayahs"
               itemsElement={listRef}
               buffer={LOAD_AHEAD}
+              preserveUrl={isVisiting}
               loading={LOADING}
             >
               <VStack gap={6}>
