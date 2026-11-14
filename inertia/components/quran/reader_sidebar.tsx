@@ -71,7 +71,11 @@ export default function ReaderSidebar({
     const term = searchable(deferredQuery)
     if (term === '') return surahs
     return surahs.filter(
-      (surah) => String(surah.number).startsWith(term) || searchable(surah.name).includes(term)
+      (surah) =>
+        String(surah.number).startsWith(term) ||
+        // A substring match on one name (String#includes), not an array lookup a Set could replace.
+        // react-doctor-disable-next-line js-set-map-lookups
+        searchable(surah.name).includes(term)
     )
   }, [surahs, deferredQuery])
   const shownAyahs = useMemo(() => {
