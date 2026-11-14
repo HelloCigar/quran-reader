@@ -20,6 +20,7 @@ function readFixture<T>(name: string): T {
 const SURAHS = readFixture<SurahSummary[]>('surahs.json')
 const FIXTURE_SURAHS: Record<number, Surah> = {
   1: readFixture<Surah>('surah_1.json'),
+  110: readFixture<Surah>('surah_110.json'),
 }
 
 /**

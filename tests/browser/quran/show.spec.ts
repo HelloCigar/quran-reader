@@ -49,7 +49,11 @@ test.group('Quran surah reading', () => {
       await page.assertNotExists(page.getByTestId('bismillah'))
     })
 
-  test("shows each ayah's Arabic, English and reference", async ({ visit, route, swap }) => {
+  test("shows each ayah's Arabic ending in its ayah-end marker, its English and reference", async ({
+    visit,
+    route,
+    swap,
+  }) => {
     swap(QuranTextService, new FakeQuranTextService())
 
     const page = await visit(route('surahs.show', { number: 1 }))
@@ -59,7 +63,7 @@ test.group('Quran surah reading', () => {
     await page.assertVisible(ayahs.getByText('1:2', { exact: true }))
     await page.assertVisible(
       ayahs.getByText(
-        '\u0671\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F \u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0671\u0644\u0652\u0639\u064E\u0640\u0670\u0644\u064E\u0645\u0650\u064A\u0646\u064E',
+        '\u0671\u0644\u0652\u062D\u064E\u0645\u0652\u062F\u064F \u0644\u0650\u0644\u0651\u064E\u0647\u0650 \u0631\u064E\u0628\u0651\u0650 \u0671\u0644\u0652\u0639\u064E\u0640\u0670\u0644\u064E\u0645\u0650\u064A\u0646\u064E \u06DD\u0662',
         { exact: true }
       )
     )
