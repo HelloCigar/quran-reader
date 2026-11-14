@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
@@ -27,6 +36,9 @@ import { useNavigationEvent } from '~/components/navigation/navigation_events'
  * a reader scrolling steadily rarely reaches the end of what's loaded.
  */
 const LOAD_AHEAD = 1600
+
+/** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
+const AYAH_HASH = /^#ayah-(\d+)$/
 
 /** Shown at the top or bottom while a block of Ayahs loads. */
 const LOADING = (
@@ -128,6 +140,28 @@ export default function Show({
       document.getElementById(`ayah-${openedAt}`)?.scrollIntoView({ block: 'start' })
     }
   }, [openedAt])
+
+  /**
+   * The browser never sends `#ayah-N` to the server, so an old link opens at
+   * the Surah's start. When Ayah N is loaded the page scrolls to it; when it
+   * isn't, the page opens again at `?ayah=N`, in place of the old URL.
+   */
+  const router = useRouter()
+  const openHashAyah = useEffectEvent(() => {
+    const match = AYAH_HASH.exec(window.location.hash)
+    if (!match) return
+    const ayah = Number(match[1])
+    const element = document.getElementById(`ayah-${ayah}`)
+    if (element) {
+      element.scrollIntoView({ block: 'start' })
+      return
+    }
+    router.get(
+      { route: 'surahs.show', routeParams: { number: surah.number }, qs: { ayah } },
+      { replace: true }
+    )
+  })
+  useEffect(() => openHashAyah(), [])
 
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>

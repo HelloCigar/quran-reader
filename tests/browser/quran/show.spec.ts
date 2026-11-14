@@ -124,6 +124,33 @@ test.group('Quran surah reading', () => {
     await page.assertNotExists(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
   })
 
+  test('opens an old #ayah link to an ayah deep in a long surah at that ayah', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}#ayah-255`)
+
+    await page.waitForURL((url) => url.searchParams.get('ayah') === '255' && url.hash === '')
+    await page.assertPath('/quran/2')
+    await waitForAyahInView(page, 255)
+  })
+
+  test('scrolls to the ayah of an old #ayah link when it is already loaded', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}#ayah-15`)
+
+    await waitForAyahInView(page, 15)
+    await page.assertUrlMatches(/\/quran\/2#ayah-15$/)
+  })
+
   test('keeps the opened ayah in view as the ayahs before it load', async ({
     visit,
     route,
