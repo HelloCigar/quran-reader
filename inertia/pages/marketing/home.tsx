@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { ArrowRightIcon } from '@heroicons/react/20/solid'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { VStack } from '@astryxdesign/core/VStack'
@@ -8,13 +8,11 @@ import { Text } from '@astryxdesign/core/Text'
 import { Button } from '@astryxdesign/core/Button'
 import { Icon } from '@astryxdesign/core/Icon'
 import { urlFor } from '~/client'
-import MarketingLayout from '~/components/marketing/marketing_layout'
+import AppLayout from '~/components/app/app_layout'
 import QuranCredit from '~/components/quran/quran_credit'
 
 /** From Astryx's `centered-hero` template. */
 export default function Home() {
-  const { props } = usePage()
-
   return (
     <Layout
       height="auto"
@@ -39,19 +37,11 @@ export default function Home() {
                   variant="primary"
                   endContent={<Icon icon={ArrowRightIcon} size="sm" color="inherit" />}
                 />
-                {props.user ? (
-                  <Button
-                    label="Your bookmarks"
-                    href={urlFor('bookmarks.index')}
-                    variant="secondary"
-                  />
-                ) : (
-                  <Button
-                    label="Create an account"
-                    href={urlFor('new_account.create')}
-                    variant="secondary"
-                  />
-                )}
+                <Button
+                  label="Create an account"
+                  href={urlFor('new_account.create')}
+                  variant="secondary"
+                />
               </HStack>
             </VStack>
             <QuranCredit />
@@ -62,4 +52,4 @@ export default function Home() {
   )
 }
 
-Home.layout = [MarketingLayout]
+Home.layout = [AppLayout]

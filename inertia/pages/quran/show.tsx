@@ -18,7 +18,7 @@ import { HStack } from '@astryxdesign/core/HStack'
 import { Spinner } from '@astryxdesign/core/Spinner'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
-import MarketingLayout from '~/components/marketing/marketing_layout'
+import AppLayout from '~/components/app/app_layout'
 import ArabicText from '~/components/quran/arabic_text'
 import SurahHeading from '~/components/quran/surah_heading'
 import AyahItem from '~/components/quran/ayah_item'
@@ -275,4 +275,4 @@ export default function Show({
   )
 }
 
-Show.layout = [MarketingLayout]
+Show.layout = [AppLayout]

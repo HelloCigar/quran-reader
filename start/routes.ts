@@ -11,7 +11,7 @@ import { middleware } from '#start/kernel'
 import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
 
-router.on('/').renderInertia('marketing/home', {}).as('home')
+router.on('/').renderInertia('marketing/home', {}).as('home').use(middleware.guest())
 
 router.get('/quran', [controllers.Surahs, 'index'])
 router.get('/quran/:number', [controllers.Surahs, 'show']).where('number', {

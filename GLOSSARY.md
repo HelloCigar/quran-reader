@@ -38,6 +38,20 @@ _Avoid_: Gloss, word meaning, word-by-word
 A Word written in Latin letters so a reader can sound it out.
 _Avoid_: Romanization, pronunciation
 
+## Reading
+
+**Reading Position**:
+The Ayah a reader last reached, by reading past it, staying on it, or hearing it in a Recitation. A quick look at an Ayah does not move it. Only signed-in readers have one, and each has exactly one.
+_Avoid_: Last read, progress, history
+
+**Bookmark**:
+An Ayah a reader has kept so they can come back to it. Unlike the Reading Position, it stays put until the reader removes it.
+_Avoid_: Favourite, saved ayah
+
+**Note**:
+The reader's own text attached to a Bookmark.
+_Avoid_: Comment, annotation
+
 ## Listening
 
 **Recitation**:
