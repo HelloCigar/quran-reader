@@ -53,6 +53,6 @@ test.group('Quran Words', () => {
     await word.click()
 
     const popover = page.getByRole('dialog', { name: 'Word 110:3:4', exact: true })
-    await page.assertVisible(popover.getByText("wa-is'taghfir'hu", { exact: false }))
+    await page.assertVisible(popover.getByText("wa-is'taghfir'hu", { exact: true }))
   })
 })
