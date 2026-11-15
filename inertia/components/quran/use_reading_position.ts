@@ -99,6 +99,8 @@ export function useReadingPosition({
 }) {
   const [saver] = useState(() => new ReadingPositionSaver())
   const isPlayingRef = useRef(isPlaying)
+  /** How many times the Recitation has started playing on this page. */
+  const playsRef = useRef(0)
 
   useEffect(() => {
     if (!isSignedIn) return
@@ -112,6 +114,7 @@ export function useReadingPosition({
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
+    if (isPlaying) playsRef.current += 1
   }, [isPlaying])
 
   useEffect(() => {
@@ -126,9 +129,13 @@ export function useReadingPosition({
     let stay: number | undefined
     const stayOn = (ayah: number) => {
       window.clearTimeout(stay)
+      const plays = playsRef.current
       stay = window.setTimeout(() => {
-        // The Recitation moves the position while it plays; a stay begun before Play doesn't count.
-        if (!isPlayingRef.current) saver.save({ surah: surahNumber, ayah })
+        // A stay the Recitation played during doesn't count, even once paused: the
+        // Recited Ayah is where the reader got to. The next scroll begins a new stay.
+        if (playsRef.current === plays && !isPlayingRef.current) {
+          saver.save({ surah: surahNumber, ayah })
+        }
       }, STAY_MS)
     }
 

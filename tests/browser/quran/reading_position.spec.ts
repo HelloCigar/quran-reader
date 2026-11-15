@@ -31,6 +31,27 @@ test.group('Reading Position', (group) => {
     await waitForReadingPosition(reader, '18:10')
   })
 
+  test('moves on from where the reader was before', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+    db,
+  }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create({ email: 'ada@example.com', password: 'secret-password' })
+    await ReadingPosition.create({ userId: reader.id, surahNumber: 2, ayahNumber: 255 })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('surahs.show', { number: 18 }))
+    await scrollPastAyah(page, 10)
+    await page.close()
+
+    await waitForReadingPosition(reader, '18:10')
+    await db.assertCount('reading_positions', 1)
+  })
+
   test('is the Ayah a signed-in reader stays on', async ({
     visit,
     route,
