@@ -41,6 +41,24 @@ export default defineConfig({
     },
   },
 
+  /**
+   * There is no index.html for Vite to crawl, so without entries it finds
+   * dependencies one page at a time (each `@astryxdesign/core/<Component>`
+   * subpath), re-bundles, and fails the requests already in flight with
+   * "504 Outdated Optimize Dep". Scanning the entry and every page up front
+   * bundles them all in one pass at startup.
+   */
+  optimizeDeps: {
+    entries: ['inertia/app.tsx', 'inertia/pages/**/*.tsx'],
+  },
+
+  /**
+   * The browser tests start their own Vite server. A separate cache keeps it
+   * from renaming `node_modules/.vite/deps` while the dev server holds it,
+   * which fails on Windows with EPERM.
+   */
+  cacheDir: process.env.NODE_ENV === 'test' ? 'node_modules/.vite-test' : 'node_modules/.vite',
+
   server: {
     /**
      * Let ngrok tunnels reach the dev server, so the app can be opened from
