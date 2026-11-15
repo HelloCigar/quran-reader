@@ -18,7 +18,7 @@ test.group('Login and logout', (group) => {
     await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 
     await page.waitForURL(route('dashboard'))
-    await page.assertTextContains('h1', 'Your dashboard is ready')
+    await page.assertTextContains('h1', 'Dashboard')
   })
 
   test('writes the last_login_method cookie after a successful login', async ({

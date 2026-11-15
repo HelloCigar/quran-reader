@@ -9,6 +9,7 @@ import SurahTransformer from '#transformers/surah_transformer'
 import AyahTransformer from '#transformers/ayah_transformer'
 import BookmarkTransformer from '#transformers/bookmark_transformer'
 import RecitationTransformer from '#transformers/recitation_transformer'
+import ReadingPositionTransformer from '#transformers/reading_position_transformer'
 import { showSurahValidator } from '#validators/surah'
 import AyahBlock from '#ayah_block/ayah_block'
 import type Bookmark from '#models/bookmark'
@@ -23,11 +24,16 @@ export default class SurahsController {
     this.#recitations = recitations
   }
 
-  async index({ inertia }: HttpContext) {
-    const surahs = await this.#quranText.listSurahs()
+  async index({ inertia, auth }: HttpContext) {
+    const [surahs, position] = await Promise.all([
+      this.#quranText.listSurahs(),
+      auth.user ? auth.user.related('readingPosition').query().first() : null,
+    ])
 
     return inertia.render('quran/index', {
       surahs: SurahTransformer.transform(surahs),
+      /** `null` for a signed-out reader, or one who hasn't read yet. */
+      readingPosition: position ? ReadingPositionTransformer.transform(position) : null,
     })
   }
 

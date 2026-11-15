@@ -1,32 +1,31 @@
 import { Head } from '@inertiajs/react'
-import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
-import { Center } from '@astryxdesign/core/Center'
-import { EmptyState } from '@astryxdesign/core/EmptyState'
-import { Icon } from '@astryxdesign/core/Icon'
-import { Text } from '@astryxdesign/core/Text'
+import { VStack } from '@astryxdesign/core/VStack'
+import { Heading } from '@astryxdesign/core/Heading'
+import type { Data } from '@generated/data'
+import type { InertiaProps } from '~/types'
 import AppLayout from '~/components/app/app_layout'
+import ContinueReadingCard from '~/components/dashboard/continue_reading_card'
+import RecentBookmarks from '~/components/dashboard/recent_bookmarks'
 
-export default function Dashboard() {
+type PageProps = InertiaProps<{
+  readingPosition: Data.ReadingPosition.Variants['forContinuing'] | null
+  bookmarks: Data.Bookmark.Variants['forRecent'][]
+}>
+
+export default function Dashboard({ readingPosition, bookmarks }: PageProps) {
   return (
     <Layout
-      height="fill"
+      height="auto"
+      contentWidth={720}
       content={
         <LayoutContent padding={6}>
           <Head title="Dashboard" />
-          <Center axis="both" height="100%">
-            <EmptyState
-              headingLevel={1}
-              icon={<Icon icon={Squares2X2Icon} size="lg" />}
-              title="Your dashboard is ready"
-              description="It's empty on purpose. A clean starting point with nothing to undo. Add your first route and component to begin."
-              actions={
-                <Text type="supporting" color="secondary">
-                  Start in <Text type="code">inertia/pages/dashboard.tsx</Text>
-                </Text>
-              }
-            />
-          </Center>
+          <VStack gap={8}>
+            <Heading level={1}>Dashboard</Heading>
+            <ContinueReadingCard readingPosition={readingPosition} />
+            <RecentBookmarks bookmarks={bookmarks} />
+          </VStack>
         </LayoutContent>
       }
     />

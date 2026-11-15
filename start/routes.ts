@@ -45,8 +45,7 @@ router
 router
   .group(() => {
     router
-      .on('/dashboard')
-      .renderInertia('app/dashboard', {})
+      .get('dashboard', [controllers.Dashboard, 'show'])
       .as('dashboard')
       .use(middleware.verifiedAccount())
     router.post('email-verifications', [controllers.EmailVerifications, 'store'])
