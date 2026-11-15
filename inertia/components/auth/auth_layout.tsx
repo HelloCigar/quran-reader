@@ -24,12 +24,18 @@ import PasskeySignals from '~/components/auth/passkey_signals'
  */
 const COLUMN_MIN_WIDTH = 240
 const STACKED = '@container auth-split (max-width: 511px)'
+/** A phone gives the card nearly the whole width; the card's own inset holds the content line. */
+const PHONE = '@media (max-width: 511px)'
 
 const styles = stylex.create({
   /** A standalone page has no app shell, so it paints the body itself. */
   page: {
     minHeight: '100dvh',
     backgroundColor: colorVars['--color-background-body'],
+    padding: {
+      default: spacingVars['--spacing-6'],
+      [PHONE]: spacingVars['--spacing-3'],
+    },
   },
   /**
    * The card is the container the stacked layout is keyed to, so the inset
@@ -56,7 +62,7 @@ const styles = stylex.create({
  */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <Center axis="both" padding={6} xstyle={styles.page}>
+    <Center axis="both" xstyle={styles.page}>
       <Card padding={0} width="100%" maxWidth={1000} xstyle={styles.card}>
         <Grid
           columns={{ minWidth: COLUMN_MIN_WIDTH, repeat: 'fit' }}

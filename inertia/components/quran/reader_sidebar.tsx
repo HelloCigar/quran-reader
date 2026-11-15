@@ -56,6 +56,8 @@ export default function ReaderSidebar({
   /** Shows a close button, for the sidebar in a drawer. */
   onClose?: () => void
 }) {
+  /** In the phone's drawer the rows are tapped, so they get a finger's height. */
+  const density = onClose ? 'balanced' : 'compact'
   const [query, setQuery] = useState('')
   const [verse, setVerse] = useState('')
   /** The Verse box filters the open Surah's Ayahs, so it clears when another opens. */
@@ -164,7 +166,7 @@ export default function ReaderSidebar({
             {shownSurahs.length === 0 ? (
               <Text type="supporting">No surah matches &ldquo;{query}&rdquo;.</Text>
             ) : (
-              <List ref={surahListRef} density="compact" aria-label="Surahs">
+              <List ref={surahListRef} density={density} aria-label="Surahs">
                 {shownSurahs.map((surah) => (
                   <ListItem
                     key={surah.number}
@@ -191,7 +193,7 @@ export default function ReaderSidebar({
               {shownAyahs.length === 0 ? (
                 <Text type="supporting">No such ayah.</Text>
               ) : (
-                <List density="compact" aria-label={`Ayahs of ${openSurah.name}`}>
+                <List density={density} aria-label={`Ayahs of ${openSurah.name}`}>
                   {shownAyahs.map((ayah) => (
                     <ListItem
                       key={ayah}

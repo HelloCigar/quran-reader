@@ -1,15 +1,18 @@
 import { type ReactNode } from 'react'
 import { usePage } from '@inertiajs/react'
 import {
+  ArrowRightEndOnRectangleIcon,
   ArrowRightStartOnRectangleIcon,
   BookOpenIcon,
   BookmarkIcon,
   Cog6ToothIcon,
   HomeIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline'
-import { AppShell } from '@astryxdesign/core/AppShell'
+import { AppShell, useAppShellMobile } from '@astryxdesign/core/AppShell'
 import { TopNav, TopNavItem } from '@astryxdesign/core/TopNav'
 import { HStack } from '@astryxdesign/core/HStack'
+import { Divider } from '@astryxdesign/core/Divider'
 import { Button } from '@astryxdesign/core/Button'
 import { Icon } from '@astryxdesign/core/Icon'
 import { urlFor } from '~/client'
@@ -36,6 +39,11 @@ const readerNav: NavItem[] = [
  * Quran, a signed-in reader also sees Dashboard, Bookmarks and Log out, and a
  * signed-out visitor sees Sign in and Get started. Pages render their own
  * `Layout` inside it, which owns the page header and padding.
+ *
+ * Responsive contract. Wide: the areas and the account actions sit in the
+ * bar. Phone (below AppShell's `md` breakpoint): the bar keeps the logo, the
+ * theme toggle and the menu button, and the menu's drawer lists the areas,
+ * then the account actions (`useAppShellMobile`).
  */
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { props } = usePage()
@@ -49,21 +57,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <TopNav
           label="Main navigation"
           heading={<Logo />}
-          startContent={items.map(({ label, href, icon, isActive }) => (
-            <TopNavItem
-              key={label}
-              label={label}
-              href={href}
-              isSelected={isActive}
-              icon={icon && <Icon icon={icon} size="sm" />}
-            />
-          ))}
-          endContent={
-            <HStack gap={2} vAlign="center">
-              <ThemeToggle />
-              {signedIn ? <LogOutButton /> : <SignInButtons />}
-            </HStack>
+          startContent={
+            <>
+              {items.map(({ label, href, icon, isActive }) => (
+                <TopNavItem
+                  key={label}
+                  label={label}
+                  href={href}
+                  isSelected={isActive}
+                  icon={icon && <Icon icon={icon} size="sm" />}
+                />
+              ))}
+              <DrawerAccountItems signedIn={signedIn} />
+            </>
           }
+          endContent={<BarActions signedIn={signedIn} />}
         />
       }
     >
@@ -71,6 +79,52 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <FlashToasts />
       <PasskeySignals />
     </AppShell>
+  )
+}
+
+/** The end of the bar: the theme toggle, and on a wide screen the account actions. */
+function BarActions({ signedIn }: { signedIn: boolean }) {
+  const { isMobile } = useAppShellMobile()
+
+  return (
+    <HStack gap={2} vAlign="center">
+      <ThemeToggle />
+      {!isMobile && (signedIn ? <LogOutButton /> : <SignInButtons />)}
+    </HStack>
+  )
+}
+
+/** The account actions as rows of the phone's menu drawer, under the areas. */
+function DrawerAccountItems({ signedIn }: { signedIn: boolean }) {
+  const { isMobile } = useAppShellMobile()
+  const logout = useRouteForm('session.destroy', {})
+  if (!isMobile) return null
+
+  return (
+    <>
+      <Divider />
+      {signedIn ? (
+        <TopNavItem
+          label="Log out"
+          icon={<Icon icon={ArrowRightStartOnRectangleIcon} size="sm" />}
+          isDisabled={logout.processing}
+          onClick={() => logout.submit()}
+        />
+      ) : (
+        <>
+          <TopNavItem
+            label="Sign in"
+            href={urlFor('session.create')}
+            icon={<Icon icon={ArrowRightEndOnRectangleIcon} size="sm" />}
+          />
+          <TopNavItem
+            label="Get started"
+            href={urlFor('new_account.create')}
+            icon={<Icon icon={UserPlusIcon} size="sm" />}
+          />
+        </>
+      )}
+    </>
   )
 }
 

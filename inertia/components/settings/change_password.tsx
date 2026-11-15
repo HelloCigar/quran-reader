@@ -33,21 +33,21 @@ export default function ChangePassword({ passwordPolicy }: { passwordPolicy: Pas
         <VStack gap={4} hAlign="stretch" width="100%" maxWidth={480}>
           <FormLayout>
             <TextInput
-              label="Current Password"
+              label="Current password"
               type="password"
               autoComplete="current-password"
               {...form.field('currentPassword')}
             />
             <PasswordStrength policy={passwordPolicy} password={form.data.password}>
               <TextInput
-                label="New Password"
+                label="New password"
                 type="password"
                 autoComplete="new-password"
                 {...form.field('password')}
               />
             </PasswordStrength>
             <TextInput
-              label="Confirm Password"
+              label="Confirm password"
               type="password"
               autoComplete="new-password"
               {...form.field('passwordConfirmation')}
@@ -56,7 +56,7 @@ export default function ChangePassword({ passwordPolicy }: { passwordPolicy: Pas
           <HStack>
             <Button
               type="submit"
-              label={form.processing ? 'Saving…' : 'Update Password'}
+              label={form.processing ? 'Saving…' : 'Update password'}
               variant="primary"
               isLoading={form.processing}
             />

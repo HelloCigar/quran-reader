@@ -14,7 +14,7 @@ import type { InfiniteScrollRef } from '@inertiajs/core'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
-import { Bars3Icon } from '@heroicons/react/20/solid'
+import { ListBulletIcon } from '@heroicons/react/20/solid'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -22,6 +22,7 @@ import { Spinner } from '@astryxdesign/core/Spinner'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
 import AppLayout from '~/components/app/app_layout'
+import { PAGE_INSET, PAGE_WIDTH } from '~/components/app/page_layout'
 import ArabicText from '~/components/quran/arabic_text'
 import SurahHeading from '~/components/quran/surah_heading'
 import AyahItem from '~/components/quran/ayah_item'
@@ -212,9 +213,9 @@ export default function Show({
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
       <Layout
-        contentWidth={720}
+        contentWidth={PAGE_WIDTH}
         content={
-          <LayoutContent padding={6}>
+          <LayoutContent padding={PAGE_INSET}>
             <Head title={surah.name} />
             <InfiniteScroll
               ref={scrollRef}
@@ -270,7 +271,7 @@ export default function Show({
                 <IconButton
                   label={sidebarToggle.label}
                   variant="ghost"
-                  icon={<Icon icon={Bars3Icon} />}
+                  icon={<Icon icon={ListBulletIcon} />}
                   onClick={sidebarToggle.onToggle}
                 />
               )

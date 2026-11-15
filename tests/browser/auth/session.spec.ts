@@ -109,6 +109,20 @@ test.group('Login and logout', (group) => {
     await page.assertPath(route('session.create'))
   })
 
+  test('logs out from the menu on a phone', async ({ visit, route, browserContext }) => {
+    const user = await User.create({ fullName: 'Ada Lovelace', ...credentials })
+    await browserContext.loginAs(user)
+    const page = await visit(route('dashboard'))
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    await page.getByRole('button', { name: 'Open navigation', exact: true }).click()
+    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+
+    await page.waitForURL(route('session.create'))
+    await page.goto(route('dashboard'))
+    await page.assertPath(route('session.create'))
+  })
+
   test('sends guests from the dashboard to the login page', async ({ visit, route }) => {
     const page = await visit(route('dashboard'))
 

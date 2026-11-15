@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react'
 import { Form } from '@adonisjs/inertia/react'
 import { VStack } from '@astryxdesign/core/VStack'
 import { HStack } from '@astryxdesign/core/HStack'
+import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
 import { Button } from '@astryxdesign/core/Button'
 import AuthLayout from '~/components/auth/auth_layout'
@@ -11,10 +12,10 @@ export default function Activate({ user }: InertiaProps) {
   return (
     <VStack gap={4} hAlign="stretch" width="100%">
       <Head title="Verify your account" />
-      <VStack gap={1}>
-        <Text type="display-1" as="h1">
+      <VStack gap={2}>
+        <Heading level={1} type="display-2" textWrap="balance">
           Verify your account
-        </Text>
+        </Heading>
         <Text type="body" color="secondary" size="sm">
           Check <Text weight="bold">{user?.unverifiedEmail}</Text> inbox for instructions from us on
           how to verify your account.
@@ -41,7 +42,13 @@ export default function Activate({ user }: InertiaProps) {
             <Text type="supporting" color="secondary">
               Wrong account?
             </Text>
-            <Button type="submit" label="Logout" variant="ghost" size="sm" isLoading={processing} />
+            <Button
+              type="submit"
+              label="Log out"
+              variant="ghost"
+              size="sm"
+              isLoading={processing}
+            />
           </HStack>
         )}
       </Form>
