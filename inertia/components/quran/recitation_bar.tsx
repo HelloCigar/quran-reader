@@ -1,5 +1,12 @@
 import { type ReactNode } from 'react'
-import { ListBulletIcon, PauseIcon, PlayIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import {
+  BackwardIcon,
+  ForwardIcon,
+  ListBulletIcon,
+  PauseIcon,
+  PlayIcon,
+  XMarkIcon,
+} from '@heroicons/react/20/solid'
 import { useAppShellMobile } from '@astryxdesign/core/AppShell'
 import { Layout, LayoutContent, LayoutFooter } from '@astryxdesign/core/Layout'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -38,9 +45,8 @@ export default function RecitationFrame({ children }: { children: ReactNode }) {
  * progress bar filling the middle, then the Surah and Ayah Reference and
  * Close. Phone (below AppShell's `md` breakpoint): the progress bar spans the
  * width on its own line, then the Surah and Ayah Reference, then the controls
- * in three groups: the sidebar toggle, Play, and Close.
- *
- * Play sits where Previous and Next Ayah join it on either side.
+ * in three groups: the sidebar toggle, Previous Ayah, Play and Next Ayah, and
+ * Close.
  */
 function RecitationBar() {
   const { recited, readingPage, isPlaying, isLoading, play, resume, pause, close } = useRecitation()
@@ -80,6 +86,13 @@ function RecitationBar() {
       isLoading={isLoading}
       onClick={onPlay}
     />
+  )
+  const controls = (
+    <HStack gap={2} vAlign="center">
+      <MoveAyahButton direction="previous" />
+      {playPause}
+      <MoveAyahButton direction="next" />
+    </HStack>
   )
   const progress = (
     <ProgressBar
@@ -127,7 +140,7 @@ function RecitationBar() {
             <StackItem size="fill">
               <HStack hAlign="start">{sidebarToggle}</HStack>
             </StackItem>
-            {playPause}
+            {controls}
             <StackItem size="fill">
               <HStack hAlign="end">{closeButton}</HStack>
             </StackItem>
@@ -137,7 +150,7 @@ function RecitationBar() {
         <HStack gap={4} vAlign="center">
           <HStack gap={2} vAlign="center">
             {sidebarToggle}
-            {playPause}
+            {controls}
           </HStack>
           <StackItem size="fill">{progress}</StackItem>
           {recitedLink}
@@ -145,5 +158,36 @@ function RecitationBar() {
         </HStack>
       )}
     </LayoutFooter>
+  )
+}
+
+/**
+ * Moves the Recitation to the start of the previous or next Ayah, and the
+ * page of the Surah being recited with it; on any other page only the
+ * Recitation moves. Disabled with no Recitation, and past either end of its
+ * Surah.
+ */
+function MoveAyahButton({ direction }: { direction: 'previous' | 'next' }) {
+  const { recited, readingPage, moveTo } = useRecitation()
+  const lastAyah = recited?.recitation.ayahs.at(-1)?.number ?? 0
+  const toAyah = recited && recited.ayah + (direction === 'previous' ? -1 : 1)
+  const canMove = toAyah !== null && toAyah !== undefined && toAyah >= 1 && toAyah <= lastAyah
+  const label = direction === 'previous' ? 'Previous Ayah' : 'Next Ayah'
+
+  const onClick = () => {
+    if (!canMove) return
+    moveTo(toAyah)
+    if (readingPage?.surahNumber === recited?.recitation.surahNumber) readingPage?.showAyah(toAyah)
+  }
+
+  return (
+    <IconButton
+      label={label}
+      tooltip={label}
+      variant="ghost"
+      icon={<Icon icon={direction === 'previous' ? BackwardIcon : ForwardIcon} />}
+      isDisabled={!canMove}
+      onClick={onClick}
+    />
   )
 }
