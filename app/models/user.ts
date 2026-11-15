@@ -1,9 +1,13 @@
+import env from '#start/env'
 import { UserSchema } from '#database/schema'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import { hasMany } from '@adonisjs/lucid/orm'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import { withManagedEmail } from '@adonisplus/persona/email'
+import { withManagedPassword } from '@adonisplus/persona/password'
+import { DbPasskeysProvider, withPasskeyManagement } from '@adonisplus/persona/passkeys'
 import Bookmark from '#models/bookmark'
 
 /**
@@ -11,9 +15,29 @@ import Bookmark from '#models/bookmark'
  */
 const UNIQUE_VIOLATION_CODES = new Set(['SQLITE_CONSTRAINT_UNIQUE', '23505', 'ER_DUP_ENTRY'])
 
-export default class User extends compose(UserSchema, withAuthFinder(hash)) {
+export default class User extends compose(
+  UserSchema,
+  withAuthFinder(hash),
+  withManagedEmail(),
+  withManagedPassword(),
+  withPasskeyManagement({
+    rpName: 'Quran Reader',
+    rpId: env.get('PASSKEY_RP_ID'),
+    origins: env.get('PASSKEY_ORIGINS').split(','),
+  })
+) {
+  static passkeys = DbPasskeysProvider.forModel(User)
+
   @hasMany(() => Bookmark)
   declare bookmarks: HasMany<typeof Bookmark>
+
+  /**
+   * The account name and display name stored inside each passkey, shown
+   * when the user picks one on their device.
+   */
+  getPasskeyUserDetails() {
+    return { name: this.email, displayName: this.fullName ?? this.email }
+  }
 
   get initials() {
     const [first, last] = this.fullName ? this.fullName.split(' ') : this.email.split('@')

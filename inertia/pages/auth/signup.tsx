@@ -8,11 +8,16 @@ import { Link } from '@astryxdesign/core/Link'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import AuthLayout from '~/components/auth/auth_layout'
+import PasswordStrength from '~/components/auth/password_strength'
+import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
 import type { InertiaProps } from '~/types'
 
-type PageProps = InertiaProps<{ bookmark: { surah: number; ayah: number } | null }>
+type PageProps = InertiaProps<{
+  bookmark: { surah: number; ayah: number } | null
+  passwordPolicy: PasswordPolicy
+}>
 
-export default function Signup({ bookmark }: PageProps) {
+export default function Signup({ bookmark, passwordPolicy }: PageProps) {
   const form = useRouteForm('new_account.store', {
     fullName: '',
     email: '',
@@ -54,13 +59,15 @@ export default function Signup({ bookmark }: PageProps) {
               size="lg"
               {...form.field('email')}
             />
-            <TextInput
-              label="Password"
-              type="password"
-              autoComplete="new-password"
-              size="lg"
-              {...form.field('password')}
-            />
+            <PasswordStrength policy={passwordPolicy} password={form.data.password}>
+              <TextInput
+                label="Password"
+                type="password"
+                autoComplete="new-password"
+                size="lg"
+                {...form.field('password')}
+              />
+            </PasswordStrength>
             <TextInput
               label="Confirm password"
               type="password"

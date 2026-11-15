@@ -1,4 +1,5 @@
 import app from '@adonisjs/core/services/app'
+import { errors as limiterErrors } from '@adonisjs/limiter'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
 
@@ -31,6 +32,21 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    /**
+     * A throttled form submission (sign-in, sign-up, password reset) would
+     * otherwise answer the Inertia visit with a plain-text 429, which shows
+     * the reader nothing they can act on. Report it like any other form
+     * error instead. JSON requests keep the 429 status.
+     */
+    if (error instanceof limiterErrors.E_TOO_MANY_REQUESTS && ctx.request.header('x-inertia')) {
+      const minutes = Math.max(1, Math.ceil(error.response.availableIn / 60))
+      ctx.session.flash(
+        'error',
+        `Too many attempts. Please try again in ${minutes} minute${minutes === 1 ? '' : 's'}`
+      )
+      return ctx.response.redirect().back()
+    }
+
     return super.handle(error, ctx)
   }
 

@@ -4,6 +4,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   BookOpenIcon,
   BookmarkIcon,
+  Cog6ToothIcon,
   HomeIcon,
 } from '@heroicons/react/24/outline'
 import { AppShell } from '@astryxdesign/core/AppShell'
@@ -16,6 +17,7 @@ import { useRouteForm } from '~/components/forms/use_route_form'
 import Logo from '~/components/brand/logo'
 import ThemeToggle from '~/components/theme/theme_toggle'
 import FlashToasts from '~/components/feedback/flash_toasts'
+import PasskeySignals from '~/components/auth/passkey_signals'
 import { useNavItems, type NavItem } from '~/components/navigation/nav'
 
 /** The areas everyone can open. */
@@ -25,6 +27,7 @@ const publicNav: NavItem[] = [{ label: 'Quran', route: 'surahs.index', icon: Boo
 const readerNav: NavItem[] = [
   { label: 'Dashboard', route: 'dashboard', icon: HomeIcon },
   { label: 'Bookmarks', route: 'bookmarks.index', icon: BookmarkIcon },
+  { label: 'Settings', route: 'settings', icon: Cog6ToothIcon },
 ]
 
 /**
@@ -66,6 +69,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     >
       {children}
       <FlashToasts />
+      <PasskeySignals />
     </AppShell>
   )
 }

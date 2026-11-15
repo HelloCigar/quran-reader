@@ -8,6 +8,7 @@ import type { InferData, InferVariants } from '@adonisjs/core/types/transformers
 import type { InferSharedProps, InferFlashData } from '@adonisjs/inertia/types'
 import type AyahTransformer from '#transformers/ayah_transformer'
 import type BookmarkTransformer from '#transformers/bookmark_transformer'
+import type PasskeyTransformer from '#transformers/passkey_transformer'
 import type RecitationTransformer from '#transformers/recitation_transformer'
 import type SurahTransformer from '#transformers/surah_transformer'
 import type UserTransformer from '#transformers/user_transformer'
@@ -22,6 +23,10 @@ export namespace Data {
   export type Bookmark = InferData<BookmarkTransformer>
   export namespace Bookmark {
     export type Variants = InferVariants<BookmarkTransformer>
+  }
+  export type Passkey = InferData<PasskeyTransformer>
+  export namespace Passkey {
+    export type Variants = InferVariants<PasskeyTransformer>
   }
   export type Recitation = InferData<RecitationTransformer>
   export namespace Recitation {

@@ -21,6 +21,68 @@ test.group('Login and logout', (group) => {
     await page.assertTextContains('h1', 'Your dashboard is ready')
   })
 
+  test('writes the last_login_method cookie after a successful login', async ({
+    visit,
+    route,
+    browserContext,
+    assert,
+  }) => {
+    await User.create({ fullName: 'Ada Lovelace', ...credentials })
+    const page = await visit(route('session.create'))
+
+    await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+    await page.getByLabel('Password', { exact: true }).fill(credentials.password)
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await page.waitForURL(route('dashboard'))
+
+    assert.equal(await browserContext.getPlainCookie('last_login_method'), 'email')
+  })
+
+  test('sends an unverified user from the dashboard to verify their email', async ({
+    visit,
+    route,
+    browserContext,
+  }) => {
+    const user = await User.create({
+      fullName: 'Ada Lovelace',
+      ...credentials,
+      unverifiedEmail: credentials.email,
+    })
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('dashboard'))
+
+    await page.assertPath(route('email_verifications.create'))
+  })
+
+  test('blocks an email after five failed sign-ins, even with the right password', async ({
+    visit,
+    route,
+  }) => {
+    await User.create({ fullName: 'Ada Lovelace', ...credentials })
+    const page = await visit(route('session.create'))
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+      await page.getByLabel('Password', { exact: true }).fill('wrong-password')
+      const answered = page.waitForResponse(
+        (response) => response.url().endsWith('/login') && response.request().method() === 'POST'
+      )
+      await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+      await answered
+    }
+
+    await page.getByLabel('Email', { exact: true }).fill(credentials.email)
+    await page.getByLabel('Password', { exact: true }).fill(credentials.password)
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+
+    await page.assertVisible(
+      page.getByText('Too many attempts. Please try again in 20 minutes', { exact: true })
+    )
+    await page.goto(route('dashboard'))
+    await page.assertPath(route('session.create'))
+  })
+
   test('shows an error toast for a wrong password', async ({ visit, route }) => {
     await User.create({ fullName: 'Ada Lovelace', ...credentials })
     const page = await visit(route('session.create'))
