@@ -128,6 +128,12 @@ const routes = {
     tokens: [[0,"logout"]],
     types: placeholder as Registry['session.destroy']['types'],
   },
+  'reading_position.update': {
+    methods: ["PUT"],
+    pattern: '/reading-position',
+    tokens: [[0,"reading-position"]],
+    types: placeholder as Registry['reading_position.update']['types'],
+  },
   'settings': {
     methods: ["GET","HEAD"],
     pattern: '/settings',

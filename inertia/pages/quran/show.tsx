@@ -35,6 +35,8 @@ import { useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderLayout from '~/components/quran/reader_layout'
+import { ayahsInView } from '~/components/quran/ayahs_in_view'
+import { useReadingPosition } from '~/components/quran/use_reading_position'
 import { useReaderSidebarToggle, type SidebarMode } from '~/components/quran/use_reader_sidebar'
 
 /**
@@ -48,12 +50,6 @@ const LOAD_AHEAD = 1600
  * the next block loads, so the Recited Word is loaded before it is heard.
  */
 const RECITATION_LOAD_AHEAD = 5
-
-/**
- * How much of an Ayah (in px) has to show below the top of the Ayahs' region
- * for it to count as in view; an Ayah showing less has been scrolled past.
- */
-const IN_VIEW_MIN = 24
 
 /** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
 const AYAH_HASH = /^#ayah-(\d+)$/
@@ -94,6 +90,7 @@ export default function Show({
   noteFor,
   openedAt,
   recitation,
+  user,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const sidebarToggle = useReaderSidebarToggle()
@@ -131,19 +128,7 @@ export default function Show({
   /**
    * The first Ayah the reader can see in the region the Ayahs scroll in.
    */
-  const firstAyahInView = useCallback(() => {
-    const list = listRef.current
-    if (!list) return 1
-    let region = list.parentElement
-    while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
-      region = region.parentElement
-    }
-    const top = region?.getBoundingClientRect().top ?? 0
-    const items = Array.from(list.querySelectorAll<HTMLElement>('[id^="ayah-"]'))
-    const first =
-      items.find((item) => item.getBoundingClientRect().bottom > top + IN_VIEW_MIN) ?? items[0]
-    return first ? Number(first.id.slice('ayah-'.length)) : 1
-  }, [])
+  const firstAyahInView = useCallback(() => ayahsInView(listRef.current)?.first ?? 1, [])
   const player = useRecitation(recitation, firstAyahInView)
   const playerRef = useRef<HTMLDivElement>(null)
   const { shown, openByReader } = player
@@ -214,6 +199,15 @@ export default function Show({
     )
   })
   useEffect(() => openHashAyah(), [])
+
+  // After the effects above, so the jump to the Ayah the page opens at is already made.
+  useReadingPosition({
+    surahNumber: surah.number,
+    listRef,
+    recitedAyah,
+    isPlaying: player.isPlaying,
+    isSignedIn: Boolean(user),
+  })
 
   return (
     <WordPopoversProvider shown={shown} onOpenChange={openByReader}>

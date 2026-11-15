@@ -2,13 +2,14 @@ import env from '#start/env'
 import { UserSchema } from '#database/schema'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { withManagedEmail } from '@adonisplus/persona/email'
 import { withManagedPassword } from '@adonisplus/persona/password'
 import { DbPasskeysProvider, withPasskeyManagement } from '@adonisplus/persona/passkeys'
 import Bookmark from '#models/bookmark'
+import ReadingPosition from '#models/reading_position'
 
 /**
  * Unique-constraint violation codes for SQLite, PostgreSQL and MySQL.
@@ -30,6 +31,10 @@ export default class User extends compose(
 
   @hasMany(() => Bookmark)
   declare bookmarks: HasMany<typeof Bookmark>
+
+  /** The Ayah the reader last reached; none until they have read. */
+  @hasOne(() => ReadingPosition)
+  declare readingPosition: HasOne<typeof ReadingPosition>
 
   /**
    * The account name and display name stored inside each passkey, shown

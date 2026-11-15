@@ -41,3 +41,44 @@ export async function waitForAyahInView(page: Page, ayah: number) {
     return top !== undefined && top >= 0 && top < window.innerHeight
   })()`)
 }
+
+/**
+ * Wheels the reading page down a little at a time, as a reader reading on
+ * would, until the Ayah numbered `ayah` has left the top of the view and the
+ * next Ayah is the first one in view.
+ */
+export async function scrollPastAyah(page: Page, ayah: number) {
+  const { width, height } = page.viewportSize() ?? { width: 1280, height: 720 }
+  await page.mouse.move(width / 2, height / 2)
+
+  // At most 400 small turns of the wheel: plenty to read past the first block.
+  for (const _ of Array.from({ length: 400 })) {
+    if (await isFirstAyahInViewAfter(page, ayah)) return
+    await page.mouse.wheel(0, 40)
+    // Two frames: the wheel has scrolled the page and the page has seen it.
+    await page.evaluate(
+      `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`
+    )
+  }
+  throw new Error(`Scrolling never passed Ayah ${ayah}`)
+}
+
+/**
+ * Whether the first Ayah in view, as the reading page counts it (more than
+ * 24 px of it below the top of the region the Ayahs scroll in), comes after
+ * the Ayah numbered `ayah`.
+ */
+async function isFirstAyahInViewAfter(page: Page, ayah: number): Promise<boolean> {
+  return page.evaluate(`(() => {
+    const list = document.querySelector('[aria-label="Ayahs"]')
+    let region = list?.parentElement ?? null
+    while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
+      region = region.parentElement
+    }
+    const top = region?.getBoundingClientRect().top ?? 0
+    const first = Array.from(list?.querySelectorAll('[id^="ayah-"]') ?? []).find(
+      (item) => item.getBoundingClientRect().bottom > top + 24
+    )
+    return first ? Number(first.id.slice('ayah-'.length)) > ${ayah} : false
+  })()`)
+}

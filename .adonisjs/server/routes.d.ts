@@ -24,6 +24,7 @@ export type ScannedRoutes = {
     'email_verifications.store': { paramsTuple?: []; params?: {} }
     'email_verifications.create': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'reading_position.update': { paramsTuple?: []; params?: {} }
     'settings': { paramsTuple?: []; params?: {} }
     'profile.show': { paramsTuple?: []; params?: {} }
     'profile.update': { paramsTuple?: []; params?: {} }
@@ -75,6 +76,7 @@ export type ScannedRoutes = {
   PUT: {
     'email_verifications.update': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'password_resets.update': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
+    'reading_position.update': { paramsTuple?: []; params?: {} }
     'profile.update': { paramsTuple?: []; params?: {} }
     'account_password.update': { paramsTuple?: []; params?: {} }
     'passkeys.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
