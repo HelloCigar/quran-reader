@@ -7,6 +7,7 @@ export const controllers = {
   AccountPassword: () => import('#controllers/account_password_controller'),
   Ayahs: () => import('#controllers/ayahs_controller'),
   Bookmarks: () => import('#controllers/bookmarks_controller'),
+  Dashboard: () => import('#controllers/dashboard_controller'),
   EmailVerifications: () => import('#controllers/email_verifications_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
   PasskeyLoginChallenges: () => import('#controllers/passkey_login_challenges_controller'),
