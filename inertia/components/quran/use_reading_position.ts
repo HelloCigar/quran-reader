@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, type RefObject } from 'react'
 import { urlFor } from '~/client'
 import { ayahsInView } from '~/components/quran/ayahs_in_view'
 
@@ -72,36 +72,26 @@ class ReadingPositionSaver {
 }
 
 /**
- * Keeps the signed-in reader's Reading Position as they read the Surah whose
- * Ayahs `listRef` lists. It moves to an Ayah when the reader:
- *
- * - scrolls past it: it leaves the top of the view while they scroll. A jump
- *   (opening at an Ayah, Go to Ayah) passes over Ayahs that were never in
- *   view, and those don't count.
- * - stays on it: it stays first in view for STAY_MS.
- * - hears it: it is the Recited Ayah. While a Recitation plays, scrolling
- *   doesn't move the position.
- *
- * Signed-out readers have none, and nothing is kept for them.
+ * The one saver the reading page and the Recitation share, so their saves
+ * stay in order.
  */
-export function useReadingPosition({
+const saver = new ReadingPositionSaver()
+
+/**
+ * Moves the signed-in reader's Reading Position to each Ayah heard in a
+ * Recitation, on whichever page the reader is on: `ayah` of the Surah
+ * numbered `surahNumber` is the Recited Ayah, both `null` when nothing is
+ * recited. It also sends a save still waiting when the reader leaves the app.
+ */
+export function useHeardReadingPosition({
   surahNumber,
-  listRef,
-  recitedAyah,
-  isPlaying,
+  ayah,
   isSignedIn,
 }: {
-  surahNumber: number
-  listRef: RefObject<HTMLElement | null>
-  recitedAyah: number | null
-  isPlaying: boolean
+  surahNumber: number | null
+  ayah: number | null
   isSignedIn: boolean
 }) {
-  const [saver] = useState(() => new ReadingPositionSaver())
-  const isPlayingRef = useRef(isPlaying)
-  /** How many times the Recitation has started playing on this page. */
-  const playsRef = useRef(0)
-
   useEffect(() => {
     if (!isSignedIn) return
     const flush = () => saver.flush()
@@ -110,17 +100,53 @@ export function useReadingPosition({
       window.removeEventListener('pagehide', flush)
       flush()
     }
-  }, [isSignedIn, saver])
+  }, [isSignedIn])
+
+  useEffect(() => {
+    if (!isSignedIn || surahNumber === null || ayah === null) return
+    saver.save({ surah: surahNumber, ayah })
+  }, [isSignedIn, surahNumber, ayah])
+}
+
+/**
+ * Keeps the signed-in reader's Reading Position as they read the Surah whose
+ * Ayahs `listRef` lists. It moves to an Ayah when the reader:
+ *
+ * - scrolls past it: it leaves the top of the view while they scroll. A jump
+ *   (opening at an Ayah, Go to Ayah) passes over Ayahs that were never in
+ *   view, and those don't count.
+ * - stays on it: it stays first in view for STAY_MS.
+ *
+ * While a Recitation plays (`isPlaying`), scrolling doesn't move the
+ * position: the Ayahs heard do (`useHeardReadingPosition`).
+ *
+ * Signed-out readers have none, and nothing is kept for them.
+ */
+export function useReadingPosition({
+  surahNumber,
+  listRef,
+  isPlaying,
+  isSignedIn,
+}: {
+  surahNumber: number
+  listRef: RefObject<HTMLElement | null>
+  isPlaying: boolean
+  isSignedIn: boolean
+}) {
+  const isPlayingRef = useRef(isPlaying)
+  /** How many times the Recitation has started playing on this page. */
+  const playsRef = useRef(0)
+
+  // A save still waiting goes out as the reader leaves the Surah.
+  useEffect(() => {
+    if (!isSignedIn) return
+    return () => saver.flush()
+  }, [isSignedIn])
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
     if (isPlaying) playsRef.current += 1
   }, [isPlaying])
-
-  useEffect(() => {
-    if (!isSignedIn || recitedAyah === null) return
-    saver.save({ surah: surahNumber, ayah: recitedAyah })
-  }, [isSignedIn, recitedAyah, saver, surahNumber])
 
   // The cleanup clears the stay timer `stayOn` keeps, as well as the frame and the listener.
   // oxlint-disable-next-line react-doctor/effect-needs-cleanup
@@ -186,5 +212,5 @@ export function useReadingPosition({
       cancelAnimationFrame(frame)
       window.clearTimeout(stay)
     }
-  }, [isSignedIn, listRef, saver, surahNumber])
+  }, [isSignedIn, listRef, surahNumber])
 }

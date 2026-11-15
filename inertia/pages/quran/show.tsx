@@ -1,20 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
 import type { InfiniteScrollRef } from '@inertiajs/core'
+import { useAppShellMobile } from '@astryxdesign/core/AppShell'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
-import { IconButton } from '@astryxdesign/core/IconButton'
-import { Icon } from '@astryxdesign/core/Icon'
-import { ListBulletIcon } from '@heroicons/react/20/solid'
 import { VStack } from '@astryxdesign/core/VStack'
 import { List } from '@astryxdesign/core/List'
 import { HStack } from '@astryxdesign/core/HStack'
@@ -31,8 +21,7 @@ import SurahPager from '~/components/quran/surah_pager'
 import NoteDialog from '~/components/bookmarks/note_dialog'
 import RemoveBookmarkDialog from '~/components/bookmarks/remove_bookmark_dialog'
 import { useRemoveBookmark } from '~/components/bookmarks/use_remove_bookmark'
-import RecitationPlayer from '~/components/quran/recitation_player'
-import { useRecitation } from '~/components/quran/use_recitation'
+import { useReadingPage, useRecitation } from '~/components/quran/recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderLayout from '~/components/quran/reader_layout'
@@ -77,7 +66,10 @@ type PageProps = InertiaProps<{
   sidebar: { isShown: boolean; mode: SidebarMode }
   bookmarks: Data.Bookmark[]
   noteFor: number | null
-  /** Loaded on the first Play; `null` when the Recitation is unavailable. */
+  /**
+   * Loaded on the first Play, by the Recitation in the app layout, which
+   * keeps it from then on; `null` when the Recitation is unavailable.
+   */
   recitation?: Data.Recitation | null
 }>
 
@@ -90,7 +82,6 @@ export default function Show({
   bookmarks,
   noteFor,
   openedAt,
-  recitation,
   user,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
@@ -130,48 +121,62 @@ export default function Show({
    * The first Ayah the reader can see in the region the Ayahs scroll in.
    */
   const firstAyahInView = useCallback(() => ayahsInView(listRef.current)?.first ?? 1, [])
-  const player = useRecitation(recitation, firstAyahInView)
-  const playerRef = useRef<HTMLDivElement>(null)
-  const { shown, openByReader } = player
+  /** The Recitation the app layout holds: this Surah's, or one started elsewhere. */
+  const recitation = useRecitation()
+  useReadingPage({ surahNumber: surah.number, firstAyahInView, sidebarToggle })
+  const pageRef = useRef<HTMLDivElement>(null)
+  const { shown, play, openWord } = recitation
   const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
-  /**
-   * `player.play` changes as the Recitation loads and moves between Ayahs.
-   * Ayahs get a stable function that calls the latest one, so they don't
-   * re-render with every change.
-   */
-  const playRef = useRef(player.play)
-  useLayoutEffect(() => {
-    playRef.current = player.play
-  })
-  const playFrom = useCallback((ayah: number) => playRef.current(ayah), [])
+  const playFrom = useCallback((ayah: number) => play(surah.number, ayah), [play, surah.number])
+  const openByReader = useCallback(
+    (location: string, isOpen: boolean) => openWord(surah.number, location, isOpen),
+    [openWord, surah.number]
+  )
 
   /**
-   * A click outside the popover the Recitation opened (but not on the player)
-   * pauses the Recitation and closes it, as a click outside does for a popover
-   * the reader opened.
+   * A click on the page, outside the popover the Recitation opened, pauses
+   * the Recitation and closes it, as a click outside does for a popover the
+   * reader opened. A click on the Recitation bar, the top nav or the sidebar
+   * does neither: going to another page keeps the Recitation playing.
    */
+  const recitedWord = shown?.by === 'recitation' ? shown.location : null
+  /**
+   * While the sidebar drawer or the menu drawer covers the Ayahs, the
+   * Recitation plays on with the Recited Word's popover closed: it would open
+   * on top of the drawer. It comes back when the drawer closes.
+   */
+  const { isMobileNavOpen } = useAppShellMobile()
+  const isCovered = Boolean(sidebarToggle?.isDrawerOpen) || isMobileNavOpen
+  const shownOnPage = recitedWord !== null && isCovered ? null : shown
+  const isRecitedHere = recitedWord?.startsWith(`${surah.number}:`) ?? false
+  const closeRecitedWord = useEffectEvent((event: PointerEvent) => {
+    const target = event.target as Element | null
+    if (recitedWord === null) return
+    if (!pageRef.current?.contains(target) || target?.closest('[role="dialog"]')) return
+    openByReader(recitedWord, false)
+  })
   useEffect(() => {
-    if (shown?.by !== 'recitation') return
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Element | null
-      if (playerRef.current?.contains(target) || target?.closest('[role="dialog"]')) return
-      openByReader(shown.location, false)
-    }
+    if (!isRecitedHere) return
+    const onPointerDown = (event: PointerEvent) => closeRecitedWord(event)
     document.addEventListener('pointerdown', onPointerDown, true)
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
-  }, [shown, openByReader])
+  }, [isRecitedHere])
 
   /**
    * A Recitation plays to the end of the Surah: as the Recited Ayah nears the
    * last loaded Ayah, the next block loads, as it does when the reader
-   * scrolls down.
+   * scrolls down. A Recited Ayah outside the loaded blocks loads nothing: the
+   * reader opened the Surah somewhere else, and the bar links to it.
    */
+  const firstLoaded = loaded[0]?.number
   const lastLoaded = loaded.at(-1)?.number
-  const { recitedAyah } = player
+  const { recited } = recitation
+  const recitedAyah = recited?.recitation.surahNumber === surah.number ? recited.ayah : null
   useEffect(() => {
-    if (recitedAyah === null || lastLoaded === undefined) return
+    if (recitedAyah === null || firstLoaded === undefined || lastLoaded === undefined) return
+    if (recitedAyah < firstLoaded || recitedAyah > lastLoaded) return
     if (lastLoaded - recitedAyah < RECITATION_LOAD_AHEAD) scrollRef.current?.fetchNext()
-  }, [recitedAyah, lastLoaded])
+  }, [recitedAyah, firstLoaded, lastLoaded])
 
   useEffect(() => {
     if (openedAt !== null) {
@@ -205,14 +210,14 @@ export default function Show({
   useReadingPosition({
     surahNumber: surah.number,
     listRef,
-    recitedAyah,
-    isPlaying: player.isPlaying,
+    isPlaying: recitation.isPlaying,
     isSignedIn: Boolean(user),
   })
 
   return (
-    <WordPopoversProvider shown={shown} onOpenChange={openByReader}>
+    <WordPopoversProvider shown={shownOnPage} onOpenChange={openByReader}>
       <Layout
+        ref={pageRef}
         contentWidth={PAGE_WIDTH}
         content={
           <LayoutContent padding={PAGE_INSET}>
@@ -262,28 +267,6 @@ export default function Show({
               onCancel={removal.cancel}
             />
           </LayoutContent>
-        }
-        footer={
-          <RecitationPlayer
-            footerRef={playerRef}
-            startContent={
-              sidebarToggle && (
-                <IconButton
-                  label={sidebarToggle.label}
-                  variant="ghost"
-                  icon={<Icon icon={ListBulletIcon} />}
-                  onClick={sidebarToggle.onToggle}
-                />
-              )
-            }
-            isPlaying={player.isPlaying}
-            isLoading={player.isLoading}
-            recitedReference={
-              loaded.find(({ number }) => number === player.recitedAyah)?.reference ?? null
-            }
-            onPlay={() => player.play()}
-            onPause={player.pause}
-          />
         }
       />
     </WordPopoversProvider>

@@ -15,7 +15,7 @@ Commands:
 Folders: the frontend is grouped by domain.
 
 - `inertia/pages/<domain>/` — one component per Inertia page; the path is the page name passed to `renderInertia` / `inertia.render` (`marketing/home`, `auth/login`, `app/dashboard`, `errors/not_found`). Put new areas in their own folder (e.g. `pages/settings/profile.tsx`).
-- `inertia/components/<domain>/` — each area's layout and parts: `app/app_layout.tsx` (the one top-nav shell for every page but sign-in and sign-up; its nav changes with sign-in), `auth/auth_layout.tsx`, `settings/settings_layout.tsx` (nested under the app layout); plus shared domains `navigation/` (Inertia link, nav items, navigation events, progress bar), `theme/` (color mode preference, toggle), `forms/` (route forms), `feedback/` (flash toasts), `brand/` (logo), `errors/` (error page). `components/app_providers.tsx` composes the providers for `app.tsx` and `ssr.tsx`.
+- `inertia/components/<domain>/` — each area's layout and parts: `app/app_layout.tsx` (the one top-nav shell for every page but sign-in and sign-up; its nav changes with sign-in; it also holds the Recitation, `quran/recitation.tsx`, and pins its bar, `quran/recitation_bar.tsx`, under every page), `auth/auth_layout.tsx`, `settings/settings_layout.tsx` (nested under the app layout); plus shared domains `navigation/` (Inertia link, nav items, navigation events, progress bar), `theme/` (color mode preference, toggle), `forms/` (route forms), `feedback/` (flash toasts), `brand/` (logo), `errors/` (error page). `components/app_providers.tsx` composes the providers for `app.tsx` and `ssr.tsx`.
 
 Routing and links:
 
