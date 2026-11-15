@@ -4,9 +4,18 @@
  */
 
 export const controllers = {
+  AccountPassword: () => import('#controllers/account_password_controller'),
   Ayahs: () => import('#controllers/ayahs_controller'),
   Bookmarks: () => import('#controllers/bookmarks_controller'),
+  EmailVerifications: () => import('#controllers/email_verifications_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
+  PasskeyLoginChallenges: () => import('#controllers/passkey_login_challenges_controller'),
+  PasskeyRegistrationChallenges: () => import('#controllers/passkey_registration_challenges_controller'),
+  PasskeySession: () => import('#controllers/passkey_session_controller'),
+  Passkeys: () => import('#controllers/passkeys_controller'),
+  PasswordResets: () => import('#controllers/password_resets_controller'),
+  Profile: () => import('#controllers/profile_controller'),
+  Security: () => import('#controllers/security_controller'),
   Session: () => import('#controllers/session_controller'),
   Surahs: () => import('#controllers/surahs_controller'),
 }

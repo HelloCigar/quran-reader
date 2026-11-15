@@ -15,6 +15,7 @@ import { urlFor } from '~/client'
 import { QuranMark } from '~/components/brand/logo'
 import ThemeToggle from '~/components/theme/theme_toggle'
 import FlashToasts from '~/components/feedback/flash_toasts'
+import PasskeySignals from '~/components/auth/passkey_signals'
 
 /**
  * Grid emits minmax(MIN, 1fr), so MIN plus the insets must fit the narrowest
@@ -98,6 +99,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         </Grid>
       </Card>
       <FlashToasts />
+      <PasskeySignals />
     </Center>
   )
 }

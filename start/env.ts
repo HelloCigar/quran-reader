@@ -29,4 +29,33 @@ export default await Env.create(new URL('../', import.meta.url), {
   QURAN_FOUNDATION_CLIENT_ID: Env.schema.string(),
   QURAN_FOUNDATION_CLIENT_SECRET: Env.schema.secret(),
   QURAN_FOUNDATION_ENV: Env.schema.enum(['prelive', 'production'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the mail package
+  |----------------------------------------------------------
+  */
+  MAIL_MAILER: Env.schema.enum(['smtp'] as const),
+  MAIL_FROM_NAME: Env.schema.string(),
+  MAIL_FROM_ADDRESS: Env.schema.string(),
+  MAIL_BRAND_NAME: Env.schema.string.optional(),
+  SMTP_HOST: Env.schema.string(),
+  SMTP_PORT: Env.schema.number(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring the limiter package
+  |----------------------------------------------------------
+  */
+  /*
+  |----------------------------------------------------------
+  | Passkeys: the domain they are bound to, and the origins
+  | allowed to register and use them. PASSKEY_RP_ID must not
+  | change once users have registered passkeys.
+  |----------------------------------------------------------
+  */
+  PASSKEY_RP_ID: Env.schema.string({ format: 'host' }),
+  PASSKEY_ORIGINS: Env.schema.string(),
+
+  LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
 })

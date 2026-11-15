@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import UserTransformer from '#transformers/user_transformer'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
+import type { PasskeySignal } from '@adonisplus/persona/passkeys/types'
 
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
   share(ctx: HttpContext) {
@@ -44,8 +45,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
 
     const success: string | undefined = session?.flashMessages.get('success')
     const error: string | undefined = session?.flashMessages.get('error')
+    const passkeySignals: PasskeySignal[] | undefined = session?.flashMessages.get('passkeySignals')
 
-    return { success, error }
+    return { success, error, passkeySignals }
   }
 
   async handle(ctx: HttpContext, next: NextFn) {

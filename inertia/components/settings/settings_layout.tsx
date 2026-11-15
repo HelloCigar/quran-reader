@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { ShieldCheckIcon, UserIcon } from '@heroicons/react/24/outline'
 import { Head } from '@inertiajs/react'
 import { useRouter } from '@adonisjs/inertia/react'
 import { useMediaQuery } from '@astryxdesign/core/hooks'
@@ -17,7 +18,10 @@ import { useNavItems, type NavItem } from '~/components/navigation/nav'
  *
  * `{ label: 'Profile', route: 'settings.profile', icon: UserIcon }`
  */
-const nav: NavItem[] = []
+const nav: NavItem[] = [
+  { label: 'Profile', route: 'profile.show', icon: UserIcon },
+  { label: 'Security', route: 'security.show', icon: ShieldCheckIcon },
+]
 
 /**
  * The settings area, from Astryx's `settings` (Settings Form) template: a

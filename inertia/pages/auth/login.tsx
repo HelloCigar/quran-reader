@@ -1,16 +1,22 @@
 import { Head } from '@inertiajs/react'
 import { VStack } from '@astryxdesign/core/VStack'
+import { HStack } from '@astryxdesign/core/HStack'
 import { Text } from '@astryxdesign/core/Text'
 import { TextInput } from '@astryxdesign/core/TextInput'
 import { FormLayout } from '@astryxdesign/core/FormLayout'
 import { Button } from '@astryxdesign/core/Button'
+import { Divider } from '@astryxdesign/core/Divider'
 import { Link } from '@astryxdesign/core/Link'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import AuthLayout from '~/components/auth/auth_layout'
+import PasskeySignIn from '~/components/auth/passkey_sign_in'
 import type { InertiaProps } from '~/types'
 
-type PageProps = InertiaProps<{ bookmark: { surah: number; ayah: number } | null }>
+type PageProps = InertiaProps<{
+  bookmark: { surah: number; ayah: number } | null
+  lastLoginMethod: string | null
+}>
 
 export default function Login({ bookmark }: PageProps) {
   const form = useRouteForm('session.store', { email: '', password: '' })
@@ -51,6 +57,11 @@ export default function Login({ bookmark }: PageProps) {
               {...form.field('password')}
             />
           </FormLayout>
+          <HStack hAlign="end">
+            <Link href={urlFor('password_resets.create')} type="supporting">
+              Forgot password?
+            </Link>
+          </HStack>
           <Button
             type="submit"
             label="Sign in"
@@ -60,6 +71,9 @@ export default function Login({ bookmark }: PageProps) {
           />
         </VStack>
       </form>
+
+      <Divider label="or" />
+      <PasskeySignIn />
 
       <Text type="supporting" color="secondary">
         New here?{' '}
