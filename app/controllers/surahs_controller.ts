@@ -92,12 +92,13 @@ export default class SurahsController {
       bookmarks: BookmarkTransformer.transform(bookmarks),
       noteFor,
       /**
-       * Loaded by a partial reload on the first Play. `null` when the
-       * Recitation is unavailable; reading still works.
+       * Loaded by a partial reload on the first Play, and kept by the app
+       * layout from then on. `null` when the Recitation is unavailable;
+       * reading still works.
        */
       recitation: inertia.optional(async () => {
         const recitation = await this.#recitations.readRecitation(surah)
-        return recitation ? RecitationTransformer.transform(recitation) : null
+        return recitation ? RecitationTransformer.transform(recitation, surah) : null
       }),
     })
   }

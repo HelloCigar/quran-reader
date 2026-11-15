@@ -1,4 +1,12 @@
-import { createContext, use, useRef, useState, useSyncExternalStore } from 'react'
+import {
+  createContext,
+  use,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { useReaderPreference } from '~/components/quran/use_reader_preference'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 
@@ -35,7 +43,7 @@ function useIsNarrow() {
  * panel beside the Ayahs, which the reader can hide. Narrow (phones, up to
  * 768px): the panel is dropped so the Ayahs keep the width, and the same
  * sidebar opens in a drawer. Either way `toggle` is the one control, and the
- * page puts it in its footer, out of the text.
+ * page puts it on the Recitation bar, out of the text.
  *
  * The drawer closes once a visit from it lands, except when the reader chose
  * a Surah in Verse mode: that is half of choosing an Ayah, so it stays open.
@@ -70,6 +78,22 @@ export function useReaderSidebar(choices: { isShown: boolean; mode: SidebarMode 
     if (!event.detail.visit.async) closesDrawer.current = false
   })
 
+  const onToggle = useCallback(() => {
+    if (isNarrow) setIsDrawerOpen(true)
+    else setShown(hasPanel ? 'hidden' : 'shown')
+  }, [isNarrow, hasPanel, setShown])
+  /** Stable while it does the same thing: the Recitation bar holds on to it. */
+  const toggle = useMemo(
+    () => ({
+      /** What the toggle says it does. */
+      label: hasPanel ? 'Hide Surahs' : 'Show Surahs',
+      onToggle,
+      /** The drawer is open, over the Ayahs. */
+      isDrawerOpen: isNarrow && isDrawerOpen,
+    }),
+    [hasPanel, onToggle, isNarrow, isDrawerOpen]
+  )
+
   return {
     hasPanel,
     /** The drawer is open; only on a narrow screen. */
@@ -77,20 +101,13 @@ export function useReaderSidebar(choices: { isShown: boolean; mode: SidebarMode 
     setDrawerOpen: setIsDrawerOpen,
     mode,
     setMode,
-    toggle: {
-      /** What the toggle says it does. */
-      label: hasPanel ? 'Hide Surahs' : 'Show Surahs',
-      onToggle: () => {
-        if (isNarrow) setIsDrawerOpen(true)
-        else setShown(hasPanel ? 'hidden' : 'shown')
-      },
-    },
+    toggle,
   }
 }
 
 export type ReaderSidebarToggle = ReturnType<typeof useReaderSidebar>['toggle']
 
-/** The sidebar toggle `ReaderLayout` hands to the page's footer. */
+/** The sidebar toggle `ReaderLayout` hands to the page, for the Recitation bar. */
 export const ReaderSidebarToggleContext = createContext<ReaderSidebarToggle | null>(null)
 
 /** The sidebar toggle, inside `ReaderLayout`; `null` outside it. */

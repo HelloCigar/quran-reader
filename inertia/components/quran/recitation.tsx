@@ -1,13 +1,42 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useRouter } from '@adonisjs/inertia/react'
 import { useToast } from '@astryxdesign/core/Toast'
 import type { Data } from '@generated/data'
+import type { ReaderSidebarToggle } from '~/components/quran/use_reader_sidebar'
+import {
+  ReadingPositionSaver,
+  useHeardReadingPosition,
+} from '~/components/quran/use_reading_position'
 
 /**
  * The Word whose popover is open, and who opened it: the Recitation as it
  * reaches the Word, or the reader by hand.
  */
 export type ShownWord = { location: string; by: 'recitation' | 'reader' } | null
+
+/** The Recited Ayah, and the Recitation it is heard in. */
+export type Recited = { recitation: Data.Recitation; ayah: number }
+
+/**
+ * What a Surah's page gives the Recitation bar while it is open: its Surah,
+ * the Ayah a first Play starts from, and the sidebar toggle.
+ */
+export type ReadingPage = {
+  surahNumber: number
+  /** The first Ayah the reader can see. */
+  firstAyahInView: () => number
+  sidebarToggle: ReaderSidebarToggle | null
+}
 
 type TimedWord = { location: string; ayah: number; startMs: number }
 
@@ -22,23 +51,22 @@ const SILENCE =
 
 /**
  * Plays a Surah's Recitation and keeps the open Word popover on the Recited
- * Word. The Recitation is loaded by a partial reload on the first Play.
+ * Word. It lives in the app layout, so the Recitation keeps playing while the
+ * reader goes to other pages; a full reload starts with none.
+ *
+ * A Surah's Recitation is loaded by a partial reload of that Surah's page, on
+ * its first Play or the first Word opened there, and kept from then on.
  *
  * - Between Words, and over Words with no timing, the popover stays on the
  *   last Recited Word.
- * - Opening or closing a popover by hand pauses the Recitation; Play resumes
- *   where it paused.
+ * - Opening or closing a popover by hand pauses the Recitation; resuming
+ *   carries on where it paused.
  * - Opening a Word's popover by hand plays that Word alone, from its start to
  *   its end, on an audio element of its own, so the Recitation keeps its place.
- * - At the end of the Surah it stops and closes the popover.
- *
- * `firstAyahInView` names the Ayah the first Play starts from when no Ayah is
- * chosen, so a reader who opened the Surah at 2:255 isn't sent back to 2:1.
+ * - At the end of the Surah, or when the reader closes it, the Recitation is
+ *   over: nothing is recited and its place is forgotten.
  */
-export function useRecitation(
-  recitation: Data.Recitation | null | undefined,
-  firstAyahInView: () => number
-) {
+function useRecitationPlayer() {
   const router = useRouter()
   const showToast = useToast()
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -51,10 +79,14 @@ export function useRecitation(
   /** What to play once the Recitation has loaded: from an Ayah, or one Word. */
   const pendingRef = useRef<((loaded: Data.Recitation) => void) | null>(null)
   const isLoadingRef = useRef(false)
+  /** Each Surah's Recitation once loaded; `null` when it was unavailable. */
+  const loadedRef = useRef(new Map<number, Data.Recitation | null>())
   const [isPlaying, setIsPlaying] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [shown, setShown] = useState<ShownWord>(null)
-  const [recitedAyah, setRecitedAyah] = useState<number | null>(null)
+  const [recited, setRecited] = useState<Recited | null>(null)
+  const [readingPage, setReadingPage] = useState<ReadingPage | null>(null)
+  const recitation = recited?.recitation
 
   const words = useMemo<TimedWord[]>(
     () =>
@@ -101,7 +133,9 @@ export function useRecitation(
             ? current
             : { location: word.location, by: 'recitation' }
         )
-        setRecitedAyah(word.ayah)
+        setRecited((current) =>
+          current && current.ayah !== word.ayah ? { ...current, ayah: word.ayah } : current
+        )
       }
       frame = requestAnimationFrame(follow)
     }
@@ -179,6 +213,10 @@ export function useRecitation(
     [stopWord, wordAudio]
   )
 
+  /**
+   * Plays `loaded` from the start of `fromAyah`, which becomes the Recited
+   * Ayah; or, with no Ayah, carries on where the audio is.
+   */
   const start = useCallback(
     (loaded: Data.Recitation, fromAyah: number | null) => {
       stopWord()
@@ -192,6 +230,7 @@ export function useRecitation(
         originMsRef.current = fromMs
         element.currentTime = fromMs / 1000
         setShown(null)
+        setRecited({ recitation: loaded, ayah: fromAyah })
       }
 
       element.play().then(
@@ -203,14 +242,15 @@ export function useRecitation(
   )
 
   /**
-   * Loads the Recitation, then plays whatever `pendingRef` holds by then:
-   * pausing empties it, and a later request replaces it. `element` is the audio
-   * element that will play: it plays a moment of silence during this click (see
-   * SILENCE). Every attempt ends here, so a failed, cancelled or repeated
-   * unavailable load never leaves Play stuck loading.
+   * Loads the Recitation of the Surah whose page is open, then plays whatever
+   * `pendingRef` holds by then: pausing empties it, and a later request
+   * replaces it. `element` is the audio element that will play: it plays a
+   * moment of silence during this click (see SILENCE). Every attempt ends
+   * here, so a failed, cancelled or repeated unavailable load never leaves
+   * Play stuck loading.
    */
   const load = useCallback(
-    (element: HTMLAudioElement, then: (loaded: Data.Recitation) => void) => {
+    (element: HTMLAudioElement, surahNumber: number, then: (loaded: Data.Recitation) => void) => {
       element.src = SILENCE
       element.play().catch(() => {})
       pendingRef.current = then
@@ -228,6 +268,7 @@ export function useRecitation(
           replace: true,
           onSuccess: (page) => {
             const loaded = (page.props as { recitation?: Data.Recitation | null }).recitation
+            loadedRef.current.set(surahNumber, loaded ?? null)
             if (!loaded) {
               showToast({ body: 'Recitation is unavailable right now.', type: 'error' })
               return
@@ -255,34 +296,59 @@ export function useRecitation(
   }, [])
 
   /**
-   * Plays from the start of `fromAyah`, or resumes where it paused (from the
-   * first Ayah in view when it has not started).
+   * Starts the Recitation of the Surah whose page is open, from the start of
+   * `fromAyah`. It takes the place of any other Recitation.
    */
   const play = useCallback(
-    (fromAyah?: number) => {
-      const hasStarted = Boolean(audioRef.current?.src) && recitedAyah !== null
-      const from = fromAyah ?? (hasStarted ? null : firstAyahInView())
-
-      if (recitation) {
-        start(recitation, from)
+    (surahNumber: number, fromAyah: number) => {
+      const loaded = loadedRef.current.get(surahNumber)
+      if (loaded) {
+        start(loaded, fromAyah)
         return
       }
 
+      pause()
       // Starting the Surah's file replaces the silence and rejects its play().
-      load(audio(), (loaded) => start(loaded, from ?? 1))
+      load(audio(), surahNumber, (fresh) => start(fresh, fromAyah))
     },
-    [audio, firstAyahInView, load, recitation, recitedAyah, start]
+    [audio, load, pause, start]
   )
+
+  /**
+   * Carries on where the Recitation paused. When its audio element has since
+   * been used to load another Surah, its place in the file is gone, and it
+   * carries on from the start of the Recited Ayah.
+   */
+  const resume = useCallback(() => {
+    if (!recited) return
+    const hasLostPlace = audio().src !== recited.recitation.audioUrl
+    start(recited.recitation, hasLostPlace ? recited.ayah : null)
+  }, [audio, recited, start])
+
+  /**
+   * Stops the Recitation, forgets its place and closes the Recited Word's
+   * popover.
+   */
+  const close = useCallback(() => {
+    pendingRef.current = null
+    const element = audioRef.current
+    if (element) {
+      element.pause()
+      element.removeAttribute('src')
+      element.load()
+    }
+    originMsRef.current = 0
+    setIsPlaying(false)
+    setRecited(null)
+    setShown((current) => (current?.by === 'recitation' ? null : current))
+  }, [])
 
   useEffect(() => {
     const element = audio()
     const onEnded = () => {
       // The silence played while the Recitation loads is not the end of the Surah.
       if (element.src === SILENCE) return
-      setIsPlaying(false)
-      setShown(null)
-      setRecitedAyah(null)
-      originMsRef.current = 0
+      close()
     }
     element.addEventListener('ended', onEnded)
     return () => {
@@ -290,34 +356,122 @@ export function useRecitation(
       element.pause()
       stopWord()
     }
-  }, [audio, stopWord])
+  }, [audio, close, stopWord])
 
   /**
-   * The reader opens or closes a Word's popover by hand: the Recitation
-   * pauses, and an opened Word plays alone. The first such Word loads the
-   * Recitation; once it is known to be unavailable, Words open silently.
+   * The reader opens or closes the popover of a Word of the Surah whose page
+   * is open: the Recitation pauses, and an opened Word plays alone. The first
+   * such Word loads that Surah's Recitation; once it is known to be
+   * unavailable, Words open silently.
    */
-  const openByReader = useCallback(
-    (location: string, isOpen: boolean) => {
+  const openWord = useCallback(
+    (surahNumber: number, location: string, isOpen: boolean) => {
       pause()
       stopWord()
       setShown(isOpen ? { location, by: 'reader' } : null)
       if (!isOpen) return
-      if (recitation) playWord(recitation, location)
-      else if (recitation === undefined) {
-        load(wordAudio(), (loaded) => playWord(loaded, location))
+      const loaded = loadedRef.current.get(surahNumber)
+      if (loaded) playWord(loaded, location)
+      else if (loaded === undefined) {
+        load(wordAudio(), surahNumber, (fresh) => playWord(fresh, location))
       }
     },
-    [load, pause, playWord, recitation, stopWord, wordAudio]
+    [load, pause, playWord, stopWord, wordAudio]
   )
 
-  return {
-    isPlaying,
-    isLoading,
-    shown,
-    recitedAyah,
-    play,
-    pause,
-    openByReader,
-  }
+  /**
+   * A popover the reader opened belongs to the Surah page it is on. Leaving
+   * that page closes it and stops its Word, so it isn't open again when the
+   * reader comes back.
+   */
+  const pageSurahNumber = readingPage?.surahNumber
+  useEffect(() => {
+    if (pageSurahNumber === undefined) return
+    return () => {
+      stopWord()
+      setShown((current) => (current?.by === 'reader' ? null : current))
+    }
+  }, [pageSurahNumber, stopWord])
+
+  return useMemo(
+    () => ({
+      isPlaying,
+      isLoading,
+      shown,
+      /** `null` until a Recitation starts, and again once it ends or is closed. */
+      recited,
+      /** The Surah page that is open, if one is. */
+      readingPage,
+      setReadingPage,
+      play,
+      resume,
+      pause,
+      close,
+      openWord,
+    }),
+    [isPlaying, isLoading, shown, recited, readingPage, play, resume, pause, close, openWord]
+  )
+}
+
+type Recitation = ReturnType<typeof useRecitationPlayer> & {
+  /**
+   * Saves the signed-in reader's Reading Position, for the Ayahs heard and
+   * for the reading page; `null` for a signed-out reader.
+   */
+  readingPositionSaver: ReadingPositionSaver | null
+}
+
+const RecitationContext = createContext<Recitation | null>(null)
+
+/**
+ * Holds the one Recitation for every page inside the app layout, and moves
+ * the signed-in reader's Reading Position to each Ayah heard. `readerId` is
+ * that reader's id, absent for a signed-out reader.
+ */
+export function RecitationProvider({
+  readerId,
+  children,
+}: {
+  readerId: number | undefined
+  children: ReactNode
+}) {
+  const player = useRecitationPlayer()
+  /**
+   * One saver per reader: it remembers the last position it saved, which must
+   * not carry over to the next reader to sign in on this tab.
+   */
+  const saver = useMemo(
+    () => (readerId === undefined ? null : new ReadingPositionSaver()),
+    [readerId]
+  )
+  const { recited } = player
+  useHeardReadingPosition({
+    surahNumber: recited?.recitation.surahNumber ?? null,
+    ayah: recited?.ayah ?? null,
+    saver,
+  })
+  const recitation = useMemo(() => ({ ...player, readingPositionSaver: saver }), [player, saver])
+
+  return <RecitationContext value={recitation}>{children}</RecitationContext>
+}
+
+/** The Recitation, inside the app layout. */
+export function useRecitation() {
+  const recitation = use(RecitationContext)
+  if (!recitation) throw new Error('useRecitation needs a RecitationProvider')
+  return recitation
+}
+
+/**
+ * Tells the Recitation bar that a Surah's page is open, for as long as it is.
+ * `firstAyahInView` must be stable (`useCallback`).
+ */
+export function useReadingPage({ surahNumber, firstAyahInView, sidebarToggle }: ReadingPage) {
+  const { setReadingPage } = useRecitation()
+
+  // Before the page is painted, so the bar is there from the first frame.
+  useLayoutEffect(() => {
+    setReadingPage({ surahNumber, firstAyahInView, sidebarToggle })
+    return () => setReadingPage(null)
+  }, [surahNumber, firstAyahInView, sidebarToggle, setReadingPage])
 }

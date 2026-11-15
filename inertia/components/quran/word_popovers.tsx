@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import type { ShownWord } from '~/components/quran/use_recitation'
+import type { ShownWord } from '~/components/quran/recitation'
 
 type WordPopovers = {
   subscribe: (listener: () => void) => () => void
