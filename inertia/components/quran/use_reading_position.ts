@@ -16,7 +16,7 @@ type Position = { surah: number; ayah: number }
  * position waits behind it. Requests use `keepalive`, so a save started just
  * before the reader closes the tab still arrives.
  */
-class ReadingPositionSaver {
+export class ReadingPositionSaver {
   #latest: string | null = null
   #waiting: Position | null = null
   #isSending = false
@@ -72,40 +72,37 @@ class ReadingPositionSaver {
 }
 
 /**
- * The one saver the reading page and the Recitation share, so their saves
- * stay in order.
- */
-const saver = new ReadingPositionSaver()
-
-/**
  * Moves the signed-in reader's Reading Position to each Ayah heard in a
  * Recitation, on whichever page the reader is on: `ayah` of the Surah
  * numbered `surahNumber` is the Recited Ayah, both `null` when nothing is
  * recited. It also sends a save still waiting when the reader leaves the app.
+ *
+ * `saver` is the signed-in reader's, shared with the reading page so their
+ * saves stay in order; `null` for a signed-out reader.
  */
 export function useHeardReadingPosition({
   surahNumber,
   ayah,
-  isSignedIn,
+  saver,
 }: {
   surahNumber: number | null
   ayah: number | null
-  isSignedIn: boolean
+  saver: ReadingPositionSaver | null
 }) {
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!saver) return
     const flush = () => saver.flush()
     window.addEventListener('pagehide', flush)
     return () => {
       window.removeEventListener('pagehide', flush)
       flush()
     }
-  }, [isSignedIn])
+  }, [saver])
 
   useEffect(() => {
-    if (!isSignedIn || surahNumber === null || ayah === null) return
+    if (!saver || surahNumber === null || ayah === null) return
     saver.save({ surah: surahNumber, ayah })
-  }, [isSignedIn, surahNumber, ayah])
+  }, [saver, surahNumber, ayah])
 }
 
 /**
@@ -120,18 +117,19 @@ export function useHeardReadingPosition({
  * While a Recitation plays (`isPlaying`), scrolling doesn't move the
  * position: the Ayahs heard do (`useHeardReadingPosition`).
  *
- * Signed-out readers have none, and nothing is kept for them.
+ * Signed-out readers have none, and nothing is kept for them: their `saver`
+ * is `null`.
  */
 export function useReadingPosition({
   surahNumber,
   listRef,
   isPlaying,
-  isSignedIn,
+  saver,
 }: {
   surahNumber: number
   listRef: RefObject<HTMLElement | null>
   isPlaying: boolean
-  isSignedIn: boolean
+  saver: ReadingPositionSaver | null
 }) {
   const isPlayingRef = useRef(isPlaying)
   /** How many times the Recitation has started playing on this page. */
@@ -139,9 +137,9 @@ export function useReadingPosition({
 
   // A save still waiting goes out as the reader leaves the Surah.
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!saver) return
     return () => saver.flush()
-  }, [isSignedIn])
+  }, [saver])
 
   useEffect(() => {
     isPlayingRef.current = isPlaying
@@ -151,7 +149,7 @@ export function useReadingPosition({
   // The cleanup clears the stay timer `stayOn` keeps, as well as the frame and the listener.
   // oxlint-disable-next-line react-doctor/effect-needs-cleanup
   useEffect(() => {
-    if (!isSignedIn) return
+    if (!saver) return
     let stay: number | undefined
     const stayOn = (ayah: number) => {
       window.clearTimeout(stay)
@@ -212,5 +210,5 @@ export function useReadingPosition({
       cancelAnimationFrame(frame)
       window.clearTimeout(stay)
     }
-  }, [isSignedIn, listRef, surahNumber])
+  }, [saver, listRef, surahNumber])
 }

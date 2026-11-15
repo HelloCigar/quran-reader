@@ -9,6 +9,7 @@ import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 import FakeRecitationService from '#tests/helpers/quran/fake_recitation_service'
 import { scrollPastAyah, waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
 import { readingPositionOf, waitForReadingPosition } from '#tests/helpers/reading_position'
+import { goToArea } from '#tests/helpers/navigation'
 
 test.group('Reading Position', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -91,6 +92,33 @@ test.group('Reading Position', (group) => {
     await later.close()
 
     assert.equal(await readingPositionOf(reader), '18:10')
+  })
+
+  test('is kept for the next reader to sign in on the same tab, at the Ayah the last reader left', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    const first = await User.create({ email: 'ada@example.com', password: 'secret-password' })
+    const next = await User.create({ email: 'grace@example.com', password: 'secret-password' })
+    await browserContext.loginAs(first)
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await waitForReadingPosition(first, '2:1')
+    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await page.waitForURL(route('session.create'))
+    await page.getByLabel('Email', { exact: true }).fill('grace@example.com')
+    await page.getByLabel('Password', { exact: true }).fill('secret-password')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+    await page.waitForURL(route('dashboard'))
+    await goToArea(page, 'Quran', route('surahs.index'))
+    await page.getByRole('link', { name: /Al-Baqarah/ }).click()
+    await page.waitForURL(route('surahs.show', { number: 2 }))
+
+    await waitForReadingPosition(next, '2:1')
   })
 
   test('follows a Recitation to the last Ayah heard', async ({

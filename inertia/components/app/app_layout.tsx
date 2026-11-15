@@ -57,7 +57,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const items = useNavItems(signedIn ? [...publicNav, ...readerNav] : publicNav)
 
   return (
-    <RecitationProvider isSignedIn={signedIn}>
+    <RecitationProvider readerId={props.user?.id}>
       <AppShell
         variant="surface"
         topNav={

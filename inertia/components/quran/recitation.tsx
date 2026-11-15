@@ -13,7 +13,10 @@ import { useRouter } from '@adonisjs/inertia/react'
 import { useToast } from '@astryxdesign/core/Toast'
 import type { Data } from '@generated/data'
 import type { ReaderSidebarToggle } from '~/components/quran/use_reader_sidebar'
-import { useHeardReadingPosition } from '~/components/quran/use_reading_position'
+import {
+  ReadingPositionSaver,
+  useHeardReadingPosition,
+} from '~/components/quran/use_reading_position'
 
 /**
  * The Word whose popover is open, and who opened it: the Recitation as it
@@ -410,26 +413,44 @@ function useRecitationPlayer() {
   )
 }
 
-const RecitationContext = createContext<ReturnType<typeof useRecitationPlayer> | null>(null)
+type Recitation = ReturnType<typeof useRecitationPlayer> & {
+  /**
+   * Saves the signed-in reader's Reading Position, for the Ayahs heard and
+   * for the reading page; `null` for a signed-out reader.
+   */
+  readingPositionSaver: ReadingPositionSaver | null
+}
+
+const RecitationContext = createContext<Recitation | null>(null)
 
 /**
- * Holds the one Recitation for every page inside the app layout, and moves a
- * signed-in reader's Reading Position to each Ayah heard.
+ * Holds the one Recitation for every page inside the app layout, and moves
+ * the signed-in reader's Reading Position to each Ayah heard. `readerId` is
+ * that reader's id, absent for a signed-out reader.
  */
 export function RecitationProvider({
-  isSignedIn,
+  readerId,
   children,
 }: {
-  isSignedIn: boolean
+  readerId: number | undefined
   children: ReactNode
 }) {
-  const recitation = useRecitationPlayer()
-  const { recited } = recitation
+  const player = useRecitationPlayer()
+  /**
+   * One saver per reader: it remembers the last position it saved, which must
+   * not carry over to the next reader to sign in on this tab.
+   */
+  const saver = useMemo(
+    () => (readerId === undefined ? null : new ReadingPositionSaver()),
+    [readerId]
+  )
+  const { recited } = player
   useHeardReadingPosition({
     surahNumber: recited?.recitation.surahNumber ?? null,
     ayah: recited?.ayah ?? null,
-    isSignedIn,
+    saver,
   })
+  const recitation = useMemo(() => ({ ...player, readingPositionSaver: saver }), [player, saver])
 
   return <RecitationContext value={recitation}>{children}</RecitationContext>
 }

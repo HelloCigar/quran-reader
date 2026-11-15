@@ -82,7 +82,6 @@ export default function Show({
   bookmarks,
   noteFor,
   openedAt,
-  user,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const sidebarToggle = useReaderSidebarToggle()
@@ -211,7 +210,7 @@ export default function Show({
     surahNumber: surah.number,
     listRef,
     isPlaying: recitation.isPlaying,
-    isSignedIn: Boolean(user),
+    saver: recitation.readingPositionSaver,
   })
 
   return (
