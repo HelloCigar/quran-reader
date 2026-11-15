@@ -9,11 +9,11 @@ import ContinueReadingCard from '~/components/dashboard/continue_reading_card'
 import RecentBookmarks from '~/components/dashboard/recent_bookmarks'
 
 type PageProps = InertiaProps<{
-  readingPosition: Data.ReadingPosition.Variants['forContinuing'] | null
+  continueReading: Data.ReadingPosition.Variants['forContinuing']
   bookmarks: Data.Bookmark.Variants['forRecent'][]
 }>
 
-export default function Dashboard({ readingPosition, bookmarks }: PageProps) {
+export default function Dashboard({ continueReading, bookmarks }: PageProps) {
   return (
     <Layout
       height="auto"
@@ -23,7 +23,7 @@ export default function Dashboard({ readingPosition, bookmarks }: PageProps) {
           <Head title="Dashboard" />
           <VStack gap={8}>
             <Heading level={1}>Dashboard</Heading>
-            <ContinueReadingCard readingPosition={readingPosition} />
+            <ContinueReadingCard continueReading={continueReading} />
             <RecentBookmarks bookmarks={bookmarks} />
           </VStack>
         </LayoutContent>

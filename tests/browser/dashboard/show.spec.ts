@@ -50,6 +50,23 @@ test.group('Dashboard', (group) => {
     await page.assertVisible(page.getByText('Surah 18 · Ayah 18:10', { exact: true }))
   })
 
+  test('titles a recent Bookmark by its reference when the Quran text is unavailable', async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    // Stands in for the Quran Foundation Content API being down.
+    swap(QuranTextService, FakeQuranTextService.unavailable())
+    const reader = await User.create(credentials)
+    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 255, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('dashboard'))
+
+    await page.assertVisible(page.getByRole('link', { name: '2:255', exact: true }))
+  })
+
   test('starts a new reader at Al-Fatihah 1:1', async ({ visit, route, swap, browserContext }) => {
     // Stands in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())

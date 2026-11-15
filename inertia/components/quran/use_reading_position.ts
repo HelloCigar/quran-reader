@@ -142,6 +142,15 @@ export function useReadingPosition({
     let before = ayahsInView(listRef.current)
     if (before && !isPlayingRef.current) stayOn(before.first)
 
+    /**
+     * A scroll that began while the Recitation played: it follows the Recited
+     * Word smoothly, and can still be moving once the reader pauses. It isn't
+     * the reader's until it ends. Without `scrollend` it can't be told apart,
+     * and only scrolls during the Recitation are left out.
+     */
+    let isFollowing = false
+    const canTellScrollEnd = 'onscrollend' in window
+
     let frame = 0
     const measure = () => {
       frame = 0
@@ -149,7 +158,7 @@ export function useReadingPosition({
       if (!now) return
       const previous = before
       before = now
-      if (isPlayingRef.current || now.first === previous?.first) return
+      if (isPlayingRef.current || isFollowing || now.first === previous?.first) return
 
       const passed = now.first - 1
       if (previous && now.first > previous.first && passed <= previous.last) {
@@ -158,13 +167,22 @@ export function useReadingPosition({
       stayOn(now.first)
     }
     const onScroll = () => {
+      if (isPlayingRef.current && canTellScrollEnd) isFollowing = true
       if (!frame) frame = requestAnimationFrame(measure)
+    }
+    const onScrollEnd = () => {
+      if (!isFollowing) return
+      isFollowing = false
+      // Where the Recitation's scroll stopped is where the reader's next scroll starts from.
+      before = ayahsInView(listRef.current)
     }
 
     // The Ayahs scroll in a region of the page: scroll events reach the document only while captured.
     document.addEventListener('scroll', onScroll, { capture: true, passive: true })
+    document.addEventListener('scrollend', onScrollEnd, { capture: true, passive: true })
     return () => {
       document.removeEventListener('scroll', onScroll, { capture: true })
+      document.removeEventListener('scrollend', onScrollEnd, { capture: true })
       cancelAnimationFrame(frame)
       window.clearTimeout(stay)
     }

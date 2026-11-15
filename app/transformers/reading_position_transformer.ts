@@ -1,17 +1,16 @@
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import type ReadingPosition from '#models/reading_position'
-import type { SurahSummary } from '#types/quran'
 
 export default class ReadingPositionTransformer extends BaseTransformer<ReadingPosition> {
-  #surahs: SurahSummary[] | null
+  #surahName: string | null
 
   /**
-   * `surahs` names the Surah on the dashboard; `null` when the Quran text is
-   * unavailable. Only the dashboard passes it.
+   * `surahName` names the Surah on the dashboard; `null` when the Quran text
+   * is unavailable. Only the dashboard passes it.
    */
-  constructor(resource: ReadingPosition, surahs: SurahSummary[] | null = null) {
+  constructor(resource: ReadingPosition, surahName: string | null = null) {
     super(resource)
-    this.#surahs = surahs
+    this.#surahName = surahName
   }
 
   /**
@@ -25,13 +24,21 @@ export default class ReadingPositionTransformer extends BaseTransformer<ReadingP
   }
 
   /**
-   * The dashboard's Continue reading card: the Surah's name, or "Surah 18"
-   * when the Quran text is unavailable.
+   * The dashboard's main card: "Continue reading" at the reader's Reading
+   * Position, or "Start reading" at a position not yet saved, where a new
+   * reader starts. The title is "Al-Kahf · Ayah 18:10", or "Surah 18 · Ayah
+   * 18:10" when the Quran text is unavailable.
    */
   async forContinuing() {
     const base = await this.toObject()
-    const surah = this.#surahs?.find((candidate) => candidate.number === base.surahNumber)
+    const heading = this.resource.$isPersisted ? 'Continue reading' : 'Start reading'
+    const surahName = this.#surahName ?? `Surah ${base.surahNumber}`
 
-    return { ...base, surahName: surah?.name ?? `Surah ${base.surahNumber}` }
+    return {
+      ...base,
+      heading,
+      title: `${surahName} · Ayah ${base.reference}`,
+      label: `${heading} at ${base.reference}`,
+    }
   }
 }
