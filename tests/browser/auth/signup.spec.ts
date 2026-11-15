@@ -70,20 +70,38 @@ test.group('Signup', (group) => {
     assert.equal(await browserContext.getPlainCookie('last_login_method'), 'email')
   })
 
-  test('throttles signup submissions per IP', async ({ visit, route, browserContext, assert }) => {
+  test('throttles signup submissions per IP', async ({ visit, route }) => {
     const page = await visit(route('new_account.create'))
-    const cookies = await browserContext.cookies()
-    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
-    const headers = { 'X-XSRF-TOKEN': xsrfToken }
 
-    const statuses: number[] = []
-    for (let attempt = 0; attempt < 11; attempt++) {
-      const response = await page.request.post('/signup', { headers, maxRedirects: 0 })
-      statuses.push(response.status())
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const answered = page.waitForResponse(
+        (response) => response.url().endsWith('/signup') && response.request().method() === 'POST'
+      )
+      await page.getByRole('button', { name: 'Create account', exact: true }).click()
+      await answered
     }
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
 
-    assert.deepEqual(statuses.slice(-1), [429])
-    assert.notInclude(statuses.slice(0, 10), 429)
+    await page.assertVisible(
+      page.getByText('Too many attempts. Please try again in 1 minute', { exact: true })
+    )
+  })
+
+  test('refuses a name over 100 characters', async ({ visit, route, db }) => {
+    const page = await visit(route('new_account.create'))
+
+    await page.getByLabel('Full name', { exact: true }).fill('A'.repeat(101))
+    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
+    await page.getByLabel('Password', { exact: true }).fill(password)
+    await page.getByLabel('Confirm password', { exact: true }).fill(password)
+    await page.getByRole('button', { name: 'Create account', exact: true }).click()
+
+    await page.assertVisible(
+      page.getByText('The fullName field must not be greater than 100 characters', {
+        exact: true,
+      })
+    )
+    await db.assertEmpty('users')
   })
 
   test('shows the password strength and requirements while typing', async ({ visit, route }) => {

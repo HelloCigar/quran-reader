@@ -28,6 +28,7 @@ test.group('Passkey Login', (group) => {
     swap,
     db,
   }) => {
+    // Stands in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())
     const user = await UserFactory.apply('verified').create()
 
@@ -40,6 +41,41 @@ test.group('Passkey Login', (group) => {
     await page.assertPath('/quran/1')
     await page.assertVisible(page.getByRole('dialog', { name: 'Note on 1:3', exact: true }))
     await db.assertHas('bookmarks', { user_id: user.id, surah_number: 1, ayah_number: 3 }, 1)
+  })
+
+  test('returns a signed-out reader to the page they asked for', async ({ visit, route }) => {
+    const user = await UserFactory.apply('verified').create()
+
+    const page = await visit(route('bookmarks.index'))
+    await page.assertPath(route('session.create'))
+    const authenticator = await addVirtualAuthenticator(page)
+    await authenticator.addPasskey(user)
+    await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
+
+    await page.assertPath(route('bookmarks.index'))
+  })
+
+  test('a carried bookmark clears the page asked for earlier', async ({ visit, route, swap }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    const user = await UserFactory.apply('verified').create()
+
+    const page = await visit(route('bookmarks.index'))
+    await page.assertPath(route('session.create'))
+    const authenticator = await addVirtualAuthenticator(page)
+    await authenticator.addPasskey(user)
+
+    await page.goto(route('surahs.show', { number: 1 }))
+    await page.getByRole('link', { name: 'Bookmark 1:3', exact: true }).click()
+    await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
+    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 1:3', exact: true }))
+    await page.getByRole('button', { name: 'Not now', exact: true }).click()
+
+    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await page.waitForURL(route('session.create'))
+    await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
+
+    await page.assertPath(route('dashboard'))
   })
 
   test('writes the last_login_method cookie', async ({ visit, route, browserContext, assert }) => {

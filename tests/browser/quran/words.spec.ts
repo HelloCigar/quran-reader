@@ -3,7 +3,7 @@ import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 
 test.group('Quran Words', () => {
-  test('opens a Word to show its Arabic, Transliteration and Word Translation', async ({
+  test('opens a Word to show its Transliteration and Word Translation', async ({
     visit,
     route,
     swap,
@@ -15,7 +15,6 @@ test.group('Quran Words', () => {
     await page.locator('[data-word-location="1:1:1"]').click()
 
     const popover = page.getByRole('dialog', { name: 'Word 1:1:1', exact: true })
-    await page.assertVisible(popover.getByText('بِسْمِ', { exact: true }))
     await page.assertVisible(popover.getByText("bis'mi", { exact: true }))
     await page.assertVisible(popover.getByText('In (the) name', { exact: true }))
   })

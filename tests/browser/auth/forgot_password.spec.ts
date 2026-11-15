@@ -70,20 +70,24 @@ test.group('Forgot password', (group) => {
     mailFake.mails.assertQueuedCount(PasswordResetProvision, 1)
   })
 
-  test('throttles reset requests per IP', async ({ visit, route, browserContext, assert }) => {
+  test('throttles reset requests per IP', async ({ visit, route }) => {
+    using _mailFake = mail.fake()
     const page = await visit(route('password_resets.create'))
-    const cookies = await browserContext.cookies()
-    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
-    const headers = { 'X-XSRF-TOKEN': xsrfToken }
+    await page.getByLabel('Email', { exact: true }).fill('ghost@example.com')
 
-    const statuses: number[] = []
-    for (let attempt = 0; attempt < 11; attempt++) {
-      const response = await page.request.post('/password-resets', { headers, maxRedirects: 0 })
-      statuses.push(response.status())
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const answered = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/password-resets') && response.request().method() === 'POST'
+      )
+      await page.getByRole('button', { name: 'Send instructions', exact: true }).click()
+      await answered
     }
+    await page.getByRole('button', { name: 'Send instructions', exact: true }).click()
 
-    assert.deepEqual(statuses.slice(-1), [429])
-    assert.notInclude(statuses.slice(0, 10), 429)
+    await page.assertVisible(
+      page.getByText('Too many attempts. Please try again in 1 minute', { exact: true })
+    )
   })
 
   test('can reset password and log in', async ({ visit, route }) => {

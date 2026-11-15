@@ -18,6 +18,34 @@ test.group('Profile Management', (group) => {
     await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
   })
 
+  test('trims spaces around the name', async ({ visit, route, browserContext, db }) => {
+    const user = await UserFactory.apply('verified').create()
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('profile.show'))
+    await page.getByLabel('Full name', { exact: true }).fill('  Ada King  ')
+    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+
+    await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
+    await db.assertHas('users', { id: user.id, full_name: 'Ada King' })
+  })
+
+  test('refuses a name over 100 characters', async ({ visit, route, browserContext, db }) => {
+    const user = await UserFactory.apply('verified').create()
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('profile.show'))
+    await page.getByLabel('Full name', { exact: true }).fill('A'.repeat(101))
+    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+
+    await page.assertVisible(
+      page.getByText('The fullName field must not be greater than 100 characters', {
+        exact: true,
+      })
+    )
+    await db.assertHas('users', { id: user.id, full_name: user.fullName })
+  })
+
   test('can update email and receive verification', async ({
     visit,
     route,

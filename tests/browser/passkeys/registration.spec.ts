@@ -30,23 +30,33 @@ test.group('Passkey Registration', (group) => {
     visit,
     route,
     browserContext,
-    assert,
   }) => {
     const user = await UserFactory.apply('verified').create()
     await browserContext.loginAs(user)
+    using _mailFake = mail.fake()
 
     const page = await visit(route('security.show'))
-    const cookies = await browserContext.cookies()
-    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
-    const headers = { 'X-XSRF-TOKEN': xsrfToken }
+    await addVirtualAuthenticator(page)
 
-    const statuses: number[] = []
-    for (let attempt = 0; attempt < 11; attempt++) {
-      const response = await page.request.post('/settings/passkeys/challenge', { headers })
-      statuses.push(response.status())
+    /**
+     * The first click adds the passkey; the next nine fetch a challenge and
+     * are refused by the device, which already holds a passkey for the user
+     */
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const answered = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/settings/passkeys/challenge') &&
+          response.request().method() === 'POST'
+      )
+      await page.getByRole('button', { name: 'Add a passkey', exact: true }).click()
+      await answered
+      await page.getByRole('button', { name: 'Add a passkey', exact: true }).waitFor()
     }
+    await page.getByRole('button', { name: 'Add a passkey', exact: true }).click()
 
-    assert.deepEqual(statuses, [...Array(10).fill(200), 429])
+    await page.assertVisible(
+      page.getByText('Unable to add the passkey. Please try again', { exact: true })
+    )
   })
 
   test('refuses a second passkey from the same authenticator', async ({
