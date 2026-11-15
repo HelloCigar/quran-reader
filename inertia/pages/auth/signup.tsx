@@ -15,7 +15,6 @@ import type { InertiaProps } from '~/types'
 type PageProps = InertiaProps<{
   bookmark: { surah: number; ayah: number } | null
   passwordPolicy: PasswordPolicy
-  lastLoginMethod: string | null
 }>
 
 export default function Signup({ bookmark, passwordPolicy }: PageProps) {

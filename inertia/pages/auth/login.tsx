@@ -15,7 +15,6 @@ import type { InertiaProps } from '~/types'
 
 type PageProps = InertiaProps<{
   bookmark: { surah: number; ayah: number } | null
-  lastLoginMethod: string | null
 }>
 
 export default function Login({ bookmark }: PageProps) {
@@ -73,7 +72,7 @@ export default function Login({ bookmark }: PageProps) {
       </form>
 
       <Divider label="or" />
-      <PasskeySignIn />
+      <PasskeySignIn bookmark={bookmark} />
 
       <Text type="supporting" color="secondary">
         New here?{' '}

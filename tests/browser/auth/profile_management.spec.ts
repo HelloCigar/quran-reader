@@ -18,7 +18,12 @@ test.group('Profile Management', (group) => {
     await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
   })
 
-  test('can update email and receive verification', async ({ visit, route, browserContext }) => {
+  test('can update email and receive verification', async ({
+    visit,
+    route,
+    browserContext,
+    db,
+  }) => {
     const user = await UserFactory.apply('verified').create()
     await browserContext.loginAs(user)
 
@@ -28,8 +33,35 @@ test.group('Profile Management', (group) => {
     await page.getByLabel('Email', { exact: true }).fill('newemail@example.com')
     await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
 
-    await page.assertVisible('text=Verify your new email address')
+    await page.assertVisible(
+      page.getByText('Verify your new email address to switch to it.', { exact: true })
+    )
     mailFake.mails.assertQueued(EmailChangeProvision)
+    await db.assertHas('users', {
+      id: user.id,
+      email: user.email,
+      unverified_email: 'newemail@example.com',
+    })
+  })
+
+  test('refuses an email another account already uses', async ({
+    visit,
+    route,
+    browserContext,
+    db,
+  }) => {
+    const [user, other] = await UserFactory.apply('verified').createMany(2)
+    await browserContext.loginAs(user)
+
+    using mailFake = mail.fake()
+
+    const page = await visit(route('profile.show'))
+    await page.getByLabel('Email', { exact: true }).fill(other.email)
+    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+
+    await page.assertVisible(page.getByText('The email has already been taken', { exact: true }))
+    mailFake.mails.assertNoneQueued()
+    await db.assertHas('users', { id: user.id, email: user.email, unverified_email: null })
   })
 
   test('reverting to the original verified email queues no mail', async ({

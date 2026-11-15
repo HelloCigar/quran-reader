@@ -70,6 +70,22 @@ test.group('Signup', (group) => {
     assert.equal(await browserContext.getPlainCookie('last_login_method'), 'email')
   })
 
+  test('throttles signup submissions per IP', async ({ visit, route, browserContext, assert }) => {
+    const page = await visit(route('new_account.create'))
+    const cookies = await browserContext.cookies()
+    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
+    const headers = { 'X-XSRF-TOKEN': xsrfToken }
+
+    const statuses: number[] = []
+    for (let attempt = 0; attempt < 11; attempt++) {
+      const response = await page.request.post('/signup', { headers, maxRedirects: 0 })
+      statuses.push(response.status())
+    }
+
+    assert.deepEqual(statuses.slice(-1), [429])
+    assert.notInclude(statuses.slice(0, 10), 429)
+  })
+
   test('shows the password strength and requirements while typing', async ({ visit, route }) => {
     const page = await visit(route('new_account.create'))
 

@@ -56,6 +56,7 @@ router
     router.on('settings').redirect('profile.show').as('settings')
     router.get('settings/profile', [controllers.Profile, 'show'])
     router.put('settings/profile', [controllers.Profile, 'update'])
+    // flow-allow flow-cruddy-controllers: the Security settings page combines the change-password form and the passkeys list; PasskeysController keeps the passkey writes.
     router.get('settings/security', [controllers.Security, 'show'])
     router.put('settings/password', [controllers.AccountPassword, 'update'])
     router.post('settings/passkeys/challenge', [controllers.PasskeyRegistrationChallenges, 'store'])

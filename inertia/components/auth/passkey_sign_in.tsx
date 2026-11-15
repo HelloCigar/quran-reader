@@ -11,7 +11,12 @@ import { Icon } from '@astryxdesign/core/Icon'
  * Signs in with a passkey: the device lists the accounts it holds for the
  * site, so there is no email to type.
  */
-export default function PasskeySignIn() {
+type Props = {
+  /** The ayah a signed-out reader tried to bookmark, kept once they sign in. */
+  bookmark?: { surah: number; ayah: number } | null
+}
+
+export default function PasskeySignIn({ bookmark }: Props) {
   const router = useRouter()
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +32,7 @@ export default function PasskeySignIn() {
 
       router.post(
         { route: 'passkey_session.store' },
-        { response },
+        bookmark ? { response, bookmark } : { response },
         { preserveScroll: true, onFinish: () => setProcessing(false) }
       )
     } catch (caught) {

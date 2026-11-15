@@ -11,7 +11,6 @@ export default class SessionController {
 
     return inertia.render('auth/login', {
       bookmark: payload.bookmark ?? null,
-      lastLoginMethod: request.plainCookie('last_login_method') ?? null,
     })
   }
 

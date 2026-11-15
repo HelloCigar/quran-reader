@@ -52,6 +52,40 @@ test.group('Forgot password', (group) => {
     mailFake.mails.assertNoneQueued()
   })
 
+  test('sends one reset email per minute for the same address', async ({ visit, route }) => {
+    const user = await UserFactory.apply('verified').create()
+    using mailFake = mail.fake()
+
+    const page = await visit(route('password_resets.create'))
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await page.getByLabel('Email', { exact: true }).fill(user.email)
+      const answered = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/password-resets') && response.request().method() === 'POST'
+      )
+      await page.getByRole('button', { name: 'Send instructions', exact: true }).click()
+      await answered
+    }
+
+    mailFake.mails.assertQueuedCount(PasswordResetProvision, 1)
+  })
+
+  test('throttles reset requests per IP', async ({ visit, route, browserContext, assert }) => {
+    const page = await visit(route('password_resets.create'))
+    const cookies = await browserContext.cookies()
+    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
+    const headers = { 'X-XSRF-TOKEN': xsrfToken }
+
+    const statuses: number[] = []
+    for (let attempt = 0; attempt < 11; attempt++) {
+      const response = await page.request.post('/password-resets', { headers, maxRedirects: 0 })
+      statuses.push(response.status())
+    }
+
+    assert.deepEqual(statuses.slice(-1), [429])
+    assert.notInclude(statuses.slice(0, 10), 429)
+  })
+
   test('can reset password and log in', async ({ visit, route }) => {
     const user = await UserFactory.apply('verified').create()
     const token = await user.createPasswordResetToken()

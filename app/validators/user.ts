@@ -21,7 +21,8 @@ const password = () => vine.string().passwordPolicy(passwordPolicy).uncompromise
  * has no way to know about the errors reported for this field.
  */
 export const signupValidator = vine.create({
-  fullName: vine.string().nullable(),
+  fullName: vine.string().trim().maxLength(100).nullable(),
+  // flow-allow review-response-exposure: signup reports a registered email so a returning reader knows to sign in or reset instead; formsThrottle limits probing.
   email: newEmail().unique({ table: 'users', column: 'email' }),
   password: password(),
   passwordConfirmation: vine.string().sameAs('password'),
@@ -101,6 +102,12 @@ export const passkeyAuthenticationValidator = vine.create({
     }),
     clientExtensionResults: vine.object({}),
   }),
+  bookmark: vine
+    .object({
+      surah: vine.number().withoutDecimals().range([1, 114]),
+      ayah: vine.number().withoutDecimals().positive().ayahOfSurah('surah'),
+    })
+    .optional(),
 })
 
 /**
@@ -116,7 +123,7 @@ export const passkeyNameValidator = vine.create({
  * email is not a duplicate.
  */
 export const updateProfileValidator = vine.withMetaData<{ userId: number }>().create({
-  fullName: vine.string().nullable(),
+  fullName: vine.string().trim().maxLength(100).nullable(),
   email: newEmail().unique({
     table: 'users',
     column: 'email',

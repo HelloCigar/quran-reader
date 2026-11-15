@@ -13,7 +13,6 @@ export default class NewAccountController {
     return inertia.render('auth/signup', {
       bookmark: payload.bookmark ?? null,
       passwordPolicy,
-      lastLoginMethod: request.plainCookie('last_login_method') ?? null,
     })
   }
 

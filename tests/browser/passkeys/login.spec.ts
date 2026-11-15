@@ -4,6 +4,8 @@ import { test } from '@japa/runner'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { addVirtualAuthenticator, recordPasskeySignals } from '#tests/helpers/passkeys'
+import QuranTextService from '#services/quran_text_service'
+import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 
 const rpId = env.get('PASSKEY_RP_ID')
 
@@ -18,6 +20,26 @@ test.group('Passkey Login', (group) => {
 
     await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
     await page.assertPath(route('dashboard'))
+  })
+
+  test('signing in with a passkey completes a carried bookmark', async ({
+    visit,
+    route,
+    swap,
+    db,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const user = await UserFactory.apply('verified').create()
+
+    const page = await visit(route('surahs.show', { number: 1 }))
+    const authenticator = await addVirtualAuthenticator(page)
+    await authenticator.addPasskey(user)
+    await page.getByRole('link', { name: 'Bookmark 1:3', exact: true }).click()
+    await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
+
+    await page.assertPath('/quran/1')
+    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 1:3', exact: true }))
+    await db.assertHas('bookmarks', { user_id: user.id, surah_number: 1, ayah_number: 3 }, 1)
   })
 
   test('writes the last_login_method cookie', async ({ visit, route, browserContext, assert }) => {

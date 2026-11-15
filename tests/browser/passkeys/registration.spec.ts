@@ -26,6 +26,29 @@ test.group('Passkey Registration', (group) => {
     })
   })
 
+  test('throttles registration challenge requests per user', async ({
+    visit,
+    route,
+    browserContext,
+    assert,
+  }) => {
+    const user = await UserFactory.apply('verified').create()
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('security.show'))
+    const cookies = await browserContext.cookies()
+    const xsrfToken = decodeURIComponent(cookies.find((c) => c.name === 'XSRF-TOKEN')!.value)
+    const headers = { 'X-XSRF-TOKEN': xsrfToken }
+
+    const statuses: number[] = []
+    for (let attempt = 0; attempt < 11; attempt++) {
+      const response = await page.request.post('/settings/passkeys/challenge', { headers })
+      statuses.push(response.status())
+    }
+
+    assert.deepEqual(statuses, [...Array(10).fill(200), 429])
+  })
+
   test('refuses a second passkey from the same authenticator', async ({
     visit,
     route,
