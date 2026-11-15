@@ -11,6 +11,7 @@ import { Icon } from '@astryxdesign/core/Icon'
 import { List, ListItem } from '@astryxdesign/core/List'
 import { TabList, Tab } from '@astryxdesign/core/TabList'
 import { useNavItems, type NavItem } from '~/components/navigation/nav'
+import { PAGE_INSET } from '~/components/app/page_layout'
 
 /**
  * The pages of the settings area, listed in the side panel. Register a route
@@ -69,16 +70,14 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
         )
       }
       content={
-        <LayoutContent padding={4}>
-          <VStack gap={4}>
+        <LayoutContent padding={PAGE_INSET}>
+          <VStack gap={6}>
             {isNarrow && items.length > 0 && (
-              <VStack hAlign="center">
-                <TabList value={active?.href ?? ''} onChange={(href) => router.visit({ href })}>
-                  {items.map(({ label, href }) => (
-                    <Tab key={label} value={href} label={label} />
-                  ))}
-                </TabList>
-              </VStack>
+              <TabList value={active?.href ?? ''} onChange={(href) => router.visit({ href })}>
+                {items.map(({ label, href }) => (
+                  <Tab key={label} value={href} label={label} />
+                ))}
+              </TabList>
             )}
             {children}
           </VStack>

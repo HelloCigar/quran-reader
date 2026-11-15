@@ -29,6 +29,28 @@ test.group('Navigation', (group) => {
     await page.assertTextContains('h1', 'Welcome back')
   })
 
+  test('guests reach the login page from the menu on a phone', async ({ visit, route }) => {
+    const page = await visit(route('home'))
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    await page.getByRole('button', { name: 'Open navigation', exact: true }).click()
+    await page.getByRole('link', { name: 'Sign in', exact: true }).click()
+
+    await page.waitForURL(route('session.create'))
+    await page.assertTextContains('h1', 'Welcome back')
+  })
+
+  test('guests reach the signup page from the menu on a phone', async ({ visit, route }) => {
+    const page = await visit(route('home'))
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    await page.getByRole('button', { name: 'Open navigation', exact: true }).click()
+    await page.getByRole('link', { name: 'Get started', exact: true }).click()
+
+    await page.waitForURL(route('new_account.create'))
+    await page.assertTextContains('h1', 'Create your account')
+  })
+
   test('sends a signed-in reader from the home page to the dashboard', async ({
     visit,
     route,

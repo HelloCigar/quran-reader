@@ -17,13 +17,16 @@ const HrefLink = Link as ComponentType<AnchorProps>
  * page load.
  *
  * External URLs, new-tab links and downloads stay native anchors, since
- * Inertia can only visit routes of this app.
+ * Inertia can only visit routes of this app. So does an item with no `href`
+ * (an action, such as Log out in the phone's menu): it only runs its
+ * `onClick`, where an Inertia `Link` would also visit the current page and
+ * cancel the action's own request.
  */
-export default function InertiaLink({
-  to: _to,
-  href = '',
-  ...props
-}: AnchorProps & { to?: unknown }) {
+export default function InertiaLink({ to: _to, href, ...props }: AnchorProps & { to?: unknown }) {
+  if (href === undefined) {
+    return <a {...props} />
+  }
+
   const isExternal = /^[a-z][a-z\d+.-]*:/i.test(href) || href.startsWith('//')
 
   if (isExternal || props.target === '_blank' || props.download !== undefined) {

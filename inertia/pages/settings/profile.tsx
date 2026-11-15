@@ -81,7 +81,7 @@ export default function Profile({ user }: InertiaProps) {
           <HStack>
             <Button
               type="submit"
-              label={form.processing ? 'Saving…' : 'Update Profile'}
+              label={form.processing ? 'Saving…' : 'Update profile'}
               variant="primary"
               isLoading={form.processing}
             />

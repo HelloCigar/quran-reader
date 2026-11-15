@@ -6,6 +6,7 @@ import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Button } from '@astryxdesign/core/Button'
 import { urlFor } from '~/client'
+import { PAGE_INSET } from '~/components/app/page_layout'
 
 /**
  * The body of the 404, 500 and 503 pages: the status, a short explanation and a
@@ -24,7 +25,7 @@ export default function ErrorPage({
     <Layout
       height="fill"
       content={
-        <LayoutContent padding={6}>
+        <LayoutContent padding={PAGE_INSET}>
           <Head title={title} />
           <Center axis="both" height="100%">
             <EmptyState

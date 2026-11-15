@@ -9,6 +9,7 @@ import { Button } from '@astryxdesign/core/Button'
 import { Icon } from '@astryxdesign/core/Icon'
 import { urlFor } from '~/client'
 import AppLayout from '~/components/app/app_layout'
+import { PAGE_INSET } from '~/components/app/page_layout'
 import QuranCredit from '~/components/quran/quran_credit'
 
 /** From Astryx's `centered-hero` template. */
@@ -17,9 +18,9 @@ export default function Home() {
     <Layout
       height="auto"
       content={
-        <LayoutContent padding={6}>
+        <LayoutContent padding={PAGE_INSET}>
           <Head title="Welcome" />
-          <VStack gap={10} hAlign="center">
+          <VStack gap={10} hAlign="center" paddingBlock={8}>
             <VStack gap={6} hAlign="center">
               <VStack gap={3} hAlign="center" maxWidth={720}>
                 <Heading level={1} type="display-2" justify="center" textWrap="balance">
@@ -30,7 +31,7 @@ export default function Home() {
                   International translation. Sign in to bookmark ayahs and keep a note on each.
                 </Text>
               </VStack>
-              <HStack gap={3}>
+              <HStack gap={3} wrap="wrap" hAlign="center">
                 <Button
                   label="Read the Quran"
                   href={urlFor('surahs.index')}
@@ -44,7 +45,7 @@ export default function Home() {
                 />
               </HStack>
             </VStack>
-            <QuranCredit />
+            <QuranCredit align="center" />
           </VStack>
         </LayoutContent>
       }

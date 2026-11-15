@@ -13,7 +13,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Full name', { exact: true }).fill('Updated Name')
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
   })
@@ -24,7 +24,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Full name', { exact: true }).fill('  Ada King  ')
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
     await db.assertHas('users', { id: user.id, full_name: 'Ada King' })
@@ -36,7 +36,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Full name', { exact: true }).fill('A'.repeat(101))
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(
       page.getByText('The fullName field must not be greater than 100 characters', {
@@ -59,7 +59,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Email', { exact: true }).fill('newemail@example.com')
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(
       page.getByText('Verify your new email address to switch to it.', { exact: true })
@@ -85,7 +85,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Email', { exact: true }).fill(other.email)
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(page.getByText('The email has already been taken', { exact: true }))
     mailFake.mails.assertNoneQueued()
@@ -106,7 +106,7 @@ test.group('Profile Management', (group) => {
 
     const page = await visit(route('profile.show'))
     await page.getByLabel('Email', { exact: true }).fill(user.email)
-    await page.getByRole('button', { name: 'Update Profile', exact: true }).click()
+    await page.getByRole('button', { name: 'Update profile', exact: true }).click()
 
     await page.assertVisible(page.getByText('Profile updated successfully', { exact: true }))
     mailFake.mails.assertNoneQueued()

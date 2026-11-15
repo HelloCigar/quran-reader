@@ -29,7 +29,7 @@ export default function PasswordRequirements({
   requirements: PasswordRequirement[]
 }) {
   return (
-    <List aria-label="Password requirements" edge="flush">
+    <List aria-label="Password requirements" edge="flush" density="compact">
       {requirements.map((requirement) => (
         <ListItem
           key={requirement.rule}

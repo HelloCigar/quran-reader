@@ -1,10 +1,7 @@
-import { Head } from '@inertiajs/react'
-import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
-import { VStack } from '@astryxdesign/core/VStack'
-import { Heading } from '@astryxdesign/core/Heading'
 import type { Data } from '@generated/data'
 import type { InertiaProps } from '~/types'
 import AppLayout from '~/components/app/app_layout'
+import PageLayout from '~/components/app/page_layout'
 import ContinueReadingCard from '~/components/dashboard/continue_reading_card'
 import RecentBookmarks from '~/components/dashboard/recent_bookmarks'
 
@@ -15,20 +12,10 @@ type PageProps = InertiaProps<{
 
 export default function Dashboard({ continueReading, bookmarks }: PageProps) {
   return (
-    <Layout
-      height="auto"
-      contentWidth={720}
-      content={
-        <LayoutContent padding={6}>
-          <Head title="Dashboard" />
-          <VStack gap={8}>
-            <Heading level={1}>Dashboard</Heading>
-            <ContinueReadingCard continueReading={continueReading} />
-            <RecentBookmarks bookmarks={bookmarks} />
-          </VStack>
-        </LayoutContent>
-      }
-    />
+    <PageLayout title="Dashboard">
+      <ContinueReadingCard continueReading={continueReading} />
+      <RecentBookmarks bookmarks={bookmarks} />
+    </PageLayout>
   )
 }
 
