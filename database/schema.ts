@@ -142,6 +142,23 @@ export class RateLimitSchema extends BaseModel {
   declare points: number
 }
 
+export class ReadingPositionSchema extends BaseModel {
+  static $columns = ['ayahNumber', 'createdAt', 'id', 'surahNumber', 'updatedAt', 'userId'] as const
+  $columns = ReadingPositionSchema.$columns
+  @column()
+  declare ayahNumber: number
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare surahNumber: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number
+}
+
 export class UserSchema extends BaseModel {
   static $columns = [
     'createdAt',

@@ -268,6 +268,19 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/session_controller').default['destroy']>>>
     }
   }
+  'reading_position.update': {
+    methods: ["PUT"]
+    pattern: '/reading-position'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/reading_position').updateReadingPositionValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/reading_position').updateReadingPositionValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/reading_position_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/reading_position_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/reading_position_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'settings': {
     methods: ["GET","HEAD"]
     pattern: '/settings'

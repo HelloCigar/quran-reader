@@ -52,6 +52,7 @@ router
     router.post('email-verifications', [controllers.EmailVerifications, 'store'])
     router.get('account/activate', [controllers.EmailVerifications, 'create'])
     router.post('logout', [controllers.Session, 'destroy'])
+    router.put('reading-position', [controllers.ReadingPosition, 'update'])
 
     router.on('settings').redirect('profile.show').as('settings')
     router.get('settings/profile', [controllers.Profile, 'show'])

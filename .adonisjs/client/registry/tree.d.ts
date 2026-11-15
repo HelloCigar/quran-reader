@@ -38,6 +38,9 @@ export interface ApiDefinition {
     store: typeof routes['passkey_session.store']
   }
   dashboard: typeof routes['dashboard']
+  readingPosition: {
+    update: typeof routes['reading_position.update']
+  }
   settings: typeof routes['settings']
   profile: {
     show: typeof routes['profile.show']

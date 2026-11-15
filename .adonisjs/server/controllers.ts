@@ -15,6 +15,7 @@ export const controllers = {
   Passkeys: () => import('#controllers/passkeys_controller'),
   PasswordResets: () => import('#controllers/password_resets_controller'),
   Profile: () => import('#controllers/profile_controller'),
+  ReadingPosition: () => import('#controllers/reading_position_controller'),
   Security: () => import('#controllers/security_controller'),
   Session: () => import('#controllers/session_controller'),
   Surahs: () => import('#controllers/surahs_controller'),
