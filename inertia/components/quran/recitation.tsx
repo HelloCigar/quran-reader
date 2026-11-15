@@ -338,11 +338,13 @@ function useRecitationPlayer() {
   /**
    * Moves the Recitation to the start of `toAyah` of its Surah. Playing, it
    * plays on from there; paused, it stays paused and Play carries on from
-   * there.
+   * there. It cancels a Play still waiting for another Surah's Recitation to
+   * load, which would otherwise replace the Ayah moved to.
    */
   const moveTo = useCallback(
     (toAyah: number) => {
       if (!recited) return
+      pendingRef.current = null
       if (isPlaying) {
         start(recited.recitation, toAyah)
         return
