@@ -228,7 +228,14 @@ function RecitedProgress({ recited }: { recited: Recited }) {
   const { ayahs, surahNumber } = recited.recitation
   const endMs = ayahs.at(-1)?.endMs ?? 1
   const lastAyah = ayahs.at(-1)?.number ?? 1
-  const ayahAt = (ms: number) => ayahs.findLast((ayah) => ayah.startMs <= ms) ?? ayahs[0]
+  /**
+   * The Ayah heard at `ms`. A first Word can begin a little before its Ayah
+   * (see ADR 0002): the Ayah counts from whichever is first, so the thumb,
+   * the Word played and the page agree.
+   */
+  const ayahAt = (ms: number) =>
+    ayahs.findLast((ayah) => Math.min(ayah.startMs, ayah.words[0]?.startMs ?? Infinity) <= ms) ??
+    ayahs[0]
   const valueMs = draggedMs ?? Math.min(positionMs, endMs)
 
   const onKeyDownCapture = (event: KeyboardEvent) => {

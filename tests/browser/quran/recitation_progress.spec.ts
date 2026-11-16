@@ -9,6 +9,7 @@ import {
   waitForRecitationPast,
 } from '#tests/helpers/quran/recitation_progress'
 import { scrollToAyah, waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
+import { goToArea } from '#tests/helpers/navigation'
 
 /**
  * The fake Recitation hears each Word for `wordMs` (1 second unless a test
@@ -76,6 +77,52 @@ test.group('Dragging through the Recitation', () => {
 
     // Half way through the 19 Words of An-Nasr is the 10th: 110:2:5, after the 5 Words of 110:1.
     await page.assertVisible(page.getByRole('dialog', { name: /^Word 110:2:[4-6]$/ }))
+  })
+
+  test('plays a first Word that begins before its Ayah when the reader lets go on it', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API. Each Ayah is said to start 9 seconds
+    // after its first Word, as Quran Foundation's timings can: 110:2:1 is heard from 50.6 to
+    // 60.6 seconds, and 110:2 starts at 59.6.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000, ayahLagMs: 9000 }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    await page.getByRole('button', { name: 'Play from 110:1', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '110:1')
+    // About 55 seconds into the 190.6 (the thumb's travel is inset from the ends of the bar):
+    // in 110:2:1, before 110:2 starts.
+    await holdRecitationThumbAt(page, 0.31)
+    await page.mouse.up()
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:2:1', exact: true }))
+  })
+
+  test("leaves another Surah's page where it is when the reader lets go", async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:3')
+    await goToArea(page, 'Quran', route('surahs.index'))
+    await page.getByRole('link', { name: /Al-Baqarah/ }).click()
+    await page.waitForURL(route('surahs.show', { number: 2 }))
+    // A tenth of the way through Ya-Sin: an Ayah Al-Baqarah has loaded too.
+    const reference = await holdRecitationThumbAt(page, 0.1)
+    await page.mouse.up()
+    await page.assertText(page.getByTestId('recited-ayah'), reference)
+
+    // The page stays at its start.
+    await waitForAyahInView(page, 1)
   })
 
   test('names the Ayah of the Word the reader lets go on', async ({ visit, route, swap }) => {
@@ -257,6 +304,23 @@ test.group('Dragging through the Recitation', () => {
     await page.assertExists(
       recitationThumb(page).and(page.locator('[aria-valuetext="Ayah 2:255"]'))
     )
+  })
+
+  test('loads the Recitation and plays from the Ayah a key moves to before the first Play', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await recitationThumb(page).focus()
+    await page.keyboard.press('ArrowRight')
+
+    // One Ayah on from 36:1, the first Ayah in view.
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:2:1', exact: true }))
   })
 
   test('loads the Recitation and plays from the Ayah dragged to before the first Play', async ({
