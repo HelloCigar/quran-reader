@@ -11,6 +11,7 @@ Commands:
 - `npm run dev` — AdonisJS + Vite dev server on http://localhost:3333
 - `npm run typecheck`, `npm run lint` (Oxlint via `vp lint`), `npm run format` / `format:check` (Oxfmt via `vp fmt`)
 - `npm run build` — production build (`node ace build`)
+- `npm test` — every test in one process; `npm run test:shards` runs them in parallel processes (`-- --shards=6`, `-- browser` to pick a suite), each with its own port, SQLite file and Vite cache
 
 Folders: the frontend is grouped by domain.
 
