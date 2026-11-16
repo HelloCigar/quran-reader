@@ -31,7 +31,6 @@ export default class NewAccountController {
     await mail.sendLater(new AccountActivationProvision(user, token))
 
     await auth.use('web').login(user)
-    response.plainCookie('last_login_method', 'email', { maxAge: '60 days' })
 
     if (bookmark) {
       await user.keepBookmark(bookmark.surah, bookmark.ayah)

@@ -34,7 +34,6 @@ export default class SessionController {
 
     await auth.use('web').login(user)
     session.flash('passkeySignals', await user.getPasskeySignals())
-    response.plainCookie('last_login_method', 'email', { maxAge: '60 days' })
 
     // Kept only after login succeeds, so failed credentials create nothing.
     if (bookmark) {

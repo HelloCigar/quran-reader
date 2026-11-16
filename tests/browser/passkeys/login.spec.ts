@@ -78,19 +78,6 @@ test.group('Passkey Login', (group) => {
     await page.assertPath(route('dashboard'))
   })
 
-  test('writes the last_login_method cookie', async ({ visit, route, browserContext, assert }) => {
-    const user = await UserFactory.apply('verified').create()
-    const page = await visit(route('session.create'))
-    const authenticator = await addVirtualAuthenticator(page)
-    await authenticator.addPasskey(user)
-
-    await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
-    await page.assertPath(route('dashboard'))
-
-    const lastLoginMethod = await browserContext.getPlainCookie('last_login_method')
-    assert.equal(lastLoginMethod, 'passkey')
-  })
-
   test('re-syncs the passkey provider after signing in with a passkey', async ({
     visit,
     route,
