@@ -55,9 +55,13 @@ export default defineConfig({
   /**
    * The browser tests start their own Vite server. A separate cache keeps it
    * from renaming `node_modules/.vite/deps` while the dev server holds it,
-   * which fails on Windows with EPERM.
+   * which fails on Windows with EPERM. Each test shard (`npm run
+   * test:shards`) gets its own for the same reason.
    */
-  cacheDir: process.env.NODE_ENV === 'test' ? 'node_modules/.vite-test' : 'node_modules/.vite',
+  cacheDir:
+    process.env.NODE_ENV === 'test'
+      ? `node_modules/.vite-test${process.env.TEST_SHARD ?? ''}`
+      : 'node_modules/.vite',
 
   server: {
     /**

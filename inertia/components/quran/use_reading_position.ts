@@ -63,7 +63,7 @@ export class ReadingPositionSaver {
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
         ...(token ? { 'X-XSRF-TOKEN': decodeURIComponent(token) } : {}),
       },
       body: JSON.stringify(position),

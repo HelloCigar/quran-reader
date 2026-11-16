@@ -19,9 +19,62 @@ jobs:
           scope: '@adonisplus'
 
       # Only the download needs the registry token. Install scripts run in a
-      # separate step, where the token is not set.
+      # separate step, where the token is not set. Five jobs install at once,
+      # so a dropped connection (ECONNRESET) gets a few retries.
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: |
+          for attempt in 1 2 3; do
+            npm ci --ignore-scripts --prefer-offline && exit 0
+            echo "npm ci failed (attempt $attempt of 3)"
+            sleep $((attempt * 15))
+          done
+          exit 1
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
+
+      - name: Run install scripts
+        run: npm rebuild
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+  test:
+    runs-on: ubuntu-latest
+    # Japa's --shard deals the test files out round-robin, so each shard gets
+    # a mix of the slow browser files. Each shard runs on its own runner, with
+    # its own SQLite file and HTTP port.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    name: test (${{ matrix.shard }}/4)
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://plus.adonisjs.com/registry/
+          scope: '@adonisplus'
+
+      # Only the download needs the registry token. Install scripts run in a
+      # separate step, where the token is not set. Five jobs install at once,
+      # so a dropped connection (ECONNRESET) gets a few retries.
+      - name: Install dependencies
+        run: |
+          for attempt in 1 2 3; do
+            npm ci --ignore-scripts --prefer-offline && exit 0
+            echo "npm ci failed (attempt $attempt of 3)"
+            sleep $((attempt * 15))
+          done
+          exit 1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
 
@@ -35,14 +88,8 @@ jobs:
           sed -i 's/^QURAN_FOUNDATION_CLIENT_ID=$/QURAN_FOUNDATION_CLIENT_ID=ci/; s/^QURAN_FOUNDATION_CLIENT_SECRET=$/QURAN_FOUNDATION_CLIENT_SECRET=ci/' .env
           node ace generate:key
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
       - name: Test
-        run: npm test
+        run: npm test -- --shard=${{ matrix.shard }}/4

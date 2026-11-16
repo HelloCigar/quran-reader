@@ -1,3 +1,4 @@
+import env from '#start/env'
 import app from '@adonisjs/core/services/app'
 import { defineConfig } from '@adonisjs/lucid'
 
@@ -16,9 +17,12 @@ const dbConfig = defineConfig({
 
       connection: {
         /**
-         * Database file location.
+         * Database file location. Each test shard (`npm run test:shards`)
+         * gets its own file, so the shards can run at the same time.
          */
-        filename: app.tmpPath(app.inTest ? 'db.test.sqlite3' : 'db.sqlite3'),
+        filename: app.tmpPath(
+          app.inTest ? `db.test${env.get('TEST_SHARD') ?? ''}.sqlite3` : 'db.sqlite3'
+        ),
       },
 
       /**
