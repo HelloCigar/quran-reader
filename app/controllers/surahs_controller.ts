@@ -38,28 +38,21 @@ export default class SurahsController {
   }
 
   async show({ inertia, params, request, auth }: HttpContext) {
-    const { ayah, note } = await request.validateUsing(showSurahValidator)
+    const { ayah } = await request.validateUsing(showSurahValidator)
     const number: number = params.number
-    const noBookmarks: Bookmark[] = []
-    const [surah, surahs, bookmarks] = await Promise.all([
+    const [surah, surahs] = await Promise.all([
       this.#quranText.readSurah(number),
       this.#quranText.listSurahs(),
-      auth.user
-        ? auth.user.related('bookmarks').query().where('surah_number', number)
-        : noBookmarks,
     ])
     const previous = surahs[number - 2] ?? null
     const next = surahs[number] ?? null
-    const noteFor =
-      note !== undefined && bookmarks.some((bookmark) => bookmark.ayahNumber === note) ? note : null
     /**
      * A scroll up or down asks for the next block by a partial reload. Any
-     * other visit opens the Surah: at `ayah`, or else at the Ayah whose note
-     * opens.
+     * other visit opens the Surah at `ayah`.
      */
     const block = inertia.requestInfo().isPartialRequest
       ? AyahBlock.holding(ayah, surah.ayahCount)
-      : AyahBlock.openingAt(ayah ?? noteFor ?? undefined, surah.ayahCount)
+      : AyahBlock.openingAt(ayah, surah.ayahCount)
 
     return inertia.render('quran/show', {
       surah: SurahTransformer.transform(surah).useVariant('forReading'),
@@ -78,8 +71,17 @@ export default class SurahsController {
       next: next ? SurahTransformer.transform(next) : null,
       /** Every Surah, for the sidebar. */
       surahs: SurahTransformer.transform(surahs).useVariant('forNavigation'),
-      bookmarks: BookmarkTransformer.transform(bookmarks),
-      noteFor,
+      /**
+       * The signed-in reader's Bookmarks in this Surah. Read only when the
+       * visit asks for them: a block of Ayahs or the Recitation loads without.
+       */
+      bookmarks: async () => {
+        const noBookmarks: Bookmark[] = []
+        const bookmarks = auth.user
+          ? await auth.user.related('bookmarks').query().where('surah_number', number)
+          : noBookmarks
+        return BookmarkTransformer.transform(bookmarks)
+      },
       /**
        * Loaded by a partial reload on the first Play, and kept by the app
        * layout from then on. `null` when the Recitation is unavailable;

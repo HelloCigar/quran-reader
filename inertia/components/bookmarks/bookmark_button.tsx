@@ -40,8 +40,13 @@ export default function BookmarkButton({
       variant="ghost"
       icon={icon}
       onClick={() =>
-        // A fresh visit, so the surah page remounts and opens the note prompt.
-        router.post({ route: 'bookmarks.store' }, { surah, ayah }, { preserveState: false })
+        // Only the bookmarks change, so the Ayahs loaded so far stay; the page
+        // then asks for the note (the `noteFor` flash).
+        router.post(
+          { route: 'bookmarks.store' },
+          { surah, ayah },
+          { preserveScroll: true, preserveState: true, only: ['bookmarks'] }
+        )
       }
     />
   )

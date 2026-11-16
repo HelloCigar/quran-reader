@@ -79,8 +79,10 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
     const success: string | undefined = session?.flashMessages.get('success')
     const error: string | undefined = session?.flashMessages.get('error')
     const passkeySignals: PasskeySignal[] | undefined = session?.flashMessages.get('passkeySignals')
+    /** The Ayah just bookmarked, whose note the Surah's page asks for. */
+    const noteFor: number | undefined = session?.flashMessages.get('noteFor')
 
-    return { success, error, passkeySignals }
+    return { success, error, passkeySignals, noteFor }
   }
 
   async handle(ctx: HttpContext, next: NextFn) {

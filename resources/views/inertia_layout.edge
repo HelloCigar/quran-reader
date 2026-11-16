@@ -16,16 +16,21 @@
     {{--
       Browser chrome color: the theme's --color-background-body, copied from
       the palette (sand light 95 / dark 10) because a meta tag cannot read
-      tokens. Follows the same cookie choice as color-scheme above.
+      tokens. Follows the same cookie choice as color-scheme above: `media`
+      picks the tag in use, and the theme toggle rewrites it on a change.
     --}}
-    @if(theme === 'dark')
-      <meta name="theme-color" content="#1f1b14" />
-    @elseif(theme === 'light')
-      <meta name="theme-color" content="#f6f0e7" />
-    @else
-      <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f0e7" />
-      <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f1b14" />
-    @end
+    <meta
+      name="theme-color"
+      data-scheme="light"
+      media="{{ theme === 'light' ? 'all' : theme === 'dark' ? 'not all' : '(prefers-color-scheme: light)' }}"
+      content="#f6f0e7"
+    />
+    <meta
+      name="theme-color"
+      data-scheme="dark"
+      media="{{ theme === 'dark' ? 'all' : theme === 'light' ? 'not all' : '(prefers-color-scheme: dark)' }}"
+      content="#1f1b14"
+    />
 
     @viteReactRefresh()
     @vite(['inertia/app.tsx'])

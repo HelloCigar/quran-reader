@@ -38,6 +38,12 @@ export function ThemePreferenceProvider({
     setPreferenceState(next)
     document.cookie = `${COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`
     document.documentElement.style.colorScheme = next === 'system' ? 'light dark' : next
+    // The browser chrome color: the Edge shell renders one tag per scheme.
+    for (const meta of document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')) {
+      const { scheme } = meta.dataset
+      if (next === 'system') meta.media = `(prefers-color-scheme: ${scheme})`
+      else meta.media = next === scheme ? 'all' : 'not all'
+    }
   }, [])
 
   const value = useMemo(() => ({ preference, setPreference }), [preference, setPreference])
