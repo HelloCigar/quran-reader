@@ -9,7 +9,7 @@ AdonisJS 7 + Inertia + React. The frontend lives in `inertia/` and is built with
 Commands:
 
 - `npm run dev` — AdonisJS + Vite dev server on http://localhost:3333
-- `npm run typecheck`, `npm run lint` (Oxlint via `vp lint`), `npm run format` / `format:check` (Oxfmt via `vp fmt`). The rules live in `.oxfmtrc.json` / `.oxlintrc.json`; `vite.config.ts` feeds them to Vite+, so `vp fmt`, `vp lint`, `vp check` and bare `oxfmt` all agree. Format only what you touched: `npm run format -- <files>`.
+- `npm run typecheck`, `npm run lint` (Oxlint via `vp lint`), `npm run format` / `format:check` (Oxfmt via `vp fmt`). The rules live in `.oxfmtrc.json` / `.oxlintrc.json`; `vite.config.ts` feeds them to Vite+, so `vp fmt`, `vp lint`, `vp check` and bare `oxfmt` all agree. Format only what you touched: `npm run format -- <files>`. The `flow/*` overrides in `.oxlintrc.json` are generated from `@adonisplus/flow`; after updating it run `npm run lint:flow` (`npm run lint` fails while they are stale).
 - `npm run build` — production build (`node ace build`)
 - `npm test` — every test in one process; `npm run test:shards` runs them in parallel processes (`-- --shards=6`, `-- browser` to pick a suite), each with its own port, SQLite file and Vite cache
 
