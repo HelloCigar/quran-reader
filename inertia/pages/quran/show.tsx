@@ -28,7 +28,7 @@ import ReaderLayout from '~/components/quran/reader_layout'
 import { ayahsInView } from '~/components/quran/ayahs_in_view'
 import { useFollowRecitation } from '~/components/quran/use_follow_recitation'
 import { useReadingPosition } from '~/components/quran/use_reading_position'
-import { useReaderSidebarToggle, type SidebarMode } from '~/components/quran/use_reader_sidebar'
+import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -61,10 +61,8 @@ type PageProps = InertiaProps<{
   openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
-  /** Every Surah, for the sidebar `ReaderLayout` renders. */
+  /** Every Surah, for the sidebar `ReaderLayout` and the app layout's drawer render. */
   surahs: Data.Surah.Variants['forNavigation'][]
-  /** The reader's sidebar choices, from their cookies, for `ReaderLayout`. */
-  sidebar: { isShown: boolean; mode: SidebarMode }
   bookmarks: Data.Bookmark[]
   noteFor: number | null
   /**
@@ -85,7 +83,7 @@ export default function Show({
   openedAt,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
-  const sidebarToggle = useReaderSidebarToggle()
+  const sidebar = useReaderSidebar()
   const scrollRef = useRef<InfiniteScrollRef>(null)
   /**
    * Inertia drops a visit's page when a client-side URL change lands while
@@ -172,7 +170,7 @@ export default function Show({
    * on top of the drawer. It comes back when the drawer closes.
    */
   const { isMobileNavOpen } = useAppShellMobile()
-  const isCovered = Boolean(sidebarToggle?.isDrawerOpen) || isMobileNavOpen
+  const isCovered = sidebar.isDrawerOpen || isMobileNavOpen
   const shownOnPage = recitedWord !== null && isCovered ? null : shown
   const isRecitedHere = recitedWord?.startsWith(`${surah.number}:`) ?? false
   const closeRecitedWord = useEffectEvent((event: PointerEvent) => {
@@ -208,7 +206,6 @@ export default function Show({
     surahNumber: surah.number,
     ayahCount: surah.ayahCount.raw,
     firstAyahInView,
-    sidebarToggle,
     showAyah: showMovedTo,
   })
   const playFrom = useCallback(

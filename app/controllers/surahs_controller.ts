@@ -78,17 +78,6 @@ export default class SurahsController {
       next: next ? SurahTransformer.transform(next) : null,
       /** Every Surah, for the sidebar. */
       surahs: SurahTransformer.transform(surahs).useVariant('forNavigation'),
-      /**
-       * The reader's sidebar choices, kept in cookies the page writes, so the
-       * page renders with them in place. An unknown value is the default.
-       */
-      sidebar: {
-        isShown: request.plainCookie('reader_sidebar', { encoded: false }) !== 'hidden',
-        mode:
-          request.plainCookie('reader_sidebar_mode', { encoded: false }) === 'surah'
-            ? ('surah' as const)
-            : ('verse' as const),
-      },
       bookmarks: BookmarkTransformer.transform(bookmarks),
       noteFor,
       /**
