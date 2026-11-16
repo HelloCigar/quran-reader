@@ -33,10 +33,12 @@ export type Recited = { recitation: Data.Recitation; ayah: number }
  */
 export type ReadingPage = {
   surahNumber: number
+  /** How many Ayahs its Surah has. */
+  ayahCount: number
   /** The first Ayah the reader can see. */
   firstAyahInView: () => number
   sidebarToggle: ReaderSidebarToggle | null
-  /** Scrolls the page to the start of an Ayah of its Surah. */
+  /** Shows the start of an Ayah of its Surah, loading its block when it isn't loaded. */
   showAyah: (ayah: number) => void
 }
 
@@ -217,29 +219,34 @@ function useRecitationPlayer() {
 
   /**
    * Puts the audio at the start of `toAyah` of `loaded`, which becomes the
-   * Recited Ayah, without playing or pausing it.
+   * Recited Ayah, without playing or pausing it; or, with `atMs`, at the
+   * start of the Word of that Ayah which begins then.
    */
-  const seek = useCallback((element: HTMLAudioElement, loaded: Data.Recitation, toAyah: number) => {
-    const ayah = loaded.ayahs.find(({ number }) => number === toAyah)
-    // A first Word can begin a little before its Ayah: start from whichever is first.
-    const fromMs = Math.min(ayah?.startMs ?? 0, ayah?.words[0]?.startMs ?? Infinity)
-    originMsRef.current = fromMs
-    element.currentTime = fromMs / 1000
-    setShown((current) => (current?.by === 'recitation' ? null : current))
-    setRecited({ recitation: loaded, ayah: toAyah })
-  }, [])
+  const seek = useCallback(
+    (element: HTMLAudioElement, loaded: Data.Recitation, toAyah: number, atMs?: number) => {
+      const ayah = loaded.ayahs.find(({ number }) => number === toAyah)
+      // A first Word can begin a little before its Ayah: start from whichever is first.
+      const fromMs = atMs ?? Math.min(ayah?.startMs ?? 0, ayah?.words[0]?.startMs ?? Infinity)
+      originMsRef.current = fromMs
+      element.currentTime = fromMs / 1000
+      setShown((current) => (current?.by === 'recitation' ? null : current))
+      setRecited({ recitation: loaded, ayah: toAyah })
+    },
+    []
+  )
 
   /**
    * Plays `loaded` from the start of `fromAyah`, which becomes the Recited
-   * Ayah; or, with no Ayah, carries on where the audio is.
+   * Ayah, or with `atMs` from the Word of that Ayah which begins then; or,
+   * with no Ayah, carries on where the audio is.
    */
   const start = useCallback(
-    (loaded: Data.Recitation, fromAyah: number | null) => {
+    (loaded: Data.Recitation, fromAyah: number | null, atMs?: number) => {
       stopWord()
       const element = audio()
       if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
       if (fromAyah !== null) {
-        seek(element, loaded, fromAyah)
+        seek(element, loaded, fromAyah, atMs)
         setShown(null)
       }
 
@@ -358,6 +365,47 @@ function useRecitationPlayer() {
   )
 
   /**
+   * Plays the Recitation from the start of `fromAyah` of its Surah, whether
+   * it was playing or paused. Like `moveTo`, it cancels a Play still waiting
+   * for another Surah's Recitation to load.
+   */
+  const playAt = useCallback(
+    (fromAyah: number) => {
+      if (!recited) return
+      pendingRef.current = null
+      start(recited.recitation, fromAyah)
+    },
+    [recited, start]
+  )
+
+  /**
+   * Plays the Recitation from the start of the Word at `location`, whose
+   * Ayah becomes the Recited Ayah. A Word with no timing plays nothing.
+   */
+  const playAtWord = useCallback(
+    (location: string) => {
+      const word = words.find((timed) => timed.location === location)
+      if (!recited || !word) return
+      pendingRef.current = null
+      start(recited.recitation, word.ayah, word.startMs)
+    },
+    [recited, start, words]
+  )
+
+  /**
+   * How far the Recitation has got: the time in its Surah's audio file, in
+   * ms (see ADR 0002). When its audio element has since been used to load
+   * another Surah, that is the start of the Recited Ayah, where Play carries
+   * on from.
+   */
+  const positionMs = useCallback(() => {
+    if (!recited) return 0
+    const element = audioRef.current
+    if (element && element.src === recited.recitation.audioUrl) return element.currentTime * 1000
+    return recited.recitation.ayahs.find(({ number }) => number === recited.ayah)?.startMs ?? 0
+  }, [recited])
+
+  /**
    * Stops the Recitation, forgets its place and closes the Recited Word's
    * popover.
    */
@@ -440,6 +488,9 @@ function useRecitationPlayer() {
       pause,
       close,
       moveTo,
+      playAt,
+      playAtWord,
+      positionMs,
       openWord,
     }),
     [
@@ -453,6 +504,9 @@ function useRecitationPlayer() {
       pause,
       close,
       moveTo,
+      playAt,
+      playAtWord,
+      positionMs,
       openWord,
     ]
   )
@@ -513,6 +567,7 @@ export function useRecitation() {
  */
 export function useReadingPage({
   surahNumber,
+  ayahCount,
   firstAyahInView,
   sidebarToggle,
   showAyah,
@@ -521,7 +576,30 @@ export function useReadingPage({
 
   // Before the page is painted, so the bar is there from the first frame.
   useLayoutEffect(() => {
-    setReadingPage({ surahNumber, firstAyahInView, sidebarToggle, showAyah })
+    setReadingPage({ surahNumber, ayahCount, firstAyahInView, sidebarToggle, showAyah })
     return () => setReadingPage(null)
-  }, [surahNumber, firstAyahInView, sidebarToggle, showAyah, setReadingPage])
+  }, [surahNumber, ayahCount, firstAyahInView, sidebarToggle, showAyah, setReadingPage])
+}
+
+/**
+ * How far the Recitation has got, in ms of its Surah's audio file, read
+ * every frame while it plays and once after each move while it is paused.
+ *
+ * `read` reads it at once. A caller that has just moved the Recitation calls
+ * it, so nothing shows the place it left for the frame before the next read.
+ */
+export function useRecitationPosition() {
+  const { isPlaying, positionMs } = useRecitation()
+  const [ms, setMs] = useState(positionMs)
+  const read = useCallback(() => setMs(positionMs()), [positionMs])
+
+  useEffect(() => {
+    let frame = requestAnimationFrame(function readFrame() {
+      setMs(positionMs())
+      if (isPlaying) frame = requestAnimationFrame(readFrame)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [isPlaying, positionMs])
+
+  return [ms, read] as const
 }

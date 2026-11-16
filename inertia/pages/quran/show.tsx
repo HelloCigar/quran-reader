@@ -122,22 +122,32 @@ export default function Show({
    */
   const firstAyahInView = useCallback(() => ayahsInView(listRef.current)?.first ?? 1, [])
   /**
-   * Scrolls to the Ayah the Recitation bar moved to. One outside the loaded
-   * blocks waits in `ayahToShowRef` while the block before or after them
-   * loads, until it is loaded.
+   * Scrolls to the Ayah the Recitation bar moved to. The Ayah just before or
+   * after the loaded blocks waits in `ayahToShowRef` while its block loads.
+   * One further away waits in `ayahToOpen` for the page to open again at it,
+   * as a link to that Ayah opens it: only its block loads, and the blocks
+   * around it load as the reader scrolls.
    */
   const ayahToShowRef = useRef<number | null>(null)
+  const [ayahToOpen, setAyahToOpen] = useState<number | null>(null)
   const showAyah = useCallback((ayah: number) => {
     ayahToShowRef.current = null
+    setAyahToOpen(null)
     const element = document.getElementById(`ayah-${ayah}`)
     if (element) {
       element.scrollIntoView({ block: 'start' })
       return
     }
-    ayahToShowRef.current = ayah
-    const first = listRef.current?.querySelector('[id^="ayah-"]')
-    if (first && ayah < Number(first.id.slice('ayah-'.length))) scrollRef.current?.fetchPrevious()
-    else scrollRef.current?.fetchNext()
+    const items = listRef.current?.querySelectorAll('[id^="ayah-"]')
+    const first = Number(items?.[0]?.id.slice('ayah-'.length))
+    const last = Number(items?.[items.length - 1]?.id.slice('ayah-'.length))
+    if (ayah === first - 1) {
+      ayahToShowRef.current = ayah
+      scrollRef.current?.fetchPrevious()
+    } else if (ayah === last + 1) {
+      ayahToShowRef.current = ayah
+      scrollRef.current?.fetchNext()
+    } else setAyahToOpen(ayah)
   }, [])
   /** The Recitation the app layout holds: this Surah's, or one started elsewhere. */
   const recitation = useRecitation()
@@ -196,6 +206,7 @@ export default function Show({
   )
   useReadingPage({
     surahNumber: surah.number,
+    ayahCount: surah.ayahCount.raw,
     firstAyahInView,
     sidebarToggle,
     showAyah: showMovedTo,
@@ -222,9 +233,14 @@ export default function Show({
     if (lastLoaded - recitedAyah < RECITATION_LOAD_AHEAD) scrollRef.current?.fetchNext()
   }, [recitedAyah, firstLoaded, lastLoaded])
 
+  // The block of the Ayah waiting in `ayahToShowRef` has loaded: the page scrolls to it.
   useEffect(() => {
-    if (ayahToShowRef.current !== null) showAyah(ayahToShowRef.current)
-  }, [firstLoaded, lastLoaded, showAyah])
+    if (ayahToShowRef.current === null) return
+    const element = document.getElementById(`ayah-${ayahToShowRef.current}`)
+    if (!element) return
+    ayahToShowRef.current = null
+    element.scrollIntoView({ block: 'start' })
+  }, [firstLoaded, lastLoaded])
 
   useEffect(() => {
     if (openedAt !== null) {
@@ -253,6 +269,21 @@ export default function Show({
     )
   })
   useEffect(() => openHashAyah(), [])
+
+  /**
+   * Opens the page again at `ayahToOpen`. A visit would cancel a Recitation
+   * still loading, so it waits for that load: dragging through the Recitation
+   * before the first Play starts both.
+   */
+  const isRecitationLoading = recitation.isLoading
+  const surahNumber = surah.number
+  useEffect(() => {
+    if (ayahToOpen === null || isRecitationLoading) return
+    router.get(
+      { route: 'surahs.show', routeParams: { number: surahNumber }, qs: { ayah: ayahToOpen } },
+      { replace: true }
+    )
+  }, [ayahToOpen, isRecitationLoading, router, surahNumber])
 
   // After the effects above, so the jump to the Ayah the page opens at is already made.
   useReadingPosition({
