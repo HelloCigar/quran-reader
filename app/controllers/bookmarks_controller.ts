@@ -16,7 +16,12 @@ const PER_PAGE = 20
 export default class BookmarksController {
   @inject()
   async index({ inertia, auth, request, response }: HttpContext, quranText: QuranTextService) {
-    const { page = 1 } = await request.validateUsing(listBookmarksValidator)
+    const [invalid, query] = await request.tryValidateUsing(listBookmarksValidator)
+    // A `page` that is no page number, as in a hand-edited URL: the list opens at its start.
+    if (invalid) {
+      return response.redirect().toRoute('bookmarks.index', {}, { qs: { page: 1 } })
+    }
+    const page = query.page ?? 1
     const user = auth.getUserOrFail()
     const bookmarks = await user
       .related('bookmarks')
