@@ -18,19 +18,22 @@ const styles = stylex.create({
 
 /**
  * An indeterminate Astryx `ProgressBar` pinned to the top of the viewport
- * while an Inertia visit is in flight. Replaces Inertia's built-in progress
+ * while an Inertia visit is in flight. A load in the background (a block of
+ * Ayahs, the Recitation) is not a visit, and never shows it. Replaces Inertia's built-in progress
  * bar (`progress: false` in `app.tsx`).
  */
 export default function NavigationProgress() {
   const [isVisible, setIsVisible] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  useNavigationEvent('start', () => {
+  useNavigationEvent('start', (event) => {
+    if (event.detail.visit.async) return
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setIsVisible(true), SHOW_AFTER_MS)
   })
 
-  useNavigationEvent('finish', () => {
+  useNavigationEvent('finish', (event) => {
+    if (event.detail.visit.async) return
     clearTimeout(timer.current)
     setIsVisible(false)
   })

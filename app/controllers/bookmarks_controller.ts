@@ -23,13 +23,15 @@ export default class BookmarksController {
     })
   }
 
-  async store({ request, response, auth }: HttpContext) {
+  async store({ request, response, auth, session }: HttpContext) {
     const { surah, ayah } = await request.validateUsing(createBookmarkValidator)
     const user = auth.getUserOrFail()
 
     await user.keepBookmark(surah, ayah)
 
-    return response.redirect().toRoute('surahs.show', { number: surah }, { qs: { note: ayah } })
+    // The reader stays where they are; the page asks for the note once.
+    session.flash('noteFor', ayah)
+    return response.redirect().back()
   }
 
   async update({ params, request, response, auth, session }: HttpContext) {

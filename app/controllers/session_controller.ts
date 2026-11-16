@@ -41,9 +41,11 @@ export default class SessionController {
       await user.keepBookmark(bookmark.surah, bookmark.ayah)
       // A stale intended URL must not hijack a later sign-in.
       session.clearIntendedUrl()
+      // The Surah opens at the Ayah, and its page asks for the note once.
+      session.flash('noteFor', bookmark.ayah)
       return response
         .redirect()
-        .toRoute('surahs.show', { number: bookmark.surah }, { qs: { note: bookmark.ayah } })
+        .toRoute('surahs.show', { number: bookmark.surah }, { qs: { ayah: bookmark.ayah } })
     }
 
     return response.redirect().toIntended(urlFor('dashboard'))

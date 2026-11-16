@@ -25,6 +25,7 @@ export default memo(function AyahItem({
   surahNumber,
   ayah,
   bookmark,
+  isSignedIn,
   onEditNote,
   onRemove,
   onPlayFrom,
@@ -32,6 +33,7 @@ export default memo(function AyahItem({
   surahNumber: number
   ayah: Data.Ayah
   bookmark: Data.Bookmark | null
+  isSignedIn: boolean
   onEditNote: (bookmark: Data.Bookmark) => void
   onRemove: (bookmark: Data.Bookmark) => void
   onPlayFrom: (ayah: number) => void
@@ -56,6 +58,7 @@ export default memo(function AyahItem({
               surah={surahNumber}
               ayah={ayah.number}
               bookmark={bookmark}
+              isSignedIn={isSignedIn}
               onEditNote={onEditNote}
               onRemove={onRemove}
             />

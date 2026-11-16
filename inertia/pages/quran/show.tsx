@@ -20,6 +20,7 @@ import QuranCredit from '~/components/quran/quran_credit'
 import SurahPager from '~/components/quran/surah_pager'
 import NoteDialog from '~/components/bookmarks/note_dialog'
 import RemoveBookmarkDialog from '~/components/bookmarks/remove_bookmark_dialog'
+import { useNotePrompt } from '~/components/bookmarks/use_note_prompt'
 import { useRemoveBookmark } from '~/components/bookmarks/use_remove_bookmark'
 import { useReadingPage, useRecitation } from '~/components/quran/recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
@@ -64,7 +65,6 @@ type PageProps = InertiaProps<{
   /** Every Surah, for the sidebar `ReaderLayout` and the app layout's drawer render. */
   surahs: Data.Surah.Variants['forNavigation'][]
   bookmarks: Data.Bookmark[]
-  noteFor: number | null
   /**
    * Loaded on the first Play, by the Recitation in the app layout, which
    * keeps it from then on; `null` when the Recitation is unavailable.
@@ -79,8 +79,8 @@ export default function Show({
   previous,
   next,
   bookmarks,
-  noteFor,
   openedAt,
+  user,
 }: PageProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const sidebar = useReaderSidebar()
@@ -105,16 +105,8 @@ export default function Show({
     () => new Map(bookmarks.map((bookmark) => [bookmark.ayahNumber, bookmark])),
     [bookmarks]
   )
-  /**
-   * `noteFor` only says which note to open when the page loads. Visits that
-   * keep this page's state (saving a note, removing a bookmark, loading the
-   * Recitation) keep the same `noteFor`; following it would reopen a note the
-   * reader closed.
-   */
-  // react-doctor-disable-next-line no-derived-useState
-  const [noteAyah, setNoteAyah] = useState<number | null>(noteFor)
+  const notePrompt = useNotePrompt(bookmarksByAyah)
   const removal = useRemoveBookmark()
-  const noteBookmark = noteAyah === null ? null : (bookmarksByAyah.get(noteAyah) ?? null)
   /**
    * The first Ayah the reader can see in the region the Ayahs scroll in.
    */
@@ -151,7 +143,6 @@ export default function Show({
   const recitation = useRecitation()
   const pageRef = useRef<HTMLDivElement>(null)
   const { shown, play, openWord } = recitation
-  const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
   const openByReader = useCallback(
     (location: string, isOpen: boolean) => openWord(surah.number, location, isOpen),
     [openWord, surah.number]
@@ -320,7 +311,8 @@ export default function Show({
                       surahNumber={surah.number}
                       ayah={ayah}
                       bookmark={bookmarksByAyah.get(ayah.number) ?? null}
-                      onEditNote={editNote}
+                      isSignedIn={Boolean(user)}
+                      onEditNote={notePrompt.edit}
                       onRemove={removal.remove}
                       onPlayFrom={playFrom}
                     />
@@ -330,11 +322,11 @@ export default function Show({
                 {hasLastAyah && <QuranCredit />}
               </VStack>
             </InfiniteScroll>
-            {noteBookmark && (
+            {notePrompt.bookmark && (
               <NoteDialog
-                key={noteBookmark.id}
-                bookmark={noteBookmark}
-                onClose={() => setNoteAyah(null)}
+                key={notePrompt.bookmark.id}
+                bookmark={notePrompt.bookmark}
+                onClose={notePrompt.close}
               />
             )}
             <RemoveBookmarkDialog

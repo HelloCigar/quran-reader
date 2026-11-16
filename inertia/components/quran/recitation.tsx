@@ -262,7 +262,8 @@ function useRecitationPlayer() {
    * replaces it. `element` is the audio element that will play: it plays a
    * moment of silence during this click (see SILENCE). Every attempt ends
    * here, so a failed, cancelled or repeated unavailable load never leaves
-   * Play stuck loading.
+   * Play stuck loading. The load runs in the background (`async`): it is not
+   * a visit, so it shows no page progress and the sidebar's drawer ignores it.
    */
   const load = useCallback(
     (element: HTMLAudioElement, surahNumber: number, then: (loaded: Data.Recitation) => void) => {
@@ -278,6 +279,7 @@ function useRecitationPlayer() {
         { href: window.location.href },
         {
           only: ['recitation'],
+          async: true,
           preserveState: true,
           preserveScroll: true,
           replace: true,

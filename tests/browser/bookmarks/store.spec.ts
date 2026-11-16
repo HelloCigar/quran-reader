@@ -92,7 +92,29 @@ test.group('Bookmarks store', (group) => {
     await db.assertHas('bookmarks', { user_id: reader.id, surah_number: 1, ayah_number: 3 }, 1)
   })
 
-  test('opens a long surah at the ayah whose note it asks for', async ({
+  test('opens a long surah at the ayah bookmarked while signing in', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    await User.create({
+      fullName: 'Ada Lovelace',
+      email: 'ada@example.com',
+      password: 'secret-password',
+    })
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=250`)
+    await page.getByRole('link', { name: 'Bookmark 2:250', exact: true }).click()
+    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
+    await page.getByLabel('Password', { exact: true }).fill('secret-password')
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 2:250', exact: true }))
+    await waitForAyahInView(page, 250)
+  })
+
+  test('keeps the ayahs loaded so far when one is bookmarked', async ({
     visit,
     route,
     swap,
@@ -104,13 +126,15 @@ test.group('Bookmarks store', (group) => {
       email: 'ada@example.com',
       password: 'secret-password',
     })
-    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 250, note: null })
     await browserContext.loginAs(reader)
 
-    const page = await visit(`${route('surahs.show', { number: 2 })}?note=250`)
+    // Opening at 2:245 loads its block and the one before; 2:225 is in the earlier one.
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=245`)
+    await page.assertExists(page.getByRole('button', { name: 'Bookmark 2:225', exact: true }))
+    await page.getByRole('button', { name: 'Bookmark 2:258', exact: true }).click()
 
-    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 2:250', exact: true }))
-    await waitForAyahInView(page, 250)
+    await page.assertVisible(page.getByRole('dialog', { name: 'Note on 2:258', exact: true }))
+    await page.assertExists(page.getByRole('button', { name: 'Bookmark 2:225', exact: true }))
   })
 
   test('bookmarks an ayah deep in a long surah and asks for its note there', async ({
