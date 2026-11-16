@@ -26,6 +26,7 @@ import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderLayout from '~/components/quran/reader_layout'
 import { ayahsInView } from '~/components/quran/ayahs_in_view'
+import { useFollowRecitation } from '~/components/quran/use_follow_recitation'
 import { useReadingPosition } from '~/components/quran/use_reading_position'
 import { useReaderSidebarToggle, type SidebarMode } from '~/components/quran/use_reader_sidebar'
 
@@ -140,11 +141,9 @@ export default function Show({
   }, [])
   /** The Recitation the app layout holds: this Surah's, or one started elsewhere. */
   const recitation = useRecitation()
-  useReadingPage({ surahNumber: surah.number, firstAyahInView, sidebarToggle, showAyah })
   const pageRef = useRef<HTMLDivElement>(null)
   const { shown, play, openWord } = recitation
   const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
-  const playFrom = useCallback((ayah: number) => play(surah.number, ayah), [play, surah.number])
   const openByReader = useCallback(
     (location: string, isOpen: boolean) => openWord(surah.number, location, isOpen),
     [openWord, surah.number]
@@ -179,6 +178,36 @@ export default function Show({
     return () => document.removeEventListener('pointerdown', onPointerDown, true)
   }, [isRecitedHere])
 
+  const { recited } = recitation
+  const recitedAyah = recited?.recitation.surahNumber === surah.number ? recited.ayah : null
+
+  const follow = useFollowRecitation({
+    listRef,
+    shown: shownOnPage,
+    recitedAyah,
+  })
+  /** Prev or Next on the Recitation bar: the page shows the Ayah moved to, and follows again. */
+  const showMovedTo = useCallback(
+    (ayah: number) => {
+      follow()
+      showAyah(ayah)
+    },
+    [follow, showAyah]
+  )
+  useReadingPage({
+    surahNumber: surah.number,
+    firstAyahInView,
+    sidebarToggle,
+    showAyah: showMovedTo,
+  })
+  const playFrom = useCallback(
+    (ayah: number) => {
+      follow()
+      play(surah.number, ayah)
+    },
+    [follow, play, surah.number]
+  )
+
   /**
    * A Recitation plays to the end of the Surah: as the Recited Ayah nears the
    * last loaded Ayah, the next block loads, as it does when the reader
@@ -187,8 +216,6 @@ export default function Show({
    */
   const firstLoaded = loaded[0]?.number
   const lastLoaded = loaded.at(-1)?.number
-  const { recited } = recitation
-  const recitedAyah = recited?.recitation.surahNumber === surah.number ? recited.ayah : null
   useEffect(() => {
     if (recitedAyah === null || firstLoaded === undefined || lastLoaded === undefined) return
     if (recitedAyah < firstLoaded || recitedAyah > lastLoaded) return

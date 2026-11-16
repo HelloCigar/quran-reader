@@ -10,10 +10,7 @@ const IN_VIEW_MIN = 24
  */
 export function ayahsInView(list: HTMLElement | null): { first: number; last: number } | null {
   if (!list) return null
-  let region = list.parentElement
-  while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
-    region = region.parentElement
-  }
+  const region = scrollRegion(list)
   const top = region?.getBoundingClientRect().top ?? 0
   const bottom = region?.getBoundingClientRect().bottom ?? window.innerHeight
   const items = Array.from(list.querySelectorAll<HTMLElement>('[id^="ayah-"]'))
@@ -26,6 +23,18 @@ export function ayahsInView(list: HTMLElement | null): { first: number; last: nu
   const shown = firstIndex === -1 ? [] : items.slice(firstIndex)
   const last = shown.findLast((item) => item.getBoundingClientRect().top < bottom) ?? first
   return { first: ayahNumber(first), last: ayahNumber(last) }
+}
+
+/**
+ * The region `element` scrolls in: its nearest ancestor that scrolls, or
+ * `null` when the window does.
+ */
+export function scrollRegion(element: HTMLElement | null): HTMLElement | null {
+  let region = element?.parentElement ?? null
+  while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
+    region = region.parentElement
+  }
+  return region
 }
 
 function ayahNumber(item: HTMLElement) {

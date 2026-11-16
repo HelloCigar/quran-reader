@@ -82,3 +82,84 @@ async function isFirstAyahInViewAfter(page: Page, ayah: number): Promise<boolean
     return first ? Number(first.id.slice('ayah-'.length)) > ${ayah} : false
   })()`)
 }
+
+/**
+ * A script for `page.evaluate`: whether the Ayah numbered `ayah` shows in the
+ * region the Ayahs scroll in, as the reading page counts it (more than 24 px
+ * of it below the top of that region).
+ */
+const IS_AYAH_IN_VIEW = `((ayah) => {
+  const item = document.getElementById('ayah-' + ayah)
+  if (!item) return false
+  let region = item.parentElement
+  while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
+    region = region.parentElement
+  }
+  const view = region?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight }
+  const rect = item.getBoundingClientRect()
+  return rect.bottom > view.top + 24 && rect.top < view.bottom
+})`
+
+/** A script for `page.evaluate`: the number of the Recited Ayah the Recitation bar names. */
+const RECITED_AYAH = `Number(
+  document.querySelector('[data-testid="recited-ayah"]')?.textContent?.split(':')[1] ?? NaN
+)`
+
+/** The number of the Recited Ayah the Recitation bar names. */
+export async function recitedAyah(page: Page): Promise<number> {
+  return page.evaluate(RECITED_AYAH)
+}
+
+/**
+ * Whether any of the Ayah numbered `ayah` shows on screen.
+ */
+export async function isAyahInView(page: Page, ayah: number): Promise<boolean> {
+  return page.evaluate(`${IS_AYAH_IN_VIEW}(${ayah})`)
+}
+
+/**
+ * Waits until the Recited Ayah is one numbered `from` to `to` and shows on
+ * screen. A Word is heard too briefly to wait for one Ayah alone.
+ */
+export async function waitForRecitedAyahInView(
+  page: Page,
+  { from, to }: { from: number; to: number },
+  timeout = 20_000
+) {
+  await page.waitForFunction(
+    `(() => {
+      const ayah = ${RECITED_AYAH}
+      return ayah >= ${from} && ayah <= ${to} && ${IS_AYAH_IN_VIEW}(ayah)
+    })()`,
+    undefined,
+    { timeout }
+  )
+}
+
+/**
+ * Waits until the Recited Ayah no longer shows on screen, as once a scroll
+ * away from it has settled.
+ */
+export async function waitForRecitedAyahOutOfView(page: Page) {
+  await page.waitForFunction(`!${IS_AYAH_IN_VIEW}(${RECITED_AYAH})`)
+}
+
+/**
+ * Wheels the reading page up a little at a time, as a reader looking for it
+ * would, until the Recited Ayah shows on screen.
+ */
+export async function scrollUpToRecitedAyah(page: Page) {
+  const { width, height } = page.viewportSize() ?? { width: 1280, height: 720 }
+  await page.mouse.move(width / 2, height / 2)
+
+  // At most 400 small turns of the wheel: plenty to go back over a block.
+  for (const _ of Array.from({ length: 400 })) {
+    if (await page.evaluate(`${IS_AYAH_IN_VIEW}(${RECITED_AYAH})`)) return
+    await page.mouse.wheel(0, -40)
+    // Two frames: the wheel has scrolled the page and the page has seen it.
+    await page.evaluate(
+      `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`
+    )
+  }
+  throw new Error('Scrolling up never reached the Recited Ayah')
+}

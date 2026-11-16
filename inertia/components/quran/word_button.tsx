@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex'
-import { useEffect, useRef, type RefObject } from 'react'
+import { useRef, type RefObject } from 'react'
 import { colorVars, radiusVars, spacingVars } from '@astryxdesign/core/theme/tokens.stylex'
 import { Button } from '@astryxdesign/core/Button'
 import { Popover } from '@astryxdesign/core/Popover'
@@ -49,32 +49,14 @@ export const wordStyles = stylex.create({
  * Word. The Word itself is the Arabic, so the popover does not repeat it.
  *
  * While a Recitation plays, the popover opens on its own on the Recited Word,
- * without taking focus, and its Transliteration is underlined.
+ * without taking focus, and its Transliteration is underlined. The Surah's
+ * page keeps it in view (`useFollowRecitation`).
  */
 export default function WordButton({ word }: { word: Data.Word }) {
   const { openedBy, onOpenChange } = useWordPopover(word.location)
   const isOpen = openedBy !== null
   const isRecited = openedBy === 'recitation'
   const anchorRef = useRef<HTMLButtonElement>(null)
-
-  /**
-   * Keeps the Recited Word on screen: scrolls only when it has left the view.
-   * The view is the region the Word scrolls in, not the window: a Word under
-   * the Recitation bar or the top nav is inside the window but hidden.
-   */
-  useEffect(() => {
-    const element = anchorRef.current
-    if (!isRecited || !element) return
-    let region = element.parentElement
-    while (region && !/auto|scroll/.test(getComputedStyle(region).overflowY)) {
-      region = region.parentElement
-    }
-    const view = region?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight }
-    const rect = element.getBoundingClientRect()
-    if (rect.top < view.top || rect.bottom > view.bottom) {
-      element.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }
-  }, [isRecited])
 
   return (
     <>
