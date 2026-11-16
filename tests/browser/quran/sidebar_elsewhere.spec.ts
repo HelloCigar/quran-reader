@@ -96,7 +96,7 @@ test.group('The Surah and Ayah sidebar off a Surah page', (group) => {
     await page.assertNotVisible(drawer)
   })
 
-  test('sends the dashboard without the Surahs until the drawer opens', async (context) => {
+  test('sends the dashboard without the Surahs, and still lists them in the drawer', async (context) => {
     // Both stand in for the Quran Foundation Content API.
     context.swap(QuranTextService, new FakeQuranTextService())
     context.swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
@@ -116,47 +116,6 @@ test.group('The Surah and Ayah sidebar off a Surah page', (group) => {
       page
         .getByRole('dialog', { name: 'Quran', exact: true })
         .getByRole('list', { name: 'Surahs', exact: true })
-    )
-  })
-
-  test('says the Surahs are unavailable when the Quran text is down', async (context) => {
-    // Both stand in for the Quran Foundation Content API.
-    const quranText = new FakeQuranTextService()
-    context.swap(QuranTextService, quranText)
-    context.swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
-    const page = await reciteAlBaqarahSignedIn(context)
-    await goToArea(page, 'Dashboard', context.route('dashboard'))
-    quranText.goDown()
-
-    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
-
-    const drawer = page.getByRole('dialog', { name: 'Quran', exact: true })
-    await page.assertVisible(
-      drawer.getByText('The Surahs are unavailable right now.', { exact: true })
-    )
-    await page.assertPath('/dashboard')
-  })
-
-  test('lists the Surahs on the next open once the Quran text is back', async (context) => {
-    // Both stand in for the Quran Foundation Content API.
-    const quranText = new FakeQuranTextService()
-    context.swap(QuranTextService, quranText)
-    context.swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
-    const page = await reciteAlBaqarahSignedIn(context)
-    await goToArea(page, 'Dashboard', context.route('dashboard'))
-    quranText.goDown()
-    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
-    const drawer = page.getByRole('dialog', { name: 'Quran', exact: true })
-    await drawer.getByText('The Surahs are unavailable right now.', { exact: true }).waitFor()
-    await page.keyboard.press('Escape')
-    await page.assertNotVisible(drawer)
-    quranText.comeBack()
-
-    await page.getByRole('button', { name: 'Show Surahs', exact: true }).click()
-
-    await page.assertElementsCount(
-      drawer.getByRole('list', { name: 'Surahs', exact: true }).getByRole('listitem'),
-      114
     )
   })
 })

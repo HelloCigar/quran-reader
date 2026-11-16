@@ -62,8 +62,6 @@ type PageProps = InertiaProps<{
   openedAt: number | null
   previous: Data.Surah | null
   next: Data.Surah | null
-  /** Every Surah, for the sidebar `ReaderLayout` and the app layout's drawer render. */
-  surahs: Data.Surah.Variants['forNavigation'][]
   bookmarks: Data.Bookmark[]
   /**
    * Loaded on the first Play, by the Recitation in the app layout, which

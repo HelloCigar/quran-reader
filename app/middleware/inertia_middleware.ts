@@ -3,7 +3,6 @@ import type { NextFn } from '@adonisjs/core/types/http'
 import UserTransformer from '#transformers/user_transformer'
 import SurahTransformer from '#transformers/surah_transformer'
 import QuranTextService from '#services/quran_text_service'
-import QuranUnavailableException from '#exceptions/quran_unavailable_exception'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 import type { PasskeySignal } from '@adonisplus/persona/passkeys/types'
 
@@ -48,21 +47,16 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       user: ctx.inertia.always(auth?.user ? UserTransformer.transform(auth.user) : undefined),
       preferences: ctx.inertia.always({ theme, sidebar }),
       /**
-       * Every Surah, for the Surah and Ayah sidebar off a Surah's page (which
-       * passes its own `surahs`). Loaded by a partial reload the first time
-       * the sidebar's drawer opens; the client keeps it from then on. `null`
-       * when the Quran text is unavailable.
+       * Every Surah, for the Surah and Ayah sidebar. A Surah's page sends
+       * them itself, under this name, and the client keeps them from then
+       * on. Here it only names the prop on every other page, so the client
+       * carries them there for the sidebar's drawer: no page asks for it.
        */
       sidebarSurahs: ctx.inertia
         .optional(async () => {
           const quranText = await ctx.containerResolver.make(QuranTextService)
-          try {
-            const surahs = await quranText.listSurahs()
-            return SurahTransformer.transform(surahs).useVariant('forNavigation')
-          } catch (error) {
-            if (error instanceof QuranUnavailableException) return null
-            throw error
-          }
+          const surahs = await quranText.listSurahs()
+          return SurahTransformer.transform(surahs).useVariant('forNavigation')
         })
         .once(),
     }
