@@ -311,12 +311,12 @@ test.group('Bookmarks index', (group) => {
 
   test('opens the first page for a reader who asks for page {value}')
     .with([{ value: '0' }, { value: '-1' }, { value: '1.5' }, { value: 'abc' }])
-    .run(async ({ visit, swap, browserContext }, { value }) => {
+    .run(async ({ visit, route, swap, browserContext }, { value }) => {
       swap(QuranTextService, new FakeQuranTextService())
       const reader = await readerWithBookmarks(21)
       await browserContext.loginAs(reader)
 
-      const page = await visit(`/bookmarks?page=${value}`)
+      const page = await visit(route('bookmarks.index', {}, { qs: { page: value } }))
 
       await page.waitForURL((url) => url.pathname === '/bookmarks' && url.search === '?page=1')
       const list = page.getByRole('list', { name: 'Bookmarks', exact: true })

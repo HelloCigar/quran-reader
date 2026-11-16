@@ -38,7 +38,9 @@ export default class SurahsController {
   }
 
   async show({ inertia, params, request, auth }: HttpContext) {
-    const { ayah } = await request.validateUsing(showSurahValidator)
+    const [invalid, query] = await request.tryValidateUsing(showSurahValidator)
+    // An `ayah` that is no Ayah number, as in a hand-edited URL: the Surah opens at its start.
+    const ayah = invalid ? undefined : query.ayah
     const number: number = params.number
     const [surah, surahs] = await Promise.all([
       this.#quranText.readSurah(number),
