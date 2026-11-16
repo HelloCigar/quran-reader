@@ -16,9 +16,6 @@ import { Banner } from '@astryxdesign/core/Banner'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { useRouteForm } from '~/components/forms/use_route_form'
 
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
-const formatDate = (value: string | null) => (value ? dateFormat.format(new Date(value)) : null)
-
 /**
  * Renames a passkey in place of its row. It is mounted only while the reader
  * renames, so each Rename starts from the name the server has.
@@ -69,8 +66,8 @@ function PasskeyRow({ passkey }: { passkey: Data.Passkey }) {
           )}
         </HStack>
       }
-      description={`Added ${formatDate(passkey.createdAt)} · ${
-        passkey.lastUsedAt ? `Last used ${formatDate(passkey.lastUsedAt)}` : 'Never used'
+      description={`Added ${passkey.addedOn} · ${
+        passkey.lastUsedOn ? `Last used ${passkey.lastUsedOn}` : 'Never used'
       }`}
       endContent={
         <HStack gap={1}>

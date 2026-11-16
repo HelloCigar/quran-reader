@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
@@ -10,7 +11,8 @@ import {
 import type { ShownWord } from '~/components/quran/recitation'
 
 type WordPopovers = {
-  subscribe: (listener: () => void) => () => void
+  /** Hears when the popover of the Word at `location` opens or closes. */
+  subscribe: (location: string, listener: () => void) => () => void
   getShown: () => ShownWord
   /** The reader opens or closes a Word's popover by hand. */
   onOpenChange: (location: string, isOpen: boolean) => void
@@ -24,7 +26,7 @@ const WordPopoversContext = createContext<WordPopovers | null>(null)
  *
  * A long Surah has thousands of Words, so each Word subscribes only to its own
  * popover (`useWordPopover`). When the open Word changes, only the Word that
- * closed and the Word that opened re-render.
+ * closed and the Word that opened are told, and re-render.
  */
 export function WordPopoversProvider({
   shown,
@@ -37,18 +39,27 @@ export function WordPopoversProvider({
   children: ReactNode
 }) {
   const shownRef = useRef(shown)
-  const listenersRef = useRef(new Set<() => void>())
+  /** The listener of each mounted Word, by its location. */
+  const listenersRef = useRef(new Map<string, Set<() => void>>())
 
   useLayoutEffect(() => {
+    const closed = shownRef.current?.location
     shownRef.current = shown
-    for (const listener of listenersRef.current) listener()
+    for (const location of new Set([closed, shown?.location])) {
+      if (location === undefined) continue
+      for (const listener of listenersRef.current.get(location) ?? []) listener()
+    }
   }, [shown])
 
   const value = useMemo<WordPopovers>(
     () => ({
-      subscribe: (listener) => {
-        listenersRef.current.add(listener)
-        return () => listenersRef.current.delete(listener)
+      subscribe: (location, listener) => {
+        const listeners = listenersRef.current.get(location) ?? new Set()
+        listenersRef.current.set(location, listeners.add(listener))
+        return () => {
+          listeners.delete(listener)
+          if (listeners.size === 0) listenersRef.current.delete(location)
+        }
       },
       getShown: () => shownRef.current,
       onOpenChange,
@@ -71,7 +82,11 @@ export function useWordPopover(location: string) {
     const shown = getShown()
     return shown?.location === location ? shown.by : null
   }
-  const openedBy = useSyncExternalStore(subscribe, openedByNow, openedByNow)
+  const subscribeHere = useCallback(
+    (listener: () => void) => subscribe(location, listener),
+    [subscribe, location]
+  )
+  const openedBy = useSyncExternalStore(subscribeHere, openedByNow, openedByNow)
 
   return { openedBy, onOpenChange }
 }
