@@ -120,9 +120,27 @@ export default function Show({
    * The first Ayah the reader can see in the region the Ayahs scroll in.
    */
   const firstAyahInView = useCallback(() => ayahsInView(listRef.current)?.first ?? 1, [])
+  /**
+   * Scrolls to the Ayah the Recitation bar moved to. One outside the loaded
+   * blocks waits in `ayahToShowRef` while the block before or after them
+   * loads, until it is loaded.
+   */
+  const ayahToShowRef = useRef<number | null>(null)
+  const showAyah = useCallback((ayah: number) => {
+    ayahToShowRef.current = null
+    const element = document.getElementById(`ayah-${ayah}`)
+    if (element) {
+      element.scrollIntoView({ block: 'start' })
+      return
+    }
+    ayahToShowRef.current = ayah
+    const first = listRef.current?.querySelector('[id^="ayah-"]')
+    if (first && ayah < Number(first.id.slice('ayah-'.length))) scrollRef.current?.fetchPrevious()
+    else scrollRef.current?.fetchNext()
+  }, [])
   /** The Recitation the app layout holds: this Surah's, or one started elsewhere. */
   const recitation = useRecitation()
-  useReadingPage({ surahNumber: surah.number, firstAyahInView, sidebarToggle })
+  useReadingPage({ surahNumber: surah.number, firstAyahInView, sidebarToggle, showAyah })
   const pageRef = useRef<HTMLDivElement>(null)
   const { shown, play, openWord } = recitation
   const editNote = useCallback((bookmark: Data.Bookmark) => setNoteAyah(bookmark.ayahNumber), [])
@@ -176,6 +194,10 @@ export default function Show({
     if (recitedAyah < firstLoaded || recitedAyah > lastLoaded) return
     if (lastLoaded - recitedAyah < RECITATION_LOAD_AHEAD) scrollRef.current?.fetchNext()
   }, [recitedAyah, firstLoaded, lastLoaded])
+
+  useEffect(() => {
+    if (ayahToShowRef.current !== null) showAyah(ayahToShowRef.current)
+  }, [firstLoaded, lastLoaded, showAyah])
 
   useEffect(() => {
     if (openedAt !== null) {

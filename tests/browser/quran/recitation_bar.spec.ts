@@ -223,3 +223,166 @@ test.group('Recitation bar', (group) => {
     await page.assertNotExists(page.getByRole('region', { name: 'Recitation', exact: true }))
   })
 })
+
+/**
+ * Most of these tests hear each Word for 10 seconds, so the Recitation never
+ * reaches the next Ayah on its own while the test runs.
+ */
+test.group('Recitation bar: previous and next Ayah', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+
+  test('plays on from the start of the next Ayah', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:3:1', exact: true }))
+    await page.getByRole('button', { name: 'Next Ayah', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:4:1', exact: true }))
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
+  })
+
+  test('plays on from the start of the previous Ayah', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:3:1', exact: true }))
+    await page.getByRole('button', { name: 'Previous Ayah', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:2:1', exact: true }))
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
+  })
+
+  test('moves the Recited Ayah without playing while paused', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:3:1', exact: true }))
+    await page.getByRole('button', { name: 'Pause Recitation', exact: true }).click()
+    await page.getByRole('button', { name: 'Next Ayah', exact: true }).click()
+
+    await page.assertText(page.getByTestId('recited-ayah'), '36:4')
+    await page.assertVisible(page.getByRole('button', { name: 'Play Recitation', exact: true }))
+  })
+
+  test('plays from the Ayah moved to while paused', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:3:1', exact: true }))
+    await page.getByRole('button', { name: 'Pause Recitation', exact: true }).click()
+    await page.getByRole('button', { name: 'Previous Ayah', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:2')
+    await page.getByRole('button', { name: 'Play Recitation', exact: true }).click()
+
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:2:1', exact: true }))
+  })
+
+  test('disables Previous Ayah on the first Ayah', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    await page.getByRole('button', { name: 'Play from 110:1', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '110:1')
+
+    await page.assertDisabled(page.getByRole('button', { name: 'Previous Ayah', exact: true }))
+  })
+
+  test('disables Next Ayah on the last Ayah of the Surah', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 110 }))
+    await page.getByRole('button', { name: 'Play from 110:3', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '110:3')
+
+    await page.assertDisabled(page.getByRole('button', { name: 'Next Ayah', exact: true }))
+  })
+
+  test('scrolls the recited Surah to the Ayah moved to', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(`${route('surahs.show', { number: 2 })}?ayah=255`)
+    await page.getByRole('button', { name: 'Play from 2:255', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '2:255')
+    await page.getByRole('button', { name: 'Pause Recitation', exact: true }).click()
+    await page.getByRole('button', { name: 'Previous Ayah', exact: true }).click()
+
+    await waitForAyahInView(page, 254)
+  })
+
+  test('moves the Recitation from another page', async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:3')
+    await goToArea(page, 'Quran', route('surahs.index'))
+    await page.getByRole('button', { name: 'Next Ayah', exact: true }).click()
+
+    await page.assertText(page.getByTestId('recited-ayah'), '36:4')
+  })
+
+  test("leaves another Surah's page where it is", async ({ visit, route, swap }) => {
+    // Both stand in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:5', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:5')
+    await page.getByRole('button', { name: 'Pause Recitation', exact: true }).click()
+    await goToArea(page, 'Quran', route('surahs.index'))
+    await page.getByRole('link', { name: /Al-Baqarah/ }).click()
+    await page.waitForURL(route('surahs.show', { number: 2 }))
+    await page.getByRole('button', { name: 'Next Ayah', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:6')
+
+    // Al-Baqarah has an Ayah 6 too: the page stays at its start.
+    await waitForAyahInView(page, 1)
+  })
+
+  test("does not start another Surah's Recitation still loading after a move", async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    // Both stand in for the Quran Foundation Content API, the Recitation answering slowly.
+    swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService({ wordMs: 10_000, delayMs: 1500 }))
+
+    const page = await visit(route('surahs.show', { number: 36 }))
+    await page.getByRole('button', { name: 'Play from 36:3', exact: true }).click()
+    await page.assertText(page.getByTestId('recited-ayah'), '36:3')
+    await page.getByRole('button', { name: 'Pause Recitation', exact: true }).click()
+    await goToArea(page, 'Quran', route('surahs.index'))
+    await page.getByRole('link', { name: /An-Nasr/ }).click()
+    await page.waitForURL(route('surahs.show', { number: 110 }))
+    await page.getByRole('button', { name: 'Play Recitation', exact: true }).click()
+    await page.assertExists(page.locator('button[aria-busy="true"]'))
+    await page.getByRole('button', { name: 'Next Ayah', exact: true }).click()
+    await page.assertNotExists(page.locator('button[aria-busy="true"]'))
+
+    await page.assertText(page.getByTestId('recited-ayah'), '36:4')
+    await page.assertVisible(page.getByRole('button', { name: 'Play Recitation', exact: true }))
+  })
+})

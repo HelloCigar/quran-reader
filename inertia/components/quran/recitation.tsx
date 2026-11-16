@@ -36,6 +36,8 @@ export type ReadingPage = {
   /** The first Ayah the reader can see. */
   firstAyahInView: () => number
   sidebarToggle: ReaderSidebarToggle | null
+  /** Scrolls the page to the start of an Ayah of its Surah. */
+  showAyah: (ayah: number) => void
 }
 
 type TimedWord = { location: string; ayah: number; startMs: number }
@@ -214,6 +216,20 @@ function useRecitationPlayer() {
   )
 
   /**
+   * Puts the audio at the start of `toAyah` of `loaded`, which becomes the
+   * Recited Ayah, without playing or pausing it.
+   */
+  const seek = useCallback((element: HTMLAudioElement, loaded: Data.Recitation, toAyah: number) => {
+    const ayah = loaded.ayahs.find(({ number }) => number === toAyah)
+    // A first Word can begin a little before its Ayah: start from whichever is first.
+    const fromMs = Math.min(ayah?.startMs ?? 0, ayah?.words[0]?.startMs ?? Infinity)
+    originMsRef.current = fromMs
+    element.currentTime = fromMs / 1000
+    setShown((current) => (current?.by === 'recitation' ? null : current))
+    setRecited({ recitation: loaded, ayah: toAyah })
+  }, [])
+
+  /**
    * Plays `loaded` from the start of `fromAyah`, which becomes the Recited
    * Ayah; or, with no Ayah, carries on where the audio is.
    */
@@ -222,15 +238,9 @@ function useRecitationPlayer() {
       stopWord()
       const element = audio()
       if (element.src !== loaded.audioUrl) element.src = loaded.audioUrl
-
       if (fromAyah !== null) {
-        const ayah = loaded.ayahs.find(({ number }) => number === fromAyah)
-        // A first Word can begin a little before its Ayah: start from whichever is first.
-        const fromMs = Math.min(ayah?.startMs ?? 0, ayah?.words[0]?.startMs ?? Infinity)
-        originMsRef.current = fromMs
-        element.currentTime = fromMs / 1000
+        seek(element, loaded, fromAyah)
         setShown(null)
-        setRecited({ recitation: loaded, ayah: fromAyah })
       }
 
       element.play().then(
@@ -238,7 +248,7 @@ function useRecitationPlayer() {
         () => setIsPlaying(false)
       )
     },
-    [audio, stopWord]
+    [audio, seek, stopWord]
   )
 
   /**
@@ -326,6 +336,28 @@ function useRecitationPlayer() {
   }, [audio, recited, start])
 
   /**
+   * Moves the Recitation to the start of `toAyah` of its Surah. Playing, it
+   * plays on from there; paused, it stays paused and Play carries on from
+   * there. It cancels a Play still waiting for another Surah's Recitation to
+   * load, which would otherwise replace the Ayah moved to.
+   */
+  const moveTo = useCallback(
+    (toAyah: number) => {
+      if (!recited) return
+      pendingRef.current = null
+      if (isPlaying) {
+        start(recited.recitation, toAyah)
+        return
+      }
+      const element = audio()
+      if (element.src === recited.recitation.audioUrl) seek(element, recited.recitation, toAyah)
+      // Its place in the file is gone: Play carries on from the start of the Recited Ayah.
+      else setRecited({ recitation: recited.recitation, ayah: toAyah })
+    },
+    [audio, isPlaying, recited, seek, start]
+  )
+
+  /**
    * Stops the Recitation, forgets its place and closes the Recited Word's
    * popover.
    */
@@ -407,9 +439,22 @@ function useRecitationPlayer() {
       resume,
       pause,
       close,
+      moveTo,
       openWord,
     }),
-    [isPlaying, isLoading, shown, recited, readingPage, play, resume, pause, close, openWord]
+    [
+      isPlaying,
+      isLoading,
+      shown,
+      recited,
+      readingPage,
+      play,
+      resume,
+      pause,
+      close,
+      moveTo,
+      openWord,
+    ]
   )
 }
 
@@ -464,14 +509,19 @@ export function useRecitation() {
 
 /**
  * Tells the Recitation bar that a Surah's page is open, for as long as it is.
- * `firstAyahInView` must be stable (`useCallback`).
+ * `firstAyahInView` and `showAyah` must be stable (`useCallback`).
  */
-export function useReadingPage({ surahNumber, firstAyahInView, sidebarToggle }: ReadingPage) {
+export function useReadingPage({
+  surahNumber,
+  firstAyahInView,
+  sidebarToggle,
+  showAyah,
+}: ReadingPage) {
   const { setReadingPage } = useRecitation()
 
   // Before the page is painted, so the bar is there from the first frame.
   useLayoutEffect(() => {
-    setReadingPage({ surahNumber, firstAyahInView, sidebarToggle })
+    setReadingPage({ surahNumber, firstAyahInView, sidebarToggle, showAyah })
     return () => setReadingPage(null)
-  }, [surahNumber, firstAyahInView, sidebarToggle, setReadingPage])
+  }, [surahNumber, firstAyahInView, sidebarToggle, showAyah, setReadingPage])
 }
