@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import UserTransformer from '#transformers/user_transformer'
+import SurahTransformer from '#transformers/surah_transformer'
+import QuranTextService from '#services/quran_text_service'
+import QuranUnavailableException from '#exceptions/quran_unavailable_exception'
 import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
 import type { PasskeySignal } from '@adonisplus/persona/passkeys/types'
 
@@ -25,13 +28,43 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       storedTheme === 'light' || storedTheme === 'dark' ? storedTheme : 'system'
 
     /**
+     * The reader's sidebar choices, kept in cookies the page writes, so every
+     * page renders with them in place. An unknown value is the default.
+     */
+    const sidebar = {
+      isShown: request?.plainCookie('reader_sidebar', { encoded: false }) !== 'hidden',
+      mode:
+        request?.plainCookie('reader_sidebar_mode', { encoded: false }) === 'surah'
+          ? ('surah' as const)
+          : ('verse' as const),
+    }
+
+    /**
      * Data shared with all Inertia pages. Make sure you are using
      * transformers for rich data-types like Models.
      */
     return {
       errors: ctx.inertia.always(this.getValidationErrors(ctx)),
       user: ctx.inertia.always(auth?.user ? UserTransformer.transform(auth.user) : undefined),
-      preferences: ctx.inertia.always({ theme }),
+      preferences: ctx.inertia.always({ theme, sidebar }),
+      /**
+       * Every Surah, for the Surah and Ayah sidebar off a Surah's page (which
+       * passes its own `surahs`). Loaded by a partial reload the first time
+       * the sidebar's drawer opens; the client keeps it from then on. `null`
+       * when the Quran text is unavailable.
+       */
+      sidebarSurahs: ctx.inertia
+        .optional(async () => {
+          const quranText = await ctx.containerResolver.make(QuranTextService)
+          try {
+            const surahs = await quranText.listSurahs()
+            return SurahTransformer.transform(surahs).useVariant('forNavigation')
+          } catch (error) {
+            if (error instanceof QuranUnavailableException) return null
+            throw error
+          }
+        })
+        .once(),
     }
   }
 

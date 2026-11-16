@@ -24,6 +24,10 @@ import PasskeySignals from '~/components/auth/passkey_signals'
 import { useNavItems, type NavItem } from '~/components/navigation/nav'
 import { RecitationProvider } from '~/components/quran/recitation'
 import RecitationFrame from '~/components/quran/recitation_bar'
+import {
+  OffPageSidebarDrawer,
+  ReaderSidebarProvider,
+} from '~/components/quran/reader_sidebar_drawer'
 
 /** The areas everyone can open. */
 const publicNav: NavItem[] = [{ label: 'Quran', route: 'surahs.index', icon: BookOpenIcon }]
@@ -43,7 +47,8 @@ const readerNav: NavItem[] = [
  * `Layout` inside it, which owns the page header and padding.
  *
  * It holds the Recitation and pins its bar under the page, so a Recitation
- * keeps playing from one page to the next. Sign-in and sign-up are outside
+ * keeps playing from one page to the next, and the Surah and Ayah sidebar's
+ * drawer, which the bar opens on any page. Sign-in and sign-up are outside
  * it: going there stops the Recitation.
  *
  * Responsive contract. Wide: the areas and the account actions sit in the
@@ -58,34 +63,37 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <RecitationProvider readerId={props.user?.id}>
-      <AppShell
-        variant="surface"
-        topNav={
-          <TopNav
-            label="Main navigation"
-            heading={<Logo />}
-            startContent={
-              <>
-                {items.map(({ label, href, icon, isActive }) => (
-                  <TopNavItem
-                    key={label}
-                    label={label}
-                    href={href}
-                    isSelected={isActive}
-                    icon={icon && <Icon icon={icon} size="sm" />}
-                  />
-                ))}
-                <DrawerAccountItems signedIn={signedIn} />
-              </>
-            }
-            endContent={<BarActions signedIn={signedIn} />}
-          />
-        }
-      >
-        <RecitationFrame>{children}</RecitationFrame>
-        <FlashToasts />
-        <PasskeySignals />
-      </AppShell>
+      <ReaderSidebarProvider>
+        <AppShell
+          variant="surface"
+          topNav={
+            <TopNav
+              label="Main navigation"
+              heading={<Logo />}
+              startContent={
+                <>
+                  {items.map(({ label, href, icon, isActive }) => (
+                    <TopNavItem
+                      key={label}
+                      label={label}
+                      href={href}
+                      isSelected={isActive}
+                      icon={icon && <Icon icon={icon} size="sm" />}
+                    />
+                  ))}
+                  <DrawerAccountItems signedIn={signedIn} />
+                </>
+              }
+              endContent={<BarActions signedIn={signedIn} />}
+            />
+          }
+        >
+          <RecitationFrame>{children}</RecitationFrame>
+          <FlashToasts />
+          <PasskeySignals />
+          <OffPageSidebarDrawer />
+        </AppShell>
+      </ReaderSidebarProvider>
     </RecitationProvider>
   )
 }

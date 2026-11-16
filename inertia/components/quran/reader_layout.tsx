@@ -1,13 +1,9 @@
 import { type ReactNode } from 'react'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
-import { Drawer } from '@astryxdesign/core/Drawer'
 import type { Data } from '@generated/data'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
-import {
-  ReaderSidebarToggleContext,
-  useReaderSidebar,
-  type SidebarMode,
-} from '~/components/quran/use_reader_sidebar'
+import ReaderSidebarDrawer from '~/components/quran/reader_sidebar_drawer'
+import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
 /**
  * The frame of the reading page, nested in the app layout: the sidebar (a
@@ -20,18 +16,16 @@ import {
 export default function ReaderLayout({
   surah,
   surahs,
-  sidebar: choices,
   children,
 }: {
   surah: Data.Surah.Variants['forReading']
   surahs: Data.Surah.Variants['forNavigation'][]
-  sidebar: { isShown: boolean; mode: SidebarMode }
   children: ReactNode
 }) {
-  const sidebar = useReaderSidebar(choices)
+  const sidebar = useReaderSidebar()
 
   return (
-    <ReaderSidebarToggleContext value={sidebar.toggle}>
+    <>
       <Layout
         start={
           sidebar.hasPanel && (
@@ -58,22 +52,7 @@ export default function ReaderLayout({
           </LayoutContent>
         }
       />
-      <Drawer
-        isOpen={sidebar.isDrawerOpen}
-        onOpenChange={sidebar.setDrawerOpen}
-        side="start"
-        width={420}
-        experimental={{ isFullWidthOnMobile: true }}
-        label="Quran"
-      >
-        <ReaderSidebar
-          surahs={surahs}
-          current={surah.number}
-          mode={sidebar.mode}
-          onModeChange={sidebar.setMode}
-          onClose={() => sidebar.setDrawerOpen(false)}
-        />
-      </Drawer>
-    </ReaderSidebarToggleContext>
+      <ReaderSidebarDrawer surahs={surahs} current={surah.number} />
+    </>
   )
 }

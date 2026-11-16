@@ -25,6 +25,7 @@ import {
   type ReadingPage,
   type Recited,
 } from '~/components/quran/recitation'
+import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
 /** The keys that move a slider's thumb. */
 const SLIDER_KEYS = new Set([
@@ -70,6 +71,7 @@ export default function RecitationFrame({ children }: { children: ReactNode }) {
 function RecitationBar() {
   const { recited, readingPage, isPlaying, isLoading, play, resume, pause, close } = useRecitation()
   const { isMobile } = useAppShellMobile()
+  const { toggle } = useReaderSidebar()
   const recitation = recited?.recitation
   const recitedAyah = recitation?.ayahs.find(({ number }) => number === recited?.ayah)
   /** Another Surah's page is open: its Play starts that Surah's Recitation. */
@@ -82,12 +84,13 @@ function RecitationBar() {
     else if (readingPage) play(readingPage.surahNumber, readingPage.firstAyahInView())
   }
 
-  const sidebarToggle = readingPage?.sidebarToggle && (
+  /** On a Surah's page it shows or hides the sidebar; elsewhere it opens it on the Surah recited. */
+  const sidebarToggle = (
     <IconButton
-      label={readingPage.sidebarToggle.label}
+      label={toggle.label}
       variant="ghost"
       icon={<Icon icon={ListBulletIcon} />}
-      onClick={readingPage.sidebarToggle.onToggle}
+      onClick={toggle.onToggle}
     />
   )
   const playPause = isPlaying ? (

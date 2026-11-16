@@ -12,7 +12,6 @@ import {
 import { useRouter } from '@adonisjs/inertia/react'
 import { useToast } from '@astryxdesign/core/Toast'
 import type { Data } from '@generated/data'
-import type { ReaderSidebarToggle } from '~/components/quran/use_reader_sidebar'
 import {
   ReadingPositionSaver,
   useHeardReadingPosition,
@@ -29,7 +28,7 @@ export type Recited = { recitation: Data.Recitation; ayah: number }
 
 /**
  * What a Surah's page gives the Recitation bar while it is open: its Surah,
- * the Ayah a first Play starts from, and the sidebar toggle.
+ * and the Ayah a first Play starts from.
  */
 export type ReadingPage = {
   surahNumber: number
@@ -37,7 +36,6 @@ export type ReadingPage = {
   ayahCount: number
   /** The first Ayah the reader can see. */
   firstAyahInView: () => number
-  sidebarToggle: ReaderSidebarToggle | null
   /** Shows the start of an Ayah of its Surah, loading its block when it isn't loaded. */
   showAyah: (ayah: number) => void
 }
@@ -565,20 +563,14 @@ export function useRecitation() {
  * Tells the Recitation bar that a Surah's page is open, for as long as it is.
  * `firstAyahInView` and `showAyah` must be stable (`useCallback`).
  */
-export function useReadingPage({
-  surahNumber,
-  ayahCount,
-  firstAyahInView,
-  sidebarToggle,
-  showAyah,
-}: ReadingPage) {
+export function useReadingPage({ surahNumber, ayahCount, firstAyahInView, showAyah }: ReadingPage) {
   const { setReadingPage } = useRecitation()
 
   // Before the page is painted, so the bar is there from the first frame.
   useLayoutEffect(() => {
-    setReadingPage({ surahNumber, ayahCount, firstAyahInView, sidebarToggle, showAyah })
+    setReadingPage({ surahNumber, ayahCount, firstAyahInView, showAyah })
     return () => setReadingPage(null)
-  }, [surahNumber, ayahCount, firstAyahInView, sidebarToggle, showAyah, setReadingPage])
+  }, [surahNumber, ayahCount, firstAyahInView, showAyah, setReadingPage])
 }
 
 /**
