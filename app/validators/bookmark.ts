@@ -1,6 +1,13 @@
 import vine from '@vinejs/vine'
 
 /**
+ * GET /bookmarks. `page` names the page of the list to show.
+ */
+export const listBookmarksValidator = vine.create({
+  page: vine.number().withoutDecimals().positive().optional(),
+})
+
+/**
  * POST /bookmarks
  */
 export const createBookmarkValidator = vine.create({

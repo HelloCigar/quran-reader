@@ -38,7 +38,9 @@ export default class SurahsController {
   }
 
   async show({ inertia, params, request, auth }: HttpContext) {
-    const { ayah } = await request.validateUsing(showSurahValidator)
+    // flow-allow request.md: a hand-edited ?ayah= that is no Ayah number opens the Surah at its start; the global handler's redirect back sends a reader with no previous page to the dashboard
+    const [invalid, query] = await request.tryValidateUsing(showSurahValidator)
+    const ayah = invalid ? undefined : query.ayah
     const number: number = params.number
     const [surah, surahs] = await Promise.all([
       this.#quranText.readSurah(number),

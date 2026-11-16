@@ -4,22 +4,48 @@ import type { HttpContext } from '@adonisjs/core/http'
 // oxlint-disable-next-line typescript/consistent-type-imports
 import QuranTextService from '#services/quran_text_service'
 import BookmarkTransformer from '#transformers/bookmark_transformer'
-import { createBookmarkValidator, updateBookmarkValidator } from '#validators/bookmark'
+import {
+  createBookmarkValidator,
+  listBookmarksValidator,
+  updateBookmarkValidator,
+} from '#validators/bookmark'
+
+/** How many Bookmarks a page of the list shows. */
+const PER_PAGE = 20
 
 export default class BookmarksController {
   @inject()
-  async index({ inertia, auth }: HttpContext, quranText: QuranTextService) {
+  async index({ inertia, auth, request, response }: HttpContext, quranText: QuranTextService) {
+    // flow-allow request.md: a hand-edited ?page= that is no page number opens the list at page 1; the global handler's redirect back sends a reader with no previous page to the dashboard
+    const [invalid, query] = await request.tryValidateUsing(listBookmarksValidator)
+    if (invalid) {
+      return response.redirect().toRoute('bookmarks.index', {}, { qs: { page: 1 } })
+    }
+    const page = query.page ?? 1
     const user = auth.getUserOrFail()
     const bookmarks = await user
       .related('bookmarks')
       .query()
       .withScopes((scopes) => scopes.newestFirst())
+      .paginate(page, PER_PAGE)
+
+    // A page past the last, as when the only Bookmark on it was removed.
+    if (page > bookmarks.lastPage) {
+      return response
+        .redirect()
+        .toRoute('bookmarks.index', {}, { qs: { page: bookmarks.lastPage } })
+    }
+
     const texts = await quranText.readSurahsIfAvailable(
       bookmarks.map((bookmark) => bookmark.surahNumber)
     )
 
     return inertia.render('bookmarks/index', {
-      bookmarks: BookmarkTransformer.transform(bookmarks, texts).useVariant('forList'),
+      bookmarks: BookmarkTransformer.paginate(
+        bookmarks.all(),
+        bookmarks.getMeta(),
+        texts
+      ).useVariant('forList'),
     })
   }
 

@@ -191,6 +191,18 @@ test.group('Quran surah reading', () => {
     await page.assertVisible(page.getByText('1:1', { exact: true }))
   })
 
+  test('opens the surah at its start when the linked ayah is {value}')
+    .with([{ value: '0' }, { value: '-1' }, { value: '1.5' }, { value: 'abc' }])
+    .run(async ({ visit, route, swap }, { value }) => {
+      swap(QuranTextService, new FakeQuranTextService())
+
+      const page = await visit(route('surahs.show', { number: 2 }, { qs: { ayah: value } }))
+
+      await page.assertPath('/quran/2')
+      await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
+      await page.assertVisible(page.getByText('2:1', { exact: true }))
+    })
+
   test('names the block in view in the address bar as the reader scrolls', async ({
     visit,
     route,
