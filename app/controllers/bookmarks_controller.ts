@@ -16,8 +16,8 @@ const PER_PAGE = 20
 export default class BookmarksController {
   @inject()
   async index({ inertia, auth, request, response }: HttpContext, quranText: QuranTextService) {
+    // flow-allow request.md: a hand-edited ?page= that is no page number opens the list at page 1; the global handler's redirect back sends a reader with no previous page to the dashboard
     const [invalid, query] = await request.tryValidateUsing(listBookmarksValidator)
-    // A `page` that is no page number, as in a hand-edited URL: the list opens at its start.
     if (invalid) {
       return response.redirect().toRoute('bookmarks.index', {}, { qs: { page: 1 } })
     }
