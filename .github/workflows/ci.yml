@@ -19,9 +19,16 @@ jobs:
           scope: '@adonisplus'
 
       # Only the download needs the registry token. Install scripts run in a
-      # separate step, where the token is not set.
+      # separate step, where the token is not set. Five jobs install at once,
+      # so a dropped connection (ECONNRESET) gets a few retries.
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: |
+          for attempt in 1 2 3; do
+            npm ci --ignore-scripts --prefer-offline && exit 0
+            echo "npm ci failed (attempt $attempt of 3)"
+            sleep $((attempt * 15))
+          done
+          exit 1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
 
@@ -58,9 +65,16 @@ jobs:
           scope: '@adonisplus'
 
       # Only the download needs the registry token. Install scripts run in a
-      # separate step, where the token is not set.
+      # separate step, where the token is not set. Five jobs install at once,
+      # so a dropped connection (ECONNRESET) gets a few retries.
       - name: Install dependencies
-        run: npm ci --ignore-scripts
+        run: |
+          for attempt in 1 2 3; do
+            npm ci --ignore-scripts --prefer-offline && exit 0
+            echo "npm ci failed (attempt $attempt of 3)"
+            sleep $((attempt * 15))
+          done
+          exit 1
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ADONISJS_PLUS_TOKEN }}
 
