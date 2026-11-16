@@ -21,7 +21,7 @@ const styles = stylex.create({
   /** A phone keeps the 16px inset; a wider screen has room for more air above and below. */
   page: {
     paddingBlock: {
-      'default': spacingVars['--spacing-2'],
+      default: spacingVars['--spacing-2'],
       '@media (min-width: 769px)': spacingVars['--spacing-6'],
     },
   },

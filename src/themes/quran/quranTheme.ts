@@ -204,7 +204,7 @@ export const quranTheme = defineTheme({
 
   components: {
     // Ayahs, bismillah and surah names: Amiri with room for the diacritics.
-    'text': {
+    text: {
       'type:arabic': {
         fontFamily: "Amiri, 'Noto Naskh Arabic', 'Times New Roman', serif",
         fontSize: 'var(--font-size-2xl)',
@@ -214,10 +214,10 @@ export const quranTheme = defineTheme({
     },
 
     // Neutral lifts secondary text on these fills with its gray stops; use sand.
-    'item': { selected: { '--color-text-secondary': liftedSecondaryText } },
+    item: { selected: { '--color-text-secondary': liftedSecondaryText } },
     'tree-list-item': { selected: { '--color-text-secondary': liftedSecondaryText } },
     'file-input': { 'mode:dropzone': { '--color-text-secondary': liftedSecondaryText } },
-    'citation': { 'variant:number': { '--color-text-secondary': liftedSecondaryText } },
+    citation: { 'variant:number': { '--color-text-secondary': liftedSecondaryText } },
     'segmented-control-item': { base: { '--color-text-secondary': liftedSecondaryText } },
 
     // Inertia's infinite scroll finds the element that scrolls by its CSS, and

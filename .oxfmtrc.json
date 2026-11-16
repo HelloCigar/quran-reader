@@ -1,27 +1,20 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "trailingComma": "es5",
   "semi": false,
   "singleQuote": true,
-  "useTabs": false,
-  "quoteProps": "consistent",
-  "bracketSpacing": true,
-  "arrowParens": "always",
+  "trailingComma": "es5",
   "printWidth": 100,
   "sortPackageJson": false,
   "ignorePatterns": [
     ".adonisjs",
-    "node_modules",
-    "build",
-    "tmp",
     "astryx-themes.ts",
-    "AGENTS.md",
-    "GEMINI.md",
-    "CLAUDE.md",
-    ".claude/CLAUDE.md",
     "src/themes/quran/quran.js",
     "src/themes/quran/quran.css",
     "src/themes/quran/*.d.ts",
-    "src/themes/quran/tokens"
+    "src/themes/quran/tokens",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    ".claude/CLAUDE.md"
   ]
 }

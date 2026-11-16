@@ -12,8 +12,8 @@ export default function ArabicText({
   align = 'start',
   'data-testid': testId,
 }: {
-  'children': ReactNode
-  'align'?: 'start' | 'center'
+  children: ReactNode
+  align?: 'start' | 'center'
   'data-testid'?: string
 }) {
   return (

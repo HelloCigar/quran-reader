@@ -74,7 +74,7 @@ VineString.macro('ayahReference', function (this: VineString) {
 })
 
 vine.messagesProvider = new SimpleMessagesProvider({
-  'ayahReference': 'Enter an ayah of the Quran, such as 2:255.',
+  ayahReference: 'Enter an ayah of the Quran, such as 2:255.',
   'note.maxLength': 'Notes can be at most 500 characters.',
-  'ayahOfSurah': 'That ayah is not in this surah.',
+  ayahOfSurah: 'That ayah is not in this surah.',
 })
