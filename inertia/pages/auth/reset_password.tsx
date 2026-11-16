@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { Head } from '@inertiajs/react'
-import { Form } from '@adonisjs/inertia/react'
 import { VStack } from '@astryxdesign/core/VStack'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
@@ -10,13 +8,17 @@ import { Button } from '@astryxdesign/core/Button'
 import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
 import AuthLayout from '~/components/auth/auth_layout'
 import PasswordStrength from '~/components/auth/password_strength'
+import { useRouteForm } from '~/components/forms/use_route_form'
 import type { InertiaProps } from '~/types'
 
 type PageProps = InertiaProps<{ token: string; passwordPolicy: PasswordPolicy }>
 
 export default function ResetPassword({ token, passwordPolicy }: PageProps) {
-  const [password, setPassword] = useState('')
-  const [passwordConfirmation, setPasswordConfirmation] = useState('')
+  const form = useRouteForm(
+    'password_resets.update',
+    { password: '', passwordConfirmation: '' },
+    { routeParams: { token }, preserveScroll: true }
+  )
 
   return (
     <VStack gap={4} hAlign="stretch" width="100%">
@@ -30,47 +32,35 @@ export default function ResetPassword({ token, passwordPolicy }: PageProps) {
         </Text>
       </VStack>
 
-      <Form options={{ preserveScroll: true }} route="password_resets.update" routeParams={[token]}>
-        {({ errors, processing }) => (
-          <VStack gap={4} hAlign="stretch">
-            <FormLayout>
-              <PasswordStrength policy={passwordPolicy} password={password}>
-                <TextInput
-                  label="Password"
-                  type="password"
-                  htmlName="password"
-                  autoComplete="new-password"
-                  size="lg"
-                  value={password}
-                  onChange={setPassword}
-                  status={errors.password ? { type: 'error', message: errors.password } : undefined}
-                />
-              </PasswordStrength>
+      <form onSubmit={form.submit}>
+        <VStack gap={4} hAlign="stretch">
+          <FormLayout>
+            <PasswordStrength policy={passwordPolicy} password={form.data.password}>
               <TextInput
-                label="Confirm password"
+                label="Password"
                 type="password"
-                htmlName="passwordConfirmation"
                 autoComplete="new-password"
                 size="lg"
-                value={passwordConfirmation}
-                onChange={setPasswordConfirmation}
-                status={
-                  errors.passwordConfirmation
-                    ? { type: 'error', message: errors.passwordConfirmation }
-                    : undefined
-                }
+                {...form.field('password')}
               />
-            </FormLayout>
-            <Button
-              type="submit"
-              label={processing ? 'Resetting…' : 'Reset password'}
-              variant="primary"
+            </PasswordStrength>
+            <TextInput
+              label="Confirm password"
+              type="password"
+              autoComplete="new-password"
               size="lg"
-              isLoading={processing}
+              {...form.field('passwordConfirmation')}
             />
-          </VStack>
-        )}
-      </Form>
+          </FormLayout>
+          <Button
+            type="submit"
+            label={form.processing ? 'Resetting…' : 'Reset password'}
+            variant="primary"
+            size="lg"
+            isLoading={form.processing}
+          />
+        </VStack>
+      </form>
     </VStack>
   )
 }

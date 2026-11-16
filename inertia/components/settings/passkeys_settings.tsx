@@ -14,56 +14,47 @@ import { List, ListItem } from '@astryxdesign/core/List'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Banner } from '@astryxdesign/core/Banner'
 import { EmptyState } from '@astryxdesign/core/EmptyState'
+import { useRouteForm } from '~/components/forms/use_route_form'
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
 const formatDate = (value: string | null) => (value ? dateFormat.format(new Date(value)) : null)
 
+/**
+ * Renames a passkey in place of its row. It is mounted only while the reader
+ * renames, so each Rename starts from the name the server has.
+ */
+function PasskeyRenameForm({ passkey, onDone }: { passkey: Data.Passkey; onDone: () => void }) {
+  const form = useRouteForm(
+    'passkeys.update',
+    { name: passkey.name },
+    { routeParams: { id: passkey.id }, preserveScroll: true, onSuccess: onDone }
+  )
+
+  return (
+    <ListItem
+      label={
+        <form onSubmit={form.submit}>
+          <HStack gap={2} vAlign="end" wrap="wrap">
+            <TextInput label="Passkey name" hasAutoFocus {...form.field('name')} />
+            <Button
+              type="submit"
+              label={form.processing ? 'Saving…' : 'Save'}
+              variant="primary"
+              isLoading={form.processing}
+            />
+            <Button label="Cancel" variant="ghost" onClick={onDone} />
+          </HStack>
+        </form>
+      }
+    />
+  )
+}
+
 /** One passkey: its name and dates, with Rename and Remove; Rename edits it in place. */
 function PasskeyRow({ passkey }: { passkey: Data.Passkey }) {
   const [renaming, setRenaming] = useState(false)
-  const [name, setName] = useState(passkey.name)
 
-  if (renaming) {
-    return (
-      <ListItem
-        label={
-          <Form
-            options={{ preserveScroll: true }}
-            route="passkeys.update"
-            routeParams={{ id: passkey.id }}
-            onSuccess={() => setRenaming(false)}
-          >
-            {({ errors, processing }) => (
-              <HStack gap={2} vAlign="end" wrap="wrap">
-                <TextInput
-                  label="Passkey name"
-                  htmlName="name"
-                  value={name}
-                  onChange={setName}
-                  hasAutoFocus
-                  status={errors.name ? { type: 'error', message: errors.name } : undefined}
-                />
-                <Button
-                  type="submit"
-                  label={processing ? 'Saving…' : 'Save'}
-                  variant="primary"
-                  isLoading={processing}
-                />
-                <Button
-                  label="Cancel"
-                  variant="ghost"
-                  onClick={() => {
-                    setName(passkey.name)
-                    setRenaming(false)
-                  }}
-                />
-              </HStack>
-            )}
-          </Form>
-        }
-      />
-    )
-  }
+  if (renaming) return <PasskeyRenameForm passkey={passkey} onDone={() => setRenaming(false)} />
 
   return (
     <ListItem
