@@ -576,24 +576,30 @@ export function useReadingPage({ surahNumber, ayahCount, firstAyahInView, showAy
 }
 
 /**
- * How far the Recitation has got, in ms of its Surah's audio file, read
- * every frame while it plays and once after each move while it is paused.
+ * How far the Recitation has got, in ms of its Surah's audio file, to the
+ * nearest `stepMs` below. It is read every frame while it plays and once
+ * after each move while it is paused, but the caller renders only when it
+ * crosses a step: a clock that shows seconds asks for 1000.
  *
  * `read` reads it at once. A caller that has just moved the Recitation calls
  * it, so nothing shows the place it left for the frame before the next read.
  */
-export function useRecitationPosition() {
+export function useRecitationPosition(stepMs: number) {
   const { isPlaying, positionMs } = useRecitation()
-  const [ms, setMs] = useState(positionMs)
-  const read = useCallback(() => setMs(positionMs()), [positionMs])
+  const steppedMs = useCallback(
+    () => Math.floor(positionMs() / stepMs) * stepMs,
+    [positionMs, stepMs]
+  )
+  const [ms, setMs] = useState(steppedMs)
+  const read = useCallback(() => setMs(steppedMs()), [steppedMs])
 
   useEffect(() => {
     let frame = requestAnimationFrame(function readFrame() {
-      setMs(positionMs())
+      setMs(steppedMs())
       if (isPlaying) frame = requestAnimationFrame(readFrame)
     })
     return () => cancelAnimationFrame(frame)
-  }, [isPlaying, positionMs])
+  }, [isPlaying, steppedMs])
 
   return [ms, read] as const
 }

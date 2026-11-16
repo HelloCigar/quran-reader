@@ -27,6 +27,13 @@ import {
 } from '~/components/quran/recitation'
 import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
+/**
+ * How many places the thumb of the progress bar takes along its track. The
+ * bar renders when the Recitation reaches the next one, not every frame: a
+ * long Surah moves the thumb less than a pixel a second.
+ */
+const THUMB_PLACES = 1000
+
 /** The keys that move a slider's thumb. */
 const SLIDER_KEYS = new Set([
   'ArrowLeft',
@@ -222,14 +229,15 @@ function MoveAyahButton({ direction }: { direction: 'previous' | 'next' }) {
  */
 function RecitedProgress({ recited }: { recited: Recited }) {
   const { readingPage, playAt, playAtWord } = useRecitation()
-  const [position, readPosition] = useRecitationPosition()
-  const positionMs = Math.floor(position)
+  const { ayahs, surahNumber } = recited.recitation
+  const endMs = ayahs.at(-1)?.endMs ?? 1
+  const [positionMs, readPosition] = useRecitationPosition(
+    Math.max(1, Math.floor(endMs / THUMB_PLACES))
+  )
   /** Where the reader holds the thumb, in ms; `null` when they don't. */
   const [draggedMs, setDraggedMs] = useState<number | null>(null)
   /** Whether a key, not a drag, is moving the thumb. */
   const isKeyRef = useRef(false)
-  const { ayahs, surahNumber } = recited.recitation
-  const endMs = ayahs.at(-1)?.endMs ?? 1
   const lastAyah = ayahs.at(-1)?.number ?? 1
   /**
    * The Ayah heard at `ms`. A first Word can begin a little before its Ayah
@@ -340,7 +348,7 @@ function UnstartedProgress({ page }: { page: ReadingPage }) {
 
 /** The elapsed and total time of the Recitation, e.g. `3:12 / 1:58:40`. */
 function RecitationTime({ recited }: { recited: Recited }) {
-  const [positionMs] = useRecitationPosition()
+  const [positionMs] = useRecitationPosition(1000)
   const endMs = recited.recitation.ayahs.at(-1)?.endMs ?? 0
 
   return (
