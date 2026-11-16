@@ -15,6 +15,7 @@ import { StackItem } from '@astryxdesign/core/Stack'
 import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Link } from '@astryxdesign/core/Link'
+import { Toolbar } from '@astryxdesign/core/Toolbar'
 import { ProgressBar } from '@astryxdesign/core/ProgressBar'
 import { Text } from '@astryxdesign/core/Text'
 import { urlFor } from '~/client'
@@ -45,8 +46,9 @@ export default function RecitationFrame({ children }: { children: ReactNode }) {
  * progress bar filling the middle, then the Surah and Ayah Reference and
  * Close. Phone (below AppShell's `md` breakpoint): the progress bar spans the
  * width on its own line, then the Surah and Ayah Reference, then the controls
- * in three groups: the sidebar toggle, Previous Ayah, Play and Next Ayah, and
- * Close.
+ * in three lanes: the sidebar toggle, Previous Ayah, Play and Next Ayah, and
+ * Close. The middle lane stays centered whether or not the side lanes have a
+ * button (Close shows only once a Recitation has started).
  */
 function RecitationBar() {
   const { recited, readingPage, isPlaying, isLoading, play, resume, pause, close } = useRecitation()
@@ -136,15 +138,12 @@ function RecitationBar() {
         <VStack gap={2}>
           {progress}
           {recitedLink && <HStack hAlign="center">{recitedLink}</HStack>}
-          <HStack vAlign="center">
-            <StackItem size="fill">
-              <HStack hAlign="start">{sidebarToggle}</HStack>
-            </StackItem>
-            {controls}
-            <StackItem size="fill">
-              <HStack hAlign="end">{closeButton}</HStack>
-            </StackItem>
-          </HStack>
+          <Toolbar
+            label="Recitation controls"
+            startContent={sidebarToggle}
+            centerContent={controls}
+            endContent={closeButton}
+          />
         </VStack>
       ) : (
         <HStack gap={4} vAlign="center">
