@@ -1,5 +1,6 @@
 import { test } from '@japa/runner'
 import mail from '@adonisjs/mail/services/main'
+import db from '@adonisjs/lucid/services/db'
 import { createPasskey } from '#tests/helpers/passkeys'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
@@ -19,6 +20,43 @@ test.group('Passkey Management', (group) => {
     await page.assertVisible(list.getByText('Work laptop', { exact: true }))
     await page.assertVisible(list.getByText('Synced', { exact: true }))
     await page.assertVisible(list.getByText('Never used', { exact: false }))
+  })
+
+  test('shows the day a passkey was added', async ({ visit, route, browserContext }) => {
+    const user = await UserFactory.apply('verified').create()
+    const passkey = await createPasskey(user, 'Work laptop')
+    await db
+      .from('passkeys')
+      .where('id', Number(passkey.identifier))
+      .update({ created_at: new Date('2026-03-05T12:00:00Z') })
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('security.show'))
+
+    await page.assertVisible(
+      page
+        .getByRole('list', { name: 'Passkeys', exact: true })
+        .getByText('Added Mar 5, 2026 · Never used', { exact: true })
+    )
+  })
+
+  test('shows the day a passkey was last used', async ({ visit, route, browserContext }) => {
+    const user = await UserFactory.apply('verified').create()
+    const passkey = await createPasskey(user, 'Work laptop')
+    // As a sign-in with the passkey leaves it.
+    await db
+      .from('passkeys')
+      .where('id', Number(passkey.identifier))
+      .update({ last_used_at: new Date('2026-04-09T12:00:00Z') })
+    await browserContext.loginAs(user)
+
+    const page = await visit(route('security.show'))
+
+    await page.assertVisible(
+      page
+        .getByRole('list', { name: 'Passkeys', exact: true })
+        .getByText('Last used Apr 9, 2026', { exact: false })
+    )
   })
 
   test('can rename a passkey', async ({ visit, route, browserContext }) => {
