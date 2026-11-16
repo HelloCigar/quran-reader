@@ -309,6 +309,22 @@ test.group('Bookmarks index', (group) => {
     )
   })
 
+  test('sends a reader who asks for page {value} back to the dashboard')
+    .with([{ value: '0' }, { value: '-1' }, { value: '1.5' }, { value: 'abc' }])
+    .run(async ({ visit, swap, browserContext }, { value }) => {
+      swap(QuranTextService, new FakeQuranTextService())
+      const reader = await readerWithBookmarks(21)
+      await browserContext.loginAs(reader)
+
+      // No list has such a page; with no page before this one, back is the dashboard.
+      const page = await visit(`/bookmarks?page=${value}`)
+
+      await page.assertPath('/dashboard')
+      await page.assertVisible(
+        page.getByRole('heading', { name: 'Dashboard', level: 1, exact: true })
+      )
+    })
+
   test('has no page controls when the bookmarks fit on one page', async ({
     visit,
     route,
