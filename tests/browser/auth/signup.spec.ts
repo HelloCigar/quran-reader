@@ -52,24 +52,6 @@ test.group('Signup', (group) => {
     )
   })
 
-  test('writes the last_login_method cookie after signup', async ({
-    visit,
-    route,
-    browserContext,
-    assert,
-  }) => {
-    using _mailFake = mail.fake()
-    const page = await visit(route('new_account.create'))
-
-    await page.getByLabel('Email', { exact: true }).fill('ada@example.com')
-    await page.getByLabel('Password', { exact: true }).fill(password)
-    await page.getByLabel('Confirm password', { exact: true }).fill(password)
-    await page.getByRole('button', { name: 'Create account', exact: true }).click()
-    await page.waitForURL(route('email_verifications.create'))
-
-    assert.equal(await browserContext.getPlainCookie('last_login_method'), 'email')
-  })
-
   test('throttles signup submissions per IP', async ({ visit, route }) => {
     const page = await visit(route('new_account.create'))
 

@@ -12,7 +12,6 @@ export default class PasskeySessionController {
 
     await auth.use('web').login(user)
     session.flash('passkeySignals', await user.getPasskeySignals())
-    response.plainCookie('last_login_method', 'passkey', { maxAge: '60 days' })
 
     // Kept only after the passkey is verified, as with a password sign-in.
     if (bookmark) {

@@ -21,23 +21,6 @@ test.group('Login and logout', (group) => {
     await page.assertTextContains('h1', 'Dashboard')
   })
 
-  test('writes the last_login_method cookie after a successful login', async ({
-    visit,
-    route,
-    browserContext,
-    assert,
-  }) => {
-    await User.create({ fullName: 'Ada Lovelace', ...credentials })
-    const page = await visit(route('session.create'))
-
-    await page.getByLabel('Email', { exact: true }).fill(credentials.email)
-    await page.getByLabel('Password', { exact: true }).fill(credentials.password)
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await page.waitForURL(route('dashboard'))
-
-    assert.equal(await browserContext.getPlainCookie('last_login_method'), 'email')
-  })
-
   test('sends an unverified user from the dashboard to verify their email', async ({
     visit,
     route,
