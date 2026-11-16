@@ -1034,14 +1034,35 @@
     },
     {
       "files": ["**/*.ts"],
+      "excludeFiles": [
+        "**/*.d.ts",
+        "**/*.config.ts",
+        "**/bin/**",
+        "**/mixins/**",
+        "**/resources/**",
+        "**/inertia/**",
+        "**/tests/**"
+      ],
       "rules": {
-        "flow/no-top-level-functions": "error",
-        "flow/exported-functions-are-factories": "error",
-        "flow/types-live-in-types-directory": "error"
+        "flow/exported-functions-are-factories": "error"
       }
     },
     {
-      "files": [
+      "files": ["**/controllers/**/*.ts"],
+      "excludeFiles": ["**/resources/**", "**/inertia/**"],
+      "rules": {
+        "flow/no-private-controller-methods": "error"
+      }
+    },
+    {
+      "files": ["tests/**/*.ts"],
+      "rules": {
+        "flow/no-shared-mutable-test-state": "error"
+      }
+    },
+    {
+      "files": ["**/*.ts"],
+      "excludeFiles": [
         "**/*.d.ts",
         "**/*.config.ts",
         "**/bin/**",
@@ -1050,18 +1071,32 @@
         "**/tests/**"
       ],
       "rules": {
-        "flow/no-top-level-functions": "off",
-        "flow/exported-functions-are-factories": "off"
+        "flow/no-top-level-functions": "error"
       }
     },
     {
-      "files": ["**/mixins/**"],
+      "files": ["tests/**/*.ts"],
       "rules": {
-        "flow/exported-functions-are-factories": "off"
+        "flow/playwright-locators-are-exact": "error"
       }
     },
     {
-      "files": [
+      "files": ["tests/**/*.ts"],
+      "excludeFiles": ["tests/helpers/**", "tests/bootstrap.ts"],
+      "rules": {
+        "flow/test-files-contain-tests": "error"
+      }
+    },
+    {
+      "files": ["tests/helpers/**/*.ts"],
+      "excludeFiles": ["tests/helpers/types.ts"],
+      "rules": {
+        "flow/test-helpers-contain-runtime-code": "error"
+      }
+    },
+    {
+      "files": ["**/*.ts"],
+      "excludeFiles": [
         "**/types/**",
         "**/validators/**",
         "**/values/**",
@@ -1071,45 +1106,7 @@
         "**/tests/**"
       ],
       "rules": {
-        "flow/types-live-in-types-directory": "off"
-      }
-    },
-    {
-      "files": ["**/controllers/**/*.ts"],
-      "rules": {
-        "flow/no-private-controller-methods": "error"
-      }
-    },
-    {
-      "files": ["**/resources/**", "**/inertia/**"],
-      "rules": {
-        "flow/no-private-controller-methods": "off"
-      }
-    },
-    {
-      "files": ["tests/**/*.ts"],
-      "rules": {
-        "flow/no-shared-mutable-test-state": "error",
-        "flow/playwright-locators-are-exact": "error",
-        "flow/test-files-contain-tests": "error"
-      }
-    },
-    {
-      "files": ["tests/helpers/**/*.ts", "tests/bootstrap.ts"],
-      "rules": {
-        "flow/test-files-contain-tests": "off"
-      }
-    },
-    {
-      "files": ["tests/helpers/**/*.ts"],
-      "rules": {
-        "flow/test-helpers-contain-runtime-code": "error"
-      }
-    },
-    {
-      "files": ["tests/helpers/types.ts"],
-      "rules": {
-        "flow/test-helpers-contain-runtime-code": "off"
+        "flow/types-live-in-types-directory": "error"
       }
     }
   ]

@@ -1,9 +1,29 @@
-import { defineConfig } from 'vite'
+import { readFileSync } from 'node:fs'
+import { defineConfig } from 'vite-plus'
 import react from '@vitejs/plugin-react'
 import { unplugin as stylex } from '@stylexjs/unplugin'
 import adonisjs from '@adonisjs/vite/client'
 
+/**
+ * Reads an Oxc config file without its `$schema` key. `.oxfmtrc.json` and
+ * `.oxlintrc.json` stay the source of truth, because editors and the bare
+ * `oxfmt` / `oxlint` binaries read them.
+ */
+function oxcConfig(file: string) {
+  const { $schema: _, ...config } = JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  return config
+}
+
 export default defineConfig({
+  /**
+   * Vite+ reads `fmt` and `lint` from here and ignores the JSON files unless
+   * `-c` names them. Without these blocks a bare `vp fmt`, `vp lint` or
+   * `vp check` falls back to defaults (semicolons, double quotes, no ignores)
+   * and rewrites the whole repo.
+   */
+  fmt: oxcConfig('./.oxfmtrc.json'),
+  lint: oxcConfig('./.oxlintrc.json'),
+
   plugins: [
     /**
      * Compiles the app's own `stylex.create()` calls. Astryx components use
