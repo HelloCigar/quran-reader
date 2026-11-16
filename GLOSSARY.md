@@ -67,5 +67,5 @@ The Word being heard at the current moment of a Recitation.
 _Avoid_: Current word, active word, playing word
 
 **Recited Ayah**:
-The Ayah being heard at the current moment of a Recitation. Moving to the previous or next Ayah, or dragging through the Recitation, always lands at the start of an Ayah. A Recitation stops at the end of its Surah and keeps playing while the reader goes to other pages.
+The Ayah being heard at the current moment of a Recitation. Moving to the previous or next Ayah always lands at the start of an Ayah; dragging through the Recitation lands at the start of a Word. A Recitation stops at the end of its Surah and keeps playing while the reader goes to other pages.
 _Avoid_: Current ayah, playing ayah, track
