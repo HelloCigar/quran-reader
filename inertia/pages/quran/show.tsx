@@ -183,7 +183,7 @@ export default function Show({
 
   const follow = useFollowRecitation({
     listRef,
-    recitedWord: shownOnPage?.by === 'recitation' ? shownOnPage.location : null,
+    shown: shownOnPage,
     recitedAyah,
   })
   /** Prev or Next on the Recitation bar: the page shows the Ayah moved to, and follows again. */

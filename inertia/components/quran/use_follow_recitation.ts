@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useEffectEvent, useRef, type RefObject } from 'react'
 import { ayahsInView, scrollRegion } from '~/components/quran/ayahs_in_view'
+import type { ShownWord } from '~/components/quran/recitation'
 
 /**
  * How long (in ms) after the reader's last wheel, touch or key a scroll still
@@ -12,10 +13,10 @@ const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home
 
 /**
  * Keeps the Recited Word in view on the page of the Surah being recited, so
- * the reader can follow along without touching the page. `recitedWord` is the
- * Recited Word's location while its popover shows on this page, and
- * `recitedAyah` the Recited Ayah while it is one of this Surah's; both `null`
- * otherwise.
+ * the reader can follow along without touching the page. `shown` is the Word
+ * whose popover shows on this page, which is the Recited Word when the
+ * Recitation opened it, and `recitedAyah` the Recited Ayah while it is one of
+ * this Surah's, `null` otherwise.
  *
  * - The page scrolls only when the Recited Word has left the view: the region
  *   the Ayahs scroll in, not the window, since a Word under the Recitation bar
@@ -34,14 +35,15 @@ const SCROLL_KEYS = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home
  */
 export function useFollowRecitation({
   listRef,
-  recitedWord,
+  shown,
   recitedAyah,
 }: {
   listRef: RefObject<HTMLElement | null>
-  recitedWord: string | null
+  shown: ShownWord
   recitedAyah: number | null
 }) {
   const isFollowingRef = useRef(true)
+  const recitedWord = shown?.by === 'recitation' ? shown.location : null
   const follow = useCallback(() => {
     isFollowingRef.current = true
   }, [])
