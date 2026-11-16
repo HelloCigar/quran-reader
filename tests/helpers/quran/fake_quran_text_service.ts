@@ -35,26 +35,11 @@ export default class FakeQuranTextService extends QuranTextService {
     return new UnavailableQuranTextService()
   }
 
-  /** Whether the text source is down, from `goDown` until `comeBack`. */
-  #isDown = false
-
-  /** The text source goes down: every read fails until `comeBack`. */
-  goDown() {
-    this.#isDown = true
-  }
-
-  /** The text source is back. */
-  comeBack() {
-    this.#isDown = false
-  }
-
   async listSurahs(): Promise<SurahSummary[]> {
-    if (this.#isDown) throw new QuranUnavailableException()
     return structuredClone(SURAHS)
   }
 
   async readSurah(number: number): Promise<Surah> {
-    if (this.#isDown) throw new QuranUnavailableException()
     const recorded = FIXTURE_SURAHS[number]
     if (recorded) return structuredClone(recorded)
 

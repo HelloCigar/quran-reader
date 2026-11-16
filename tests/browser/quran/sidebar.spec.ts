@@ -38,6 +38,37 @@ test.group('Quran reader sidebar', (group) => {
     await page.assertVisible(page.getByRole('heading', { name: "Ali 'Imran", exact: true }))
   })
 
+  test('sends the next surah without the surahs, and still lists them', async ({
+    assert,
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page.getByRole('radio', { name: 'Surah', exact: true }).click()
+    const answered = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === '/quran/3' &&
+        response.request().headers()['x-inertia'] === 'true'
+    )
+
+    await page
+      .getByRole('list', { name: 'Surahs', exact: true })
+      .getByText("Ali 'Imran", { exact: true })
+      .click()
+
+    const nextSurah = await answered
+    const sent = await nextSurah.json()
+    assert.notProperty(sent.props, 'sidebarSurahs')
+    await page.assertVisible(page.getByRole('heading', { name: "Ali 'Imran", exact: true }))
+    const surahs = page
+      .getByRole('navigation', { name: 'Quran', exact: true })
+      .getByRole('list', { name: 'Surahs', exact: true })
+    await page.assertTextContains(surahs.locator('[aria-current="true"]'), "Ali 'Imran")
+    await page.assertElementsCount(surahs.getByRole('listitem'), 114)
+  })
+
   test('hides the ayahs and the Verse box in Surah mode', async ({ visit, route, swap }) => {
     swap(QuranTextService, new FakeQuranTextService())
 

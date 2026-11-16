@@ -54,6 +54,17 @@ export default class SurahsController {
       ? AyahBlock.holding(ayah, surah.ayahCount)
       : AyahBlock.openingAt(ayah, surah.ayahCount)
 
+    /**
+     * Every Surah, for the sidebar, in place of the shared prop of the same
+     * name: here the page opens with them. Sent once; the client keeps them
+     * from one Surah to the next.
+     */
+    inertia.share({
+      sidebarSurahs: inertia.once(() =>
+        SurahTransformer.transform(surahs).useVariant('forNavigation')
+      ),
+    })
+
     return inertia.render('quran/show', {
       surah: SurahTransformer.transform(surah).useVariant('forReading'),
       bismillah: surah.bismillah,
@@ -69,8 +80,6 @@ export default class SurahsController {
       openedAt: block.openedAt,
       previous: previous ? SurahTransformer.transform(previous) : null,
       next: next ? SurahTransformer.transform(next) : null,
-      /** Every Surah, for the sidebar. */
-      surahs: SurahTransformer.transform(surahs).useVariant('forNavigation'),
       /**
        * The signed-in reader's Bookmarks in this Surah. Read only when the
        * visit asks for them: a block of Ayahs or the Recitation loads without.

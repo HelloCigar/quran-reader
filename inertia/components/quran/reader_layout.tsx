@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { usePage } from '@inertiajs/react'
 import { Layout, LayoutContent, LayoutPanel } from '@astryxdesign/core/Layout'
 import type { Data } from '@generated/data'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
@@ -9,20 +10,21 @@ import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
  * The frame of the reading page, nested in the app layout: the sidebar (a
  * start panel, or a drawer on a phone) beside the page. Inertia keeps it
  * mounted from one Surah to the next, so an open drawer and the panel's
- * scroll survive opening a Surah. It reads the reading page's props:
+ * scroll survive opening a Surah. It reads the reading page's `surah`, and
+ * the shared `sidebarSurahs`, which the page sends once and the client keeps:
  *
  * `Show.layout = [AppLayout, ReaderLayout]`
  */
 export default function ReaderLayout({
   surah,
-  surahs,
   children,
 }: {
   surah: Data.Surah.Variants['forReading']
-  surahs: Data.Surah.Variants['forNavigation'][]
   children: ReactNode
 }) {
   const sidebar = useReaderSidebar()
+  const surahs = usePage().props.sidebarSurahs
+  if (!surahs) return children
 
   return (
     <>
