@@ -93,9 +93,8 @@ test.group('Dragging through the Recitation', () => {
     const page = await visit(route('surahs.show', { number: 110 }))
     await page.getByRole('button', { name: 'Play from 110:1', exact: true }).click()
     await page.assertText(page.getByTestId('recited-ayah'), '110:1')
-    // About 55 seconds into the 190.6 (the thumb's travel is inset from the ends of the bar):
-    // in 110:2:1, before 110:2 starts.
-    await holdRecitationThumbAt(page, 0.31)
+    // About 55 seconds into the 190.6: in 110:2:1, before 110:2 starts.
+    await holdRecitationThumbAt(page, 0.29)
     await page.mouse.up()
 
     await page.assertVisible(page.getByRole('dialog', { name: 'Word 110:2:1', exact: true }))

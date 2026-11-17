@@ -1,5 +1,7 @@
 import { type SVGProps } from 'react'
-import { NavIcon } from '@astryxdesign/core/NavIcon'
+import * as stylex from '@stylexjs/stylex'
+import { typographyVars } from '@astryxdesign/core/theme/tokens.stylex'
+import { Icon } from '@astryxdesign/core/Icon'
 import { TopNavHeading } from '@astryxdesign/core/TopNav'
 import { urlFor } from '~/client'
 
@@ -22,16 +24,24 @@ export function QuranMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+const styles = stylex.create({
+  /** The name is set in the heading font, like the titles of the pages. */
+  heading: {
+    fontFamily: typographyVars['--font-family-heading'],
+  },
+})
+
 /**
- * The product heading for the top navigation bar: the Quran Reader mark and
- * name, linking home.
+ * The product heading for the top navigation bar: the Quran Reader mark, bare
+ * in the accent colour, and the name in the heading font, linking home.
  */
 export default function Logo() {
   return (
     <TopNavHeading
       heading="Quran Reader"
       headingHref={urlFor('home')}
-      logo={<NavIcon icon={<QuranMark />} />}
+      logo={<Icon icon={QuranMark} color="accent" size="lg" />}
+      xstyle={styles.heading}
     />
   )
 }

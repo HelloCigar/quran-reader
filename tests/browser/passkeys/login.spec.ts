@@ -6,6 +6,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import { addVirtualAuthenticator, recordPasskeySignals } from '#tests/helpers/passkeys'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { logOut } from '#tests/helpers/navigation'
 
 const rpId = env.get('PASSKEY_RP_ID')
 
@@ -71,7 +72,7 @@ test.group('Passkey Login', (group) => {
     await page.assertVisible(page.getByRole('dialog', { name: 'Note on 1:3', exact: true }))
     await page.getByRole('button', { name: 'Not now', exact: true }).click()
 
-    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await logOut(page)
     await page.waitForURL(route('session.create'))
     await page.getByRole('button', { name: 'Sign in with a passkey', exact: true }).click()
 

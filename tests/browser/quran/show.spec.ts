@@ -15,7 +15,7 @@ test.group('Quran surah reading', () => {
     await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
     await page.assertVisible(page.getByText('البقرة', { exact: true }))
     await page.assertVisible(page.getByText('The Cow', { exact: true }))
-    await page.assertVisible(page.getByText('Medinan · 286 ayahs', { exact: true }))
+    await page.assertVisible(page.getByText('Surah 2 · Medinan · 286 ayahs', { exact: true }))
   })
 
   test('shows the Bismillah on its own line before the first ayah', async ({

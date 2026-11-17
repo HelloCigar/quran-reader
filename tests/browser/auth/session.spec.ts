@@ -3,6 +3,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import { logOut } from '#tests/helpers/navigation'
 
 const credentials = { email: 'ada@example.com', password: 'secret-password' }
 
@@ -83,7 +84,7 @@ test.group('Login and logout', (group) => {
     await browserContext.loginAs(user)
     const page = await visit(route('dashboard'))
 
-    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await logOut(page)
 
     await page.waitForURL(route('session.create'))
     await page.assertTextContains('h1', 'Welcome back')

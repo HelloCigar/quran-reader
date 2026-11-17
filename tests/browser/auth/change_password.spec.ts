@@ -3,6 +3,7 @@ import app from '@adonisjs/core/services/app'
 import { fakePwnedPasswords } from '@adonisplus/persona/password'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
+import { logOut } from '#tests/helpers/navigation'
 
 test.group('Change Password', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -26,7 +27,7 @@ test.group('Change Password', (group) => {
     await page.getByLabel('Confirm password', { exact: true }).fill('N3w-Purple-Monkey-Dishwasher!')
     await page.getByRole('button', { name: 'Update password', exact: true }).click()
     await page.assertVisible(page.getByText('Password updated successfully', { exact: true }))
-    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await logOut(page)
     await page.assertPath(route('session.create'))
 
     await page.getByLabel('Email', { exact: true }).fill(user.email)

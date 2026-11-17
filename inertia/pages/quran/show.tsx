@@ -30,6 +30,7 @@ import { ayahsInView } from '~/components/quran/ayahs_in_view'
 import { useFollowRecitation } from '~/components/quran/use_follow_recitation'
 import { useReadingPosition } from '~/components/quran/use_reading_position'
 import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
+import { ENTRANCE_DELAYS, entranceStyles } from '~/components/quran/entrance_styles'
 
 /**
  * How far (in px) beyond the screen's edge the next block starts loading, so
@@ -97,6 +98,12 @@ export default function Show({
     if (!event.detail.visit.async) setIsVisiting(false)
   })
   const loaded = ayahs.data
+  /**
+   * The first Ayah of the block the page opened with: the Ayahs from it on
+   * fade up one after the other. An Ayah of a block loaded later has no
+   * entrance.
+   */
+  const [firstAtOpen] = useState(loaded[0]?.number ?? 1)
   const hasFirstAyah = loaded[0]?.number === 1
   const hasLastAyah = loaded.at(-1)?.number === surah.ayahCount.raw
   const bookmarksByAyah = useMemo(
@@ -193,6 +200,7 @@ export default function Show({
   )
   useReadingPage({
     surahNumber: surah.number,
+    surahName: surah.name,
     ayahCount: surah.ayahCount.raw,
     firstAyahInView,
     showAyah: showMovedTo,
@@ -296,13 +304,17 @@ export default function Show({
               loading={LOADING}
             >
               <VStack gap={6}>
-                {hasFirstAyah && <SurahHeading surah={surah} />}
-                {hasFirstAyah && bismillah && (
-                  <ArabicText align="center" data-testid="bismillah">
-                    {bismillah}
-                  </ArabicText>
+                {hasFirstAyah && (
+                  <VStack gap={6} xstyle={entranceStyles.fadeUp}>
+                    <SurahHeading surah={surah} />
+                    {bismillah && (
+                      <ArabicText align="center" data-testid="bismillah">
+                        {bismillah}
+                      </ArabicText>
+                    )}
+                  </VStack>
                 )}
-                <List ref={listRef} hasDividers edge="flush" aria-label="Ayahs">
+                <List ref={listRef} edge="padded" density="spacious" aria-label="Ayahs">
                   {loaded.map((ayah) => (
                     <AyahItem
                       key={ayah.number}
@@ -310,6 +322,13 @@ export default function Show({
                       ayah={ayah}
                       bookmark={bookmarksByAyah.get(ayah.number) ?? null}
                       isSignedIn={Boolean(user)}
+                      isRecited={ayah.number === recitedAyah}
+                      entranceOrder={
+                        ayah.number >= firstAtOpen &&
+                        ayah.number < firstAtOpen + ENTRANCE_DELAYS.length
+                          ? ayah.number - firstAtOpen
+                          : null
+                      }
                       onEditNote={notePrompt.edit}
                       onRemove={removal.remove}
                       onPlayFrom={playFrom}

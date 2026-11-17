@@ -10,15 +10,18 @@ import { Text } from '@astryxdesign/core/Text'
 export default function ArabicText({
   children,
   align = 'start',
+  color = 'primary',
   'data-testid': testId,
 }: {
   children: ReactNode
   align?: 'start' | 'center'
+  /** `accent` for a name set apart, such as a Surah's in its heading. */
+  color?: 'primary' | 'accent'
   'data-testid'?: string
 }) {
   return (
     <VStack dir="rtl" hAlign={align} data-testid={testId}>
-      <Text type="arabic" color="primary" justify={align}>
+      <Text type="arabic" color={color} justify={align}>
         {/* Astryx components omit `lang` from their props (BaseProps), so a
             native span is the only place the language can be declared. */}
         <span lang="ar">{children}</span>
