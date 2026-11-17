@@ -445,6 +445,11 @@ export const quranTheme = {
         "padding": "var(--spacing-3)"
       }
     },
+    "slider-thumb": {
+      "base": {
+        "scale": "0.6"
+      }
+    },
     "layout-content": {
       "base": {
         "maxHeight": "100%"

@@ -220,6 +220,11 @@ export const quranTheme = defineTheme({
     citation: { 'variant:number': { '--color-text-secondary': liftedSecondaryText } },
     'segmented-control-item': { base: { '--color-text-secondary': liftedSecondaryText } },
 
+    // The Recitation's progress bar is a quiet line: a small thumb rides it.
+    // `scale` draws it smaller about its centre; its box, which the slider
+    // places along the track and hits under a finger, keeps its size.
+    'slider-thumb': { base: { scale: '0.6' } },
+
     // Inertia's infinite scroll finds the element that scrolls by its CSS, and
     // counts an `overflow: auto` one only when its height is bounded. A content
     // region already fills its layout, so this bounds it without moving it.

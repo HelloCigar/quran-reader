@@ -32,6 +32,8 @@ export type Recited = { recitation: Data.Recitation; ayah: number }
  */
 export type ReadingPage = {
   surahNumber: number
+  /** Its Surah's transliterated name, which the bar shows before a Recitation starts. */
+  surahName: string
   /** How many Ayahs its Surah has. */
   ayahCount: number
   /** The first Ayah the reader can see. */
@@ -565,14 +567,20 @@ export function useRecitation() {
  * Tells the Recitation bar that a Surah's page is open, for as long as it is.
  * `firstAyahInView` and `showAyah` must be stable (`useCallback`).
  */
-export function useReadingPage({ surahNumber, ayahCount, firstAyahInView, showAyah }: ReadingPage) {
+export function useReadingPage({
+  surahNumber,
+  surahName,
+  ayahCount,
+  firstAyahInView,
+  showAyah,
+}: ReadingPage) {
   const { setReadingPage } = useRecitation()
 
   // Before the page is painted, so the bar is there from the first frame.
   useLayoutEffect(() => {
-    setReadingPage({ surahNumber, ayahCount, firstAyahInView, showAyah })
+    setReadingPage({ surahNumber, surahName, ayahCount, firstAyahInView, showAyah })
     return () => setReadingPage(null)
-  }, [surahNumber, ayahCount, firstAyahInView, showAyah, setReadingPage])
+  }, [surahNumber, surahName, ayahCount, firstAyahInView, showAyah, setReadingPage])
 }
 
 /**

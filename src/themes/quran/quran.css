@@ -548,6 +548,10 @@
     --astryx-section-padding: var(--spacing-3);
   }
 
+  .astryx-slider-thumb {
+    scale: 0.6;
+  }
+
   .astryx-layout-content {
     max-height: 100%;
   }
