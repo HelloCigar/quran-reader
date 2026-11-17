@@ -12,3 +12,12 @@ export async function goToArea(page: Page, label: string, path: string) {
   await page.waitForURL(path)
   await page.getByRole('heading', { level: 1 }).waitFor()
 }
+
+/**
+ * Logs out from the top bar of a wide screen, as a reader does: opens the
+ * Account menu and picks Log out.
+ */
+export async function logOut(page: Page) {
+  await page.getByRole('button', { name: 'Account menu', exact: true }).click()
+  await page.getByRole('menuitem', { name: 'Log out', exact: true }).click()
+}

@@ -9,7 +9,7 @@ import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
 import FakeRecitationService from '#tests/helpers/quran/fake_recitation_service'
 import { scrollPastAyah, waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
 import { readingPositionOf, waitForReadingPosition } from '#tests/helpers/reading_position'
-import { goToArea } from '#tests/helpers/navigation'
+import { goToArea, logOut } from '#tests/helpers/navigation'
 
 test.group('Reading Position', (group) => {
   group.each.setup(() => testUtils.db().truncate())
@@ -108,7 +108,7 @@ test.group('Reading Position', (group) => {
 
     const page = await visit(route('surahs.show', { number: 2 }))
     await waitForReadingPosition(first, '2:1')
-    await page.getByRole('button', { name: 'Log out', exact: true }).click()
+    await logOut(page)
     await page.waitForURL(route('session.create'))
     await page.getByLabel('Email', { exact: true }).fill('grace@example.com')
     await page.getByLabel('Password', { exact: true }).fill('secret-password')
