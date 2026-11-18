@@ -2,25 +2,36 @@ import env from '#start/env'
 import { defineConfig, store, drivers } from '@adonisjs/cache'
 
 const cacheConfig = defineConfig({
-  default: 'default',
+  /**
+   * `database` in development and tests, `redis` in production.
+   */
+  default: env.get('CACHE_STORE', 'database'),
 
   stores: {
     memoryOnly: store().useL1Layer(drivers.memory()),
 
     /**
-     * Memory L1 in front of a database L2 on the app's database connection.
-     * The `cache` table is created by a migration, never by the driver.
-     * No bus: the app runs in one process.
+     * Memory L1 in front of a SQLite L2. The `cache` table is created by a
+     * migration, never by the driver. No bus: it runs in one process.
      */
-    default: store()
+    database: store()
       .useL1Layer(drivers.memory())
       .useL2Layer(
         drivers.database({
-          connectionName: env.get('DB_CONNECTION', 'sqlite'),
+          connectionName: 'sqlite',
           autoCreateTable: false,
           tableName: 'cache',
         })
       ),
+
+    /**
+     * Memory L1 in front of a Redis L2. The bus evicts other processes' L1
+     * entries after a write, so the service can run more than one replica.
+     */
+    redis: store()
+      .useL1Layer(drivers.memory())
+      .useL2Layer(drivers.redis({ connectionName: 'main' }))
+      .useBus(drivers.redisBus({ connectionName: 'main' })),
   },
 })
 

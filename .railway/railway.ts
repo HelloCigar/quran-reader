@@ -37,6 +37,8 @@ export default defineRailway(() => {
       APP_URL: preserve(),
       SESSION_DRIVER: preserve(),
       LIMITER_STORE: preserve(),
+      CACHE_STORE: preserve(),
+      REDIS_URL: preserve(),
       DB_CONNECTION: preserve(),
       LIBSQL_URL: preserve(),
       LIBSQL_AUTH_TOKEN: preserve(),

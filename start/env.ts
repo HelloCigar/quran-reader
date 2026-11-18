@@ -67,5 +67,16 @@ export default await Env.create(new URL('../', import.meta.url), {
   PASSKEY_RP_ID: Env.schema.string({ format: 'host' }),
   PASSKEY_ORIGINS: Env.schema.string(),
 
-  LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
+  /*
+  |----------------------------------------------------------
+  | Shared state: rate limits and the cache's L2. `database`
+  | (the default) keeps them in SQLite; production uses
+  | `redis`, since the limiter cannot use libSQL.
+  |----------------------------------------------------------
+  */
+  LIMITER_STORE: Env.schema.enum(['database', 'memory', 'redis'] as const),
+  CACHE_STORE: Env.schema.enum.optional(['database', 'redis'] as const),
+
+  // Redis (redis:// or rediss:// for TLS), needed only when a store above is `redis`
+  REDIS_URL: Env.schema.string.optional(),
 })
