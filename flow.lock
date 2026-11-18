@@ -12,7 +12,12 @@
     "@adonisjs/lucid",
     "@adonisjs/session",
     "@vinejs/vine",
-    "edge.js"
+    "edge.js",
+    "@adonisjs/limiter",
+    "@adonisjs/redis"
   ],
-  "exclude": []
+  "exclude": [
+    "@adonisjs/mail",
+    "@adonisplus/persona"
+  ]
 }
