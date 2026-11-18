@@ -4,8 +4,8 @@ import type { InferConnections } from '@adonisjs/redis/types'
 
 /**
  * Hosted Redis hands out one URL. ioredis takes options, so the URL is split
- * here. Connections open on first use, so the fallback is never dialled while
- * every store stays on the database.
+ * here. With `lazyConnect` the fallback is never dialled while every store
+ * stays on the database (development, tests, CI).
  */
 const redisUrl = new URL(env.get('REDIS_URL') || 'redis://127.0.0.1:6379')
 
@@ -26,6 +26,11 @@ const redisConfig = defineConfig({
        * Resolve IPv4 and IPv6: Railway's private network is IPv6 only.
        */
       family: 0,
+      /**
+       * Connect on the first command, not when the cache provider builds the
+       * Redis store at boot.
+       */
+      lazyConnect: true,
       db: 0,
       keyPrefix: '',
       retryStrategy(times) {

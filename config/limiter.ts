@@ -13,11 +13,11 @@ const limiterConfig = defineConfig({
     }),
 
     /**
-     * Redis store, used in production: the database store cannot use
-     * libSQL. Never call `limiter.clear()` on it; that flushes the Redis
-     * database the cache shares.
+     * Redis store on the default connection, used in production: the
+     * database store cannot use libSQL. Never call `limiter.clear()` on it;
+     * that flushes the Redis database the cache shares.
      */
-    redis: stores.redis({ connectionName: 'main' }),
+    redis: stores.redis({}),
 
     /**
      * Memory store could be used during
