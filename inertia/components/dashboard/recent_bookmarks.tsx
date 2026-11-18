@@ -143,7 +143,7 @@ const styles = stylex.create({
 export default function RecentBookmarks({
   bookmarks,
 }: {
-  bookmarks: Data.Bookmark.Variants['forRecent'][]
+  bookmarks: Data.Bookmark.Variants['forRow'][]
 }) {
   return (
     <VStack xstyle={[styles.section, entranceStyles.fadeUp, ENTRANCE_DELAYS[3]]}>

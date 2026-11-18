@@ -28,10 +28,12 @@ const styles = stylex.create({
 
 type PageProps = InertiaProps<{
   /** One page of the reader's Bookmarks, newest first; `?page=` names it. */
-  bookmarks: Paginated<Data.Bookmark.Variants['forList']>
+  bookmarks: Paginated<Data.Bookmark.Variants['forRow']>
+  /** "1 saved ayah", or `null` when there are none. */
+  savedCount: string | null
 }>
 
-export default function Index({ bookmarks: { data: bookmarks, metadata } }: PageProps) {
+export default function Index({ bookmarks: { data: bookmarks, metadata }, savedCount }: PageProps) {
   const [noteId, setNoteId] = useState<number | null>(null)
   const removal = useRemoveBookmark()
   const rows = useLeavingRows(bookmarks, metadata.currentPage)
@@ -40,11 +42,7 @@ export default function Index({ bookmarks: { data: bookmarks, metadata } }: Page
   return (
     <PageLayout
       title="Bookmarks"
-      eyebrow={
-        metadata.total > 0
-          ? `${metadata.total} saved ${metadata.total === 1 ? 'ayah' : 'ayahs'}`
-          : undefined
-      }
+      eyebrow={savedCount ?? undefined}
       gap="compact"
       phoneTop="roomy"
       phoneInset="row"

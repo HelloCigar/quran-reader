@@ -47,8 +47,11 @@ const GAP_PHONE = SPACE_10
 const RING = `0 0 0 ${borderVars['--border-width']} ${colorVars['--color-border']}`
 const LIFTED = `${RING}, 0 ${spacingVars['--spacing-4']} ${spacingVars['--spacing-9']} calc(-1 * ${spacingVars['--spacing-5']} - ${borderVars['--border-width']}) color-mix(in srgb, ${colorVars['--color-text-primary']} 32%, transparent)`
 
+/** 420px: taller than any card, so a card's height can ease from it to nothing as it leaves. */
+const LEAVE_FROM_HEIGHT = `calc(105 * ${spacingVars['--spacing-1']})`
+
 const leave = stylex.keyframes({
-  from: { opacity: 1, transform: 'none', maxHeight: '420px' },
+  from: { opacity: 1, transform: 'none', maxHeight: LEAVE_FROM_HEIGHT },
   to: {
     opacity: 0,
     transform: `translateX(${spacingVars['--spacing-6']}) scale(0.98)`,
@@ -59,7 +62,7 @@ const leave = stylex.keyframes({
 })
 
 const leavePhone = stylex.keyframes({
-  from: { opacity: 1, transform: 'none', maxHeight: '420px' },
+  from: { opacity: 1, transform: 'none', maxHeight: LEAVE_FROM_HEIGHT },
   to: {
     opacity: 0,
     transform: `translateX(${spacingVars['--spacing-6']}) scale(0.98)`,
@@ -184,7 +187,7 @@ export default function BookmarkListItem({
   onEditNote,
   onRemove,
 }: {
-  bookmark: Data.Bookmark.Variants['forList']
+  bookmark: Data.Bookmark.Variants['forRow']
   entranceOrder?: number | null
   leaving?: boolean
   onEditNote: () => void

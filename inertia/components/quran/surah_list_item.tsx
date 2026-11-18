@@ -79,7 +79,7 @@ const styles = stylex.create({
     },
     '--surah-chevron-shift': {
       default: `calc(-1 * ${spacingVars['--spacing-1-5']})`,
-      ':hover': { default: null, '@media (hover: hover)': '0px' },
+      ':hover': { default: null, '@media (hover: hover)': spacingVars['--spacing-0'] },
     },
   },
   /** The 8-point star behind the number: 44px, 36px on a phone. */

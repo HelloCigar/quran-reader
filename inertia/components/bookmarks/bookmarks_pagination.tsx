@@ -33,7 +33,12 @@ function pagesToShow(current: number, last: number): (number | 'gap')[] {
 }
 
 const styles = stylex.create({
-  nav: { columnGap: spacingVars['--spacing-1'] },
+  /** The pages wrap onto a second row rather than overflow a narrow phone; each keeps its 44px target. */
+  nav: {
+    flexWrap: 'wrap',
+    columnGap: spacingVars['--spacing-1'],
+    rowGap: spacingVars['--spacing-1'],
+  },
   /** A round 40px button (44px on a phone); the current page is filled. */
   page: {
     width: PAGE_SIZE,

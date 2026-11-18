@@ -1,5 +1,10 @@
 import * as stylex from '@stylexjs/stylex'
-import { colorVars, radiusVars, spacingVars } from '@astryxdesign/core/theme/tokens.stylex'
+import {
+  borderVars,
+  colorVars,
+  radiusVars,
+  spacingVars,
+} from '@astryxdesign/core/theme/tokens.stylex'
 
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 const SPRING = 'cubic-bezier(0.34, 1.25, 0.5, 1)'
@@ -42,7 +47,7 @@ export const dialogStyles = stylex.create({
     animationTimingFunction: SPRING,
     '::backdrop': {
       backgroundColor: `color-mix(in srgb, ${colorVars['--color-overlay']} 84%, transparent)`,
-      backdropFilter: 'blur(3px)',
+      backdropFilter: `blur(calc(0.75 * ${spacingVars['--spacing-1']}))`,
       animationName: fadeIn,
       // An opacity fade only, short enough to stay under Reduce Motion (the
       // xstyle type takes no media query inside a pseudo-element).
@@ -72,7 +77,7 @@ export const dialogButtonStyles = stylex.create({
   },
   secondary: {
     backgroundColor: colorVars['--color-background-card'],
-    boxShadow: `0 0 0 1px ${colorVars['--color-border-emphasized']}`,
+    boxShadow: `0 0 0 ${borderVars['--border-width']} ${colorVars['--color-border-emphasized']}`,
   },
   /** Remove is a solid red pill, the one thing on the dialog that is not quiet. */
   destructive: {

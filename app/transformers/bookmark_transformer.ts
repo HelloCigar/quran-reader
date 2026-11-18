@@ -29,17 +29,11 @@ export default class BookmarkTransformer extends BaseTransformer<Bookmark> {
   }
 
   /**
-   * The bookmarks list: what the dashboard shows, for the same Ayah.
+   * A bookmark's row, on the bookmarks list and the dashboard alike: a
+   * "2:255 · Al-Baqarah" title, or just the reference when the surah's text
+   * is unavailable, and the ayah's text or `null`.
    */
-  async forList() {
-    return this.forRecent()
-  }
-
-  /**
-   * A bookmark's row: a "2:255 · Al-Baqarah" title, or just the reference
-   * when the surah's text is unavailable, and the ayah's text or `null`.
-   */
-  async forRecent() {
+  async forRow() {
     const base = await this.toObject()
     const surah = this.#texts.get(this.resource.surahNumber) ?? null
     const ayah = surah?.ayahs?.find((candidate) => candidate.number === this.resource.ayahNumber)

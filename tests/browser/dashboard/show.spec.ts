@@ -29,6 +29,7 @@ test.group('Dashboard', (group) => {
     // A reader clicks anywhere on the card; its text sits over the link.
     await page.assertVisible(page.getByText('Ayah 18:10 · The Cave', { exact: true }))
     await page.assertVisible(page.getByText('10 of 110 ayahs', { exact: true }))
+    await page.assertVisible(page.getByText('آية 10', { exact: true }))
     await page.getByText('Al-Kahf', { exact: true }).click()
 
     await page.assertPath('/quran/18')
@@ -51,6 +52,7 @@ test.group('Dashboard', (group) => {
 
     await page.assertVisible(page.getByText('Surah 18', { exact: true }))
     await page.assertVisible(page.getByText('Ayah 18:10', { exact: true }))
+    await page.assertNotExists(page.getByText(/ of d+ ayahs$/))
   })
 
   test('titles a recent Bookmark by its reference when the Quran text is unavailable', async ({
@@ -81,6 +83,8 @@ test.group('Dashboard', (group) => {
     await page.assertVisible(card)
     // A reader clicks anywhere on the card; its text sits over the link.
     await page.assertVisible(page.getByText('Ayah 1:1 · The Opener', { exact: true }))
+    // A reader who hasn't read yet has no progress through the Surah.
+    await page.assertNotExists(page.getByText(/ of d+ ayahs$/))
     await page.getByText('Al-Fatihah', { exact: true }).click()
 
     await page.assertPath('/quran/1')
@@ -132,6 +136,24 @@ test.group('Dashboard', (group) => {
       await page.assertVisible(list.getByText(`Note on 2:${ayah}`, { exact: true }))
     }
     await page.assertNotExists(list.getByText('2:2 · Al-Baqarah', { exact: true }))
+  })
+
+  test("shows a recent Bookmark's Ayah text when it has no note", async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create(credentials)
+    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 255, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('dashboard'))
+
+    const list = page.getByRole('list', { name: 'Recent bookmarks', exact: true })
+    await page.assertVisible(list.getByText('Ayah 2:255', { exact: true }))
   })
 
   test('opens a recent Bookmark at its Ayah', async ({ visit, route, swap, browserContext }) => {

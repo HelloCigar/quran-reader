@@ -78,7 +78,7 @@ const styles = stylex.create({
     paddingBlockEnd: `calc(${spacingVars['--spacing-5']} + ${spacingVars['--spacing-0-5']})`,
     paddingInline: spacingVars['--spacing-4'],
     backgroundColor: `color-mix(in srgb, ${colorVars['--color-background-body']} 92%, transparent)`,
-    backdropFilter: 'blur(14px)',
+    backdropFilter: `blur(calc(${spacingVars['--spacing-3']} + ${spacingVars['--spacing-0-5']}))`,
     borderBlockStartWidth: borderVars['--border-width'],
     borderBlockStartStyle: 'solid',
     borderBlockStartColor: `color-mix(in srgb, ${colorVars['--color-text-primary']} 6%, transparent)`,

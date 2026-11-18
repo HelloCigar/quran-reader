@@ -10,11 +10,11 @@ import { Button } from '@astryxdesign/core/Button'
 import { IconButton } from '@astryxdesign/core/IconButton'
 import { Icon } from '@astryxdesign/core/Icon'
 import { TextArea } from '@astryxdesign/core/TextArea'
-import { Text } from '@astryxdesign/core/Text'
 import type { Data } from '@generated/data'
 import { focusBookmarkTrigger } from '~/components/bookmarks/bookmarked_menu'
 import { dialogButtonStyles, dialogStyles } from '~/components/bookmarks/dialog_styles'
 import { useRouteForm } from '~/components/forms/use_route_form'
+import ArabicText from '~/components/quran/arabic_text'
 
 const styles = stylex.create({
   title: {
@@ -97,11 +97,9 @@ export default function NoteDialog({
                 {`Note on ${bookmark.reference}`}
               </Heading>
               {arabic && (
-                <Text type="arabic" color="secondary" xstyle={styles.arabic}>
-                  <span lang="ar" dir="rtl">
-                    {arabic}
-                  </span>
-                </Text>
+                <ArabicText color="secondary" xstyle={styles.arabic}>
+                  {arabic}
+                </ArabicText>
               )}
             </VStack>
             <IconButton

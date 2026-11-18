@@ -45,7 +45,12 @@ export default class BookmarksController {
         bookmarks.all(),
         bookmarks.getMeta(),
         texts
-      ).useVariant('forList'),
+      ).useVariant('forRow'),
+      /** The count over the list: "1 saved ayah", or `null` when there are none. */
+      savedCount:
+        bookmarks.total > 0
+          ? `${bookmarks.total} saved ${bookmarks.total === 1 ? 'ayah' : 'ayahs'}`
+          : null,
     })
   }
 

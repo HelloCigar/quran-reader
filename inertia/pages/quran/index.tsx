@@ -66,10 +66,12 @@ const styles = stylex.create({
 
 type PageProps = InertiaProps<{
   surahs: Data.Surah.Variants['forIndex'][]
-  readingPosition: Data.ReadingPosition | null
+  /** "114 Surahs". */
+  surahCount: string
+  readingPosition: Data.ReadingPosition.Variants['forIndex'] | null
 }>
 
-export default function Index({ surahs, readingPosition, user }: PageProps) {
+export default function Index({ surahs, surahCount, readingPosition, user }: PageProps) {
   const continueHref =
     readingPosition &&
     urlFor(
@@ -82,7 +84,7 @@ export default function Index({ surahs, readingPosition, user }: PageProps) {
     <PageLayout
       title="The Quran"
       inset="row"
-      eyebrow={`${surahs.length} Surahs`}
+      eyebrow={surahCount}
       actions={
         (readingPosition || user) && (
           <>
@@ -112,9 +114,7 @@ export default function Index({ surahs, readingPosition, user }: PageProps) {
     >
       {readingPosition && continueHref && (
         <ContinueReadingCard
-          surahName={
-            surahs.find((surah) => surah.number === readingPosition.surahNumber)?.name ?? ''
-          }
+          surahName={readingPosition.surahName}
           reference={readingPosition.reference}
           href={continueHref}
           xstyle={styles.phone}

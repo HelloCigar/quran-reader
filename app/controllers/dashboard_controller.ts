@@ -54,7 +54,7 @@ export default class DashboardController {
       continueReading: ReadingPositionTransformer.transform(continueAt, surah).useVariant(
         'forContinuing'
       ),
-      bookmarks: BookmarkTransformer.transform(bookmarks, texts).useVariant('forRecent'),
+      bookmarks: BookmarkTransformer.transform(bookmarks, texts).useVariant('forRow'),
     })
   }
 }

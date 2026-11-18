@@ -4,6 +4,7 @@ import {
   borderVars,
   colorVars,
   durationVars,
+  focusVars,
   radiusVars,
   spacingVars,
 } from '@astryxdesign/core/theme/tokens.stylex'
@@ -44,7 +45,7 @@ const styles = stylex.create({
     boxShadow: {
       default: ring(10),
       ':hover': ring(22),
-      ':focus-within': `0 0 0 2px ${colorVars['--color-accent']}`,
+      ':focus-within': `0 0 0 ${focusVars['--focus-outline-width']} ${colorVars['--color-accent']}`,
     },
     transitionProperty: { default: 'box-shadow, background-color', [REDUCED_MOTION]: 'none' },
     transitionDuration: durationVars['--duration-fast'],

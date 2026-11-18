@@ -124,7 +124,10 @@ const styles = stylex.create({
   go: {
     transform: {
       default: 'none',
-      ':is([data-astryx-clickable-card]:hover *)': { default: null, [HOVER]: 'translateX(3px)' },
+      ':is([data-astryx-clickable-card]:hover *)': {
+        default: null,
+        [HOVER]: `translateX(calc(0.75 * ${spacingVars['--spacing-1']}))`,
+      },
     },
     transitionProperty: { default: 'transform', [REDUCED_MOTION]: 'none' },
     transitionDuration: durationVars['--duration-medium-min'],
@@ -196,7 +199,7 @@ export default function ContinueReadingCard({
           </VStack>
           <HStack vAlign="center" xstyle={styles.pill}>
             <Text type="body" color="inherit" xstyle={styles.pillText}>
-              {continueReading.heading === 'Start reading' ? 'Start' : 'Continue'}
+              {continueReading.action}
             </Text>
             <Icon icon={ArrowRightIcon} size="sm" xstyle={[styles.arrow, styles.go]} />
           </HStack>

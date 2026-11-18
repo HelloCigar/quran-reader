@@ -7,7 +7,7 @@ import RecentBookmarks from '~/components/dashboard/recent_bookmarks'
 
 type PageProps = InertiaProps<{
   continueReading: Data.ReadingPosition.Variants['forContinuing']
-  bookmarks: Data.Bookmark.Variants['forRecent'][]
+  bookmarks: Data.Bookmark.Variants['forRow'][]
 }>
 
 export default function Dashboard({ continueReading, bookmarks }: PageProps) {
