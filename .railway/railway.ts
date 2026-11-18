@@ -21,6 +21,13 @@ export default defineRailway(() => {
      * setting it with `railway variable set`, or the next apply removes it.
      */
     env: {
+      /**
+       * Build only: `@adonisplus/*` installs from the AdonisJS Plus registry,
+       * which needs the token. Passed as a flag so it is never written to disk.
+       */
+      ADONISJS_PLUS_TOKEN: preserve(),
+      RAILPACK_INSTALL_CMD:
+        'npm ci --//plus.adonisjs.com/registry/:_authToken=$ADONISJS_PLUS_TOKEN',
       TZ: preserve(),
       NODE_ENV: preserve(),
       HOST: preserve(),
