@@ -1,6 +1,8 @@
 import { test } from '@japa/runner'
 import QuranTextService from '#services/quran_text_service'
+import RecitationService from '#services/recitation_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
+import FakeRecitationService from '#tests/helpers/quran/fake_recitation_service'
 
 test.group('Quran Words', () => {
   test('opens a Word to show its Transliteration and Word Translation', async ({
@@ -8,8 +10,9 @@ test.group('Quran Words', () => {
     route,
     swap,
   }) => {
-    // Stands in for the Quran Foundation Content API.
+    // Both stand in for the Quran Foundation Content API: opening a Word loads its Surah's Recitation.
     swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
 
     const page = await visit(route('surahs.show', { number: 1 }))
     await page.locator('[data-word-location="1:1:1"]').click()
@@ -20,8 +23,9 @@ test.group('Quran Words', () => {
   })
 
   test('opens a Word from the keyboard', async ({ visit, route, swap }) => {
-    // Stands in for the Quran Foundation Content API.
+    // Both stand in for the Quran Foundation Content API: opening a Word loads its Surah's Recitation.
     swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
 
     const page = await visit(route('surahs.show', { number: 1 }))
     await page.locator('[data-word-location="1:2:1"]').press('Enter')
@@ -35,8 +39,9 @@ test.group('Quran Words', () => {
     route,
     swap,
   }) => {
-    // Stands in for the Quran Foundation Content API.
+    // Both stand in for the Quran Foundation Content API: opening a Word loads its Surah's Recitation.
     swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
 
     const page = await visit(route('surahs.show', { number: 1 }))
     await page.locator('[data-word-location="1:2:1"]').press('Enter')
@@ -49,8 +54,9 @@ test.group('Quran Words', () => {
   })
 
   test('does not open the ayah-end marker', async ({ visit, route, swap }) => {
-    // Stands in for the Quran Foundation Content API.
+    // Both stand in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
 
     const page = await visit(route('surahs.show', { number: 1 }))
     const marker = page.locator('#ayah-1').getByTestId('ayah-end')
@@ -61,8 +67,9 @@ test.group('Quran Words', () => {
   })
 
   test('keeps the pause sign with its Word', async ({ visit, route, swap }) => {
-    // Stands in for the Quran Foundation Content API.
+    // Both stand in for the Quran Foundation Content API: opening a Word loads its Surah's Recitation.
     swap(QuranTextService, new FakeQuranTextService())
+    swap(RecitationService, new FakeRecitationService())
 
     const page = await visit(route('surahs.show', { number: 110 }))
     const word = page.locator('[data-word-location="110:3:4"]')

@@ -3,7 +3,12 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import User from '#models/user'
 import QuranTextService from '#services/quran_text_service'
 import FakeQuranTextService from '#tests/helpers/quran/fake_quran_text_service'
-import { scrollAyahs, scrollToAyah, waitForAyahInView } from '#tests/helpers/quran/scroll_to_ayah'
+import {
+  scrollAyahs,
+  scrollPastAyah,
+  scrollToAyah,
+  waitForAyahInView,
+} from '#tests/helpers/quran/scroll_to_ayah'
 
 test.group('Quran surah reading', () => {
   test('shows the surah heading', async ({ visit, route, swap }) => {
@@ -245,8 +250,9 @@ test.group('Quran surah reading', () => {
       .getByRole('link')
       .filter({ hasText: 'Al-Baqarah' })
       .click()
-    await scrollToAyah(page, '2:61', 'down')
-    await page.waitForURL((url) => url.searchParams.has('ayah'))
+    await scrollPastAyah(page, 20)
+    // The address bar has settled on the block in view: a later update would replace the entry Back goes to.
+    await page.waitForURL((url) => url.searchParams.get('ayah') === '21')
     await page.goBack()
 
     await page.assertPath(route('surahs.index'))

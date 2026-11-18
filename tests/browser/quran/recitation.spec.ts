@@ -63,6 +63,8 @@ test.group('Quran Recitation', () => {
 
     const page = await visit(route('surahs.show', { number: 2 }))
     await page.getByRole('button', { name: 'Play from 2:18', exact: true }).click()
+    // Al-Baqarah's whole Recitation loads first: it is not part of the wait for the next block.
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
 
     // Any Word of the next block (Ayahs 21-40): one Word lasts too briefly to wait for.
     await page.assertVisible(page.getByRole('dialog', { name: /^Word 2:(2[1-9]|3\d|40):/ }))
