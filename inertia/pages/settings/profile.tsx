@@ -1,17 +1,20 @@
 import { Head } from '@inertiajs/react'
 import { Form } from '@adonisjs/inertia/react'
-import { VStack } from '@astryxdesign/core/VStack'
 import { HStack } from '@astryxdesign/core/HStack'
-import { Heading } from '@astryxdesign/core/Heading'
-import { Text } from '@astryxdesign/core/Text'
-import { TextInput } from '@astryxdesign/core/TextInput'
-import { FormLayout } from '@astryxdesign/core/FormLayout'
 import { Button } from '@astryxdesign/core/Button'
 import { Banner } from '@astryxdesign/core/Banner'
 import AppLayout from '~/components/app/app_layout'
 import SettingsLayout from '~/components/settings/settings_layout'
+import {
+  SettingsFields,
+  SettingsSection,
+  SettingsSaveBar,
+} from '~/components/settings/settings_section'
+import { SettingsTextInput } from '~/components/settings/settings_controls'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import type { InertiaProps } from '~/types'
+
+const FORM_ID = 'update-profile'
 
 export default function Profile({ user }: InertiaProps) {
   const account = user!
@@ -23,14 +26,11 @@ export default function Profile({ user }: InertiaProps) {
   )
 
   return (
-    <VStack gap={6} hAlign="stretch">
+    <SettingsSection
+      heading="Profile"
+      description="Your name and the email address you sign in with."
+    >
       <Head title="Profile" />
-      <VStack gap={1}>
-        <Heading level={2}>Profile</Heading>
-        <Text type="supporting" color="secondary">
-          Your name and the email address you sign in with.
-        </Text>
-      </VStack>
 
       {account.unverifiedEmail && (
         <Banner
@@ -72,23 +72,24 @@ export default function Profile({ user }: InertiaProps) {
         />
       )}
 
-      <form onSubmit={form.submit}>
-        <VStack gap={4} hAlign="stretch" width="100%" maxWidth={480}>
-          <FormLayout>
-            <TextInput label="Full name" autoComplete="name" {...form.field('fullName')} />
-            <TextInput label="Email" type="email" autoComplete="email" {...form.field('email')} />
-          </FormLayout>
-          <HStack>
-            <Button
-              type="submit"
-              label={form.processing ? 'Saving…' : 'Update profile'}
-              variant="primary"
-              isLoading={form.processing}
-            />
-          </HStack>
-        </VStack>
+      <form id={FORM_ID} onSubmit={form.submit}>
+        <SettingsFields>
+          <SettingsTextInput label="Full name" autoComplete="name" {...form.field('fullName')} />
+          <SettingsTextInput
+            label="Email"
+            type="email"
+            autoComplete="email"
+            helper="We send a link to a new address before switching to it."
+            {...form.field('email')}
+          />
+          <SettingsSaveBar
+            form={FORM_ID}
+            processing={form.processing}
+            saved={form.recentlySuccessful}
+          />
+        </SettingsFields>
       </form>
-    </VStack>
+    </SettingsSection>
   )
 }
 

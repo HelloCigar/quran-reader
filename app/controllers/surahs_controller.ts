@@ -31,7 +31,7 @@ export default class SurahsController {
     ])
 
     return inertia.render('quran/index', {
-      surahs: SurahTransformer.transform(surahs),
+      surahs: SurahTransformer.transform(surahs).useVariant('forIndex'),
       /** `null` for a signed-out reader, or one who hasn't read yet. */
       readingPosition: position ? ReadingPositionTransformer.transform(position) : null,
     })

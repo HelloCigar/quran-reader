@@ -79,6 +79,7 @@ test.group('Bookmarks index', (group) => {
     const page = await visit(route('bookmarks.index'))
 
     await page.assertPath('/bookmarks')
+    await page.assertVisible(page.getByText('1 saved ayah', { exact: true }))
     const list = page.getByRole('list', { name: 'Bookmarks', exact: true })
     for (const text of ['2:255 · Al-Baqarah', 'آية 255', 'Ayah 2:255', 'Ayat al-Kursi']) {
       await page.assertVisible(list.getByText(text, { exact: true }))
@@ -156,8 +157,7 @@ test.group('Bookmarks index', (group) => {
     await browserContext.loginAs(reader)
 
     const page = await visit(route('bookmarks.index'))
-    await page.getByRole('button', { name: 'Bookmarked 2:255', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'Edit note', exact: true }).click()
+    await page.getByRole('button', { name: 'Edit note on 2:255', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: 'Note on 2:255', exact: true })
     await dialog.getByLabel('Note', { exact: true }).fill('Updated')
     await dialog.getByRole('button', { name: 'Save', exact: true }).click()
@@ -187,8 +187,7 @@ test.group('Bookmarks index', (group) => {
     await browserContext.loginAs(reader)
 
     const page = await visit(route('bookmarks.index'))
-    await page.getByRole('button', { name: 'Bookmarked 2:255', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'Remove', exact: true }).click()
+    await page.getByRole('button', { name: 'Remove bookmark 2:255', exact: true }).click()
 
     await page.assertPath('/bookmarks')
     await page.assertNotExists(page.getByText('2:255 · Al-Baqarah', { exact: true }))
@@ -279,7 +278,7 @@ test.group('Bookmarks index', (group) => {
 
     await page
       .getByRole('navigation', { name: 'Pages of bookmarks', exact: true })
-      .getByRole('button', { name: 'Go to next page', exact: true })
+      .getByRole('button', { name: 'Go to page 2', exact: true })
       .click()
 
     await page.waitForURL((url) => url.searchParams.get('page') === '2')
@@ -299,8 +298,7 @@ test.group('Bookmarks index', (group) => {
     await browserContext.loginAs(reader)
     const page = await visit(route('bookmarks.index', {}, { qs: { page: 2 } }))
 
-    await page.getByRole('button', { name: 'Bookmarked 2:1', exact: true }).click()
-    await page.getByRole('menuitem', { name: 'Remove', exact: true }).click()
+    await page.getByRole('button', { name: 'Remove bookmark 2:1', exact: true }).click()
 
     await page.waitForURL((url) => url.searchParams.get('page') === '1')
     await page.assertElementsCount(

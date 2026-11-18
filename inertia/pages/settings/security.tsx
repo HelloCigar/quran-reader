@@ -1,6 +1,4 @@
 import { Head } from '@inertiajs/react'
-import { VStack } from '@astryxdesign/core/VStack'
-import { Divider } from '@astryxdesign/core/Divider'
 import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
 import AppLayout from '~/components/app/app_layout'
 import SettingsLayout from '~/components/settings/settings_layout'
@@ -13,12 +11,12 @@ type PageProps = InertiaProps<{ passwordPolicy: PasswordPolicy; passkeys: Data.P
 
 export default function Security({ passwordPolicy, passkeys }: PageProps) {
   return (
-    <VStack gap={6} hAlign="stretch">
+    <>
       <Head title="Security" />
-      <ChangePassword passwordPolicy={passwordPolicy} />
-      <Divider />
-      <PasskeysSettings passkeys={passkeys} />
-    </VStack>
+      <ChangePassword passwordPolicy={passwordPolicy}>
+        <PasskeysSettings passkeys={passkeys} />
+      </ChangePassword>
+    </>
   )
 }
 

@@ -7,8 +7,7 @@ export default class BookmarkTransformer extends BaseTransformer<Bookmark> {
 
   /**
    * `texts` holds the Quran text per surah number, `null` when that surah's
-   * text is unavailable. The bookmarks list passes each whole Surah; the
-   * dashboard passes only the summaries, for the Surah names.
+   * text is unavailable.
    */
   constructor(
     resource: Bookmark,
@@ -30,31 +29,25 @@ export default class BookmarkTransformer extends BaseTransformer<Bookmark> {
   }
 
   /**
-   * The bookmarks list: a "2:255 · Al-Baqarah" title, or just the reference
-   * when the surah's text is unavailable, and the ayah's text or `null`.
+   * The bookmarks list: what the dashboard shows, for the same Ayah.
    */
   async forList() {
-    const base = await this.forRecent()
+    return this.forRecent()
+  }
+
+  /**
+   * A bookmark's row: a "2:255 · Al-Baqarah" title, or just the reference
+   * when the surah's text is unavailable, and the ayah's text or `null`.
+   */
+  async forRecent() {
+    const base = await this.toObject()
     const surah = this.#texts.get(this.resource.surahNumber) ?? null
     const ayah = surah?.ayahs?.find((candidate) => candidate.number === this.resource.ayahNumber)
 
     return {
       ...base,
-      text: ayah ? { arabic: ayah.arabic, english: ayah.english } : null,
-    }
-  }
-
-  /**
-   * The dashboard's recent bookmarks: the "2:255 · Al-Baqarah" title, or
-   * just the reference when the surah's name is unavailable, and the note.
-   */
-  async forRecent() {
-    const base = await this.toObject()
-    const surah = this.#texts.get(this.resource.surahNumber) ?? null
-
-    return {
-      ...base,
       title: surah ? `${base.reference} · ${surah.name}` : base.reference,
+      text: ayah ? { arabic: ayah.arabic, english: ayah.english } : null,
     }
   }
 }

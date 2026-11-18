@@ -225,6 +225,63 @@ export const quranTheme = defineTheme({
     // places along the track and hits under a finger, keeps its size.
     'slider-thumb': { base: { scale: '0.6' } },
 
+    // Popovers and menus: a 16px white surface held by a hairline ring and a
+    // soft lift. A menu's rows are 40px tall pills of 10px, 6px in from its edge.
+    popover: {
+      base: {
+        borderRadius: '1rem',
+        boxShadow:
+          `0 0 0 1px light-dark(${sand.light[5]}0F, ${white}14), ` +
+          `0 18px 40px -16px light-dark(${sand.light[5]}59, ${sand.dark[0]}B3)`,
+      },
+    },
+    'dropdown-menu': { base: { padding: 'var(--spacing-1-5)', gap: 'var(--spacing-0)' } },
+    'dropdown-menu-item': {
+      base: {
+        minHeight: 'var(--spacing-10)',
+        '--color-icon-secondary': 'var(--color-icon-primary)',
+        paddingBlock: 'var(--spacing-0)',
+        paddingInline: 'var(--spacing-3)',
+        gap: 'calc(var(--spacing-2) + var(--spacing-0-5))',
+        borderRadius: 'var(--radius-container)',
+      },
+    },
+
+    // A note's field: a softly rounded sheet, set a little larger than the page's text.
+    'text-area': { base: { borderRadius: '0.875rem' } },
+    'text-area-control': {
+      base: {
+        paddingBlockStart: 'var(--spacing-3)',
+        paddingInline: 'calc(var(--spacing-3) + var(--spacing-0-5))',
+        fontSize: '0.9375rem',
+        lineHeight: '1.5',
+      },
+    },
+
+    // Toasts: one dark (light on dark mode) rounded card with the message, a
+    // dismiss button and a line that runs out as its time does. An error is a
+    // pale red card with a red ring that stays until it is dismissed.
+    toast: {
+      base: {
+        position: 'relative',
+        overflow: 'hidden',
+        width: 'auto',
+        maxWidth: '28.75rem',
+        paddingBlock: 'calc(var(--spacing-2) + var(--spacing-0-5))',
+        paddingInlineStart: 'calc(var(--spacing-3) + var(--spacing-0-5))',
+        paddingInlineEnd: 'var(--spacing-2)',
+        borderRadius: '1rem',
+        backgroundColor: 'var(--color-text-primary)',
+        boxShadow: `0 18px 40px -16px light-dark(${sand.light[5]}80, ${sand.dark[0]}B3)`,
+      },
+      'type:error': {
+        backgroundColor: `light-dark(${red.light[95]}, ${red.dark[25]})`,
+        boxShadow:
+          `0 0 0 1px light-dark(${red.light[45]}40, ${red.dark[75]}40), ` +
+          `0 18px 40px -18px light-dark(${red.light[25]}73, ${sand.dark[0]}B3)`,
+      },
+    },
+
     // Inertia's infinite scroll finds the element that scrolls by its CSS, and
     // counts an `overflow: auto` one only when its height is bounded. A content
     // region already fills its layout, so this bounds it without moving it.

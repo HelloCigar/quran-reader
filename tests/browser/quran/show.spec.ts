@@ -13,7 +13,9 @@ test.group('Quran surah reading', () => {
 
     await page.assertPath('/quran/2')
     await page.assertVisible(page.getByRole('heading', { name: 'Al-Baqarah', exact: true }))
-    await page.assertVisible(page.getByText('البقرة', { exact: true }))
+    await page.assertVisible(
+      page.getByRole('group', { name: 'Content', exact: true }).getByText('البقرة', { exact: true })
+    )
     await page.assertVisible(page.getByText('The Cow', { exact: true }))
     await page.assertVisible(page.getByText('Surah 2 · Medinan · 286 ayahs', { exact: true }))
   })
@@ -241,7 +243,7 @@ test.group('Quran surah reading', () => {
     await page
       .getByRole('list', { name: 'Surahs', exact: true })
       .getByRole('link')
-      .filter({ hasText: '2 · Al-Baqarah' })
+      .filter({ hasText: 'Al-Baqarah' })
       .click()
     await scrollToAyah(page, '2:61', 'down')
     await page.waitForURL((url) => url.searchParams.has('ayah'))

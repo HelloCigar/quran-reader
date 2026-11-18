@@ -1,6 +1,6 @@
 import { type SVGProps } from 'react'
 import * as stylex from '@stylexjs/stylex'
-import { typographyVars } from '@astryxdesign/core/theme/tokens.stylex'
+import { spacingVars, typographyVars } from '@astryxdesign/core/theme/tokens.stylex'
 import { Icon } from '@astryxdesign/core/Icon'
 import { TopNavHeading } from '@astryxdesign/core/TopNav'
 import { urlFor } from '~/client'
@@ -24,10 +24,22 @@ export function QuranMark(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+/** AppShell's `md` breakpoint: below it the bar is the phone's bar. */
+const PHONE = '@media (max-width: 768px)'
+
 const styles = stylex.create({
-  /** The name is set in the heading font, like the titles of the pages. */
+  /**
+   * The name is set in the heading font, like the titles of the pages. On a
+   * phone the mark sits on the bar's 16px inset, with 8px to the name.
+   */
   heading: {
     fontFamily: typographyVars['--font-family-heading'],
+    paddingInline: { default: null, [PHONE]: spacingVars['--spacing-0'] },
+  },
+  /** The mark is 24px on a wide bar and 20px on a phone's. */
+  mark: {
+    width: { default: null, [PHONE]: spacingVars['--spacing-5'] },
+    height: { default: null, [PHONE]: spacingVars['--spacing-5'] },
   },
 })
 
@@ -40,7 +52,7 @@ export default function Logo() {
     <TopNavHeading
       heading="Quran Reader"
       headingHref={urlFor('home')}
-      logo={<Icon icon={QuranMark} color="accent" size="lg" />}
+      logo={<Icon icon={QuranMark} color="accent" size="lg" xstyle={styles.mark} />}
       xstyle={styles.heading}
     />
   )

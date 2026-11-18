@@ -1,16 +1,17 @@
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import type ReadingPosition from '#models/reading_position'
+import type { ContinuingSurah } from '#types/quran'
 
 export default class ReadingPositionTransformer extends BaseTransformer<ReadingPosition> {
-  #surahName: string | null
+  #surah: ContinuingSurah | null
 
   /**
-   * `surahName` names the Surah on the dashboard; `null` when the Quran text
+   * `surah` describes the Surah on the dashboard; `null` when the Quran text
    * is unavailable. Only the dashboard passes it.
    */
-  constructor(resource: ReadingPosition, surahName: string | null = null) {
+  constructor(resource: ReadingPosition, surah: ContinuingSurah | null = null) {
     super(resource)
-    this.#surahName = surahName
+    this.#surah = surah
   }
 
   /**
@@ -26,19 +27,32 @@ export default class ReadingPositionTransformer extends BaseTransformer<ReadingP
   /**
    * The dashboard's main card: "Continue reading" at the reader's Reading
    * Position, or "Start reading" at a position not yet saved, where a new
-   * reader starts. The title is "Al-Kahf · Ayah 18:10", or "Surah 18 · Ayah
-   * 18:10" when the Quran text is unavailable.
+   * reader starts. It names the Surah ("Al-Kahf", or "Surah 18" when the
+   * Quran text is unavailable), the Ayah ("Ayah 18:10 · The Cave"), the
+   * Ayah's Arabic, and how far into the Surah it is ("10 of 110 ayahs").
+   * The Arabic and the progress are `null` when the text is not at hand, and
+   * the progress for a reader who hasn't read yet.
    */
   async forContinuing() {
     const base = await this.toObject()
     const heading = this.resource.$isPersisted ? 'Continue reading' : 'Start reading'
-    const surahName = this.#surahName ?? `Surah ${base.surahNumber}`
+    const surah = this.#surah
+    const ayah = surah?.ayahs?.find((candidate) => candidate.number === base.ayahNumber)
 
     return {
       ...base,
       heading,
-      title: `${surahName} · Ayah ${base.reference}`,
       label: `${heading} at ${base.reference}`,
+      surahName: surah?.name ?? `Surah ${base.surahNumber}`,
+      subtitle: surah ? `Ayah ${base.reference} · ${surah.meaning}` : `Ayah ${base.reference}`,
+      arabic: ayah?.arabic ?? null,
+      progress:
+        surah && this.resource.$isPersisted
+          ? {
+              percent: Math.round((base.ayahNumber / surah.ayahCount) * 100),
+              label: `${base.ayahNumber} of ${surah.ayahCount} ayahs`,
+            }
+          : null,
     }
   }
 }

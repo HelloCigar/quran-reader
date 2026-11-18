@@ -139,7 +139,7 @@ test.group('Signup', (group) => {
     await page.getByRole('link', { name: 'Sign in', exact: true }).click()
 
     await page.waitForURL(route('session.create'))
-    await page.assertTextContains('h1', 'Welcome back')
+    await page.assertTextContains('h1', 'Sign in')
   })
 })
 
