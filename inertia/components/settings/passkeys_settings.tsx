@@ -1,20 +1,47 @@
+import * as stylex from '@stylexjs/stylex'
 import { useState } from 'react'
+import { colorVars, spacingVars } from '@astryxdesign/core/theme/tokens.stylex'
 import { KeyIcon } from '@heroicons/react/24/outline'
-import { PlusIcon } from '@heroicons/react/20/solid'
 import type { Data } from '@generated/data'
 import { Form, useHttp, useRouter } from '@adonisjs/inertia/react'
 import { startRegistration, WebAuthnError } from '@simplewebauthn/browser'
 import { VStack } from '@astryxdesign/core/VStack'
 import { HStack } from '@astryxdesign/core/HStack'
-import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
 import { Button } from '@astryxdesign/core/Button'
-import { TextInput } from '@astryxdesign/core/TextInput'
 import { List, ListItem } from '@astryxdesign/core/List'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Banner } from '@astryxdesign/core/Banner'
-import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { useRouteForm } from '~/components/forms/use_route_form'
+import { SettingsButton, SettingsTextInput } from '~/components/settings/settings_controls'
+
+/** The page's phone breakpoint, the one `PageLayout` uses. */
+const PHONE = '@media (max-width: 600px)'
+
+const styles = stylex.create({
+  /** The passkeys box: a pale green card of 16px corners, 14px above and below and 16px to each side on a phone. */
+  box: {
+    boxSizing: 'border-box',
+    paddingBlock: {
+      default: spacingVars['--spacing-4'],
+      [PHONE]: `calc(${spacingVars['--spacing-3']} + ${spacingVars['--spacing-0-5']})`,
+    },
+    paddingInline: {
+      default: `calc(${spacingVars['--spacing-4']} + ${spacingVars['--spacing-0-5']})`,
+      [PHONE]: spacingVars['--spacing-4'],
+    },
+    borderRadius: spacingVars['--spacing-4'],
+    backgroundColor: `color-mix(in srgb, ${colorVars['--color-accent']} 7%, transparent)`,
+  },
+  /** The text over the button on a phone, 12px apart, the button under it at the start. */
+  head: {
+    flexDirection: { default: null, [PHONE]: 'column' },
+    alignItems: { default: null, [PHONE]: 'flex-start' },
+    rowGap: { default: null, [PHONE]: spacingVars['--spacing-3'] },
+  },
+  title: { fontSize: '0.875rem', lineHeight: 'normal' },
+  description: { fontSize: '0.8125rem', lineHeight: 'normal' },
+})
 
 /**
  * Renames a passkey in place of its row. It is mounted only while the reader
@@ -32,7 +59,7 @@ function PasskeyRenameForm({ passkey, onDone }: { passkey: Data.Passkey; onDone:
       label={
         <form onSubmit={form.submit}>
           <HStack gap={2} vAlign="end" wrap="wrap">
-            <TextInput label="Passkey name" hasAutoFocus {...form.field('name')} />
+            <SettingsTextInput label="Passkey name" hasAutoFocus {...form.field('name')} />
             <Button
               type="submit"
               label={form.processing ? 'Saving…' : 'Save'}
@@ -137,14 +164,23 @@ export default function PasskeysSettings({ passkeys }: { passkeys: Data.Passkey[
   }
 
   return (
-    <VStack gap={4} hAlign="stretch">
-      <VStack gap={1}>
-        <Heading level={2}>Passkeys</Heading>
-        <Text type="supporting" color="secondary">
-          Sign in with your fingerprint, face, or screen lock instead of a password. Passkeys are
-          stored by your device or password manager and cannot be phished.
-        </Text>
-      </VStack>
+    <VStack gap={3} hAlign="stretch" xstyle={styles.box}>
+      <HStack gap={4} hAlign="between" vAlign="center" wrap="wrap" xstyle={styles.head}>
+        <VStack gap={0.5}>
+          <Text weight="semibold" as="p" xstyle={styles.title}>
+            Passkeys
+          </Text>
+          <Text type="supporting" color="secondary" xstyle={styles.description}>
+            Sign in with your fingerprint, face or screen lock.
+          </Text>
+        </VStack>
+        <SettingsButton
+          tone="white"
+          label={processing ? 'Waiting for your device…' : 'Add a passkey'}
+          isLoading={processing}
+          onClick={addPasskey}
+        />
+      </HStack>
 
       {passkeys.length > 0 ? (
         <List aria-label="Passkeys" edge="flush">
@@ -153,24 +189,12 @@ export default function PasskeysSettings({ passkeys }: { passkeys: Data.Passkey[
           ))}
         </List>
       ) : (
-        <EmptyState
-          isCompact
-          icon={<Icon icon={KeyIcon} size="lg" color="secondary" />}
-          title="You have not added any passkeys yet."
-        />
+        <Text type="supporting" color="secondary" xstyle={styles.description}>
+          You have not added any passkeys yet.
+        </Text>
       )}
 
       {error && <Banner status="error" title={error} role="alert" />}
-
-      <HStack>
-        <Button
-          label={processing ? 'Waiting for your device…' : 'Add a passkey'}
-          variant="secondary"
-          icon={<Icon icon={PlusIcon} />}
-          isLoading={processing}
-          onClick={addPasskey}
-        />
-      </HStack>
     </VStack>
   )
 }

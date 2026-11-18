@@ -25,7 +25,7 @@ test.group('Change Password', (group) => {
     await page.getByLabel('Current password', { exact: true }).fill('Corr3ct-Horse-Battery-Staple!')
     await page.getByLabel('New password', { exact: true }).fill('N3w-Purple-Monkey-Dishwasher!')
     await page.getByLabel('Confirm password', { exact: true }).fill('N3w-Purple-Monkey-Dishwasher!')
-    await page.getByRole('button', { name: 'Update password', exact: true }).click()
+    await page.getByRole('button', { name: 'Save changes', exact: true }).click()
     await page.assertVisible(page.getByText('Password updated successfully', { exact: true }))
     await logOut(page)
     await page.assertPath(route('session.create'))
@@ -45,7 +45,7 @@ test.group('Change Password', (group) => {
     await page.getByLabel('Current password', { exact: true }).fill('wrongpassword')
     await page.getByLabel('New password', { exact: true }).fill('N3w-Purple-Monkey-Dishwasher!')
     await page.getByLabel('Confirm password', { exact: true }).fill('N3w-Purple-Monkey-Dishwasher!')
-    await page.getByRole('button', { name: 'Update password', exact: true }).click()
+    await page.getByRole('button', { name: 'Save changes', exact: true }).click()
 
     await page.assertVisible(page.getByText('The current password is incorrect', { exact: true }))
   })

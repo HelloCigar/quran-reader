@@ -1,19 +1,29 @@
+import { type ReactNode } from 'react'
 import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
-import { VStack } from '@astryxdesign/core/VStack'
-import { HStack } from '@astryxdesign/core/HStack'
-import { Heading } from '@astryxdesign/core/Heading'
-import { Text } from '@astryxdesign/core/Text'
-import { TextInput } from '@astryxdesign/core/TextInput'
-import { FormLayout } from '@astryxdesign/core/FormLayout'
-import { Button } from '@astryxdesign/core/Button'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import PasswordStrength from '~/components/auth/password_strength'
+import {
+  SettingsFields,
+  SettingsSection,
+  SettingsSaveBar,
+} from '~/components/settings/settings_section'
+import { SettingsTextInput } from '~/components/settings/settings_controls'
+
+const FORM_ID = 'change-password'
 
 /**
- * The Change password section of the Security page. The fields clear once
- * the new password is saved.
+ * The Security section: the change-password fields, then `children` (the
+ * passkeys box), then the Save changes pill at the foot. The pill sits
+ * outside the form, under the passkeys, and submits it by id. The fields
+ * clear once the new password is saved.
  */
-export default function ChangePassword({ passwordPolicy }: { passwordPolicy: PasswordPolicy }) {
+export default function ChangePassword({
+  passwordPolicy,
+  children,
+}: {
+  passwordPolicy: PasswordPolicy
+  children?: ReactNode
+}) {
   const form = useRouteForm(
     'account_password.update',
     { currentPassword: '', password: '', passwordConfirmation: '' },
@@ -21,48 +31,40 @@ export default function ChangePassword({ passwordPolicy }: { passwordPolicy: Pas
   )
 
   return (
-    <VStack gap={4} hAlign="stretch">
-      <VStack gap={1}>
-        <Heading level={2}>Change password</Heading>
-        <Text type="supporting" color="secondary">
-          Enter your current password, then choose a new one.
-        </Text>
-      </VStack>
-
-      <form onSubmit={form.submit}>
-        <VStack gap={4} hAlign="stretch" width="100%" maxWidth={480}>
-          <FormLayout>
-            <TextInput
-              label="Current password"
-              type="password"
-              autoComplete="current-password"
-              {...form.field('currentPassword')}
-            />
-            <PasswordStrength policy={passwordPolicy} password={form.data.password}>
-              <TextInput
-                label="New password"
-                type="password"
-                autoComplete="new-password"
-                {...form.field('password')}
-              />
-            </PasswordStrength>
-            <TextInput
-              label="Confirm password"
+    <SettingsSection
+      heading="Security"
+      description="Change your password, or sign in with a passkey instead."
+    >
+      <form id={FORM_ID} onSubmit={form.submit}>
+        <SettingsFields>
+          <SettingsTextInput
+            label="Current password"
+            type="password"
+            autoComplete="current-password"
+            {...form.field('currentPassword')}
+          />
+          <PasswordStrength policy={passwordPolicy} password={form.data.password}>
+            <SettingsTextInput
+              label="New password"
               type="password"
               autoComplete="new-password"
-              {...form.field('passwordConfirmation')}
+              {...form.field('password')}
             />
-          </FormLayout>
-          <HStack>
-            <Button
-              type="submit"
-              label={form.processing ? 'Saving…' : 'Update password'}
-              variant="primary"
-              isLoading={form.processing}
-            />
-          </HStack>
-        </VStack>
+          </PasswordStrength>
+          <SettingsTextInput
+            label="Confirm password"
+            type="password"
+            autoComplete="new-password"
+            {...form.field('passwordConfirmation')}
+          />
+        </SettingsFields>
       </form>
-    </VStack>
+      {children}
+      <SettingsSaveBar
+        form={FORM_ID}
+        processing={form.processing}
+        saved={form.recentlySuccessful}
+      />
+    </SettingsSection>
   )
 }

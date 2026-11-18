@@ -31,9 +31,16 @@ export default class SurahsController {
     ])
 
     return inertia.render('quran/index', {
-      surahs: SurahTransformer.transform(surahs),
+      surahs: SurahTransformer.transform(surahs).useVariant('forIndex'),
+      /** The count over the list: "114 Surahs". */
+      surahCount: `${surahs.length} Surahs`,
       /** `null` for a signed-out reader, or one who hasn't read yet. */
-      readingPosition: position ? ReadingPositionTransformer.transform(position) : null,
+      readingPosition: position
+        ? ReadingPositionTransformer.transform(
+            position,
+            surahs.find((surah) => surah.number === position.surahNumber) ?? null
+          ).useVariant('forIndex')
+        : null,
     })
   }
 

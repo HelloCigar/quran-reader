@@ -3,7 +3,7 @@ import { FingerPrintIcon } from '@heroicons/react/20/solid'
 import { startAuthentication } from '@simplewebauthn/browser'
 import { useHttp, useRouter } from '@adonisjs/inertia/react'
 import { VStack } from '@astryxdesign/core/VStack'
-import { Button } from '@astryxdesign/core/Button'
+import { AuthButton } from '~/components/auth/auth_controls'
 import { Banner } from '@astryxdesign/core/Banner'
 import { Icon } from '@astryxdesign/core/Icon'
 
@@ -50,10 +50,9 @@ export default function PasskeySignIn({ bookmark }: Props) {
   return (
     <VStack gap={2} hAlign="stretch">
       {error && <Banner status="error" title={error} role="alert" />}
-      <Button
+      <AuthButton
         label={processing ? 'Waiting for your device…' : 'Sign in with a passkey'}
         variant="secondary"
-        size="lg"
         icon={<Icon icon={FingerPrintIcon} />}
         isLoading={processing}
         onClick={signIn}

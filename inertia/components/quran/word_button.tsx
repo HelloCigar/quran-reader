@@ -34,6 +34,16 @@ export const wordStyles = stylex.create({
    */
   transliteration: {
     fontStyle: 'italic',
+    lineHeight: 1.9,
+  },
+  /** The popover is wider than the theme's padding makes it: more room beside its text. */
+  popover: {
+    paddingInline: spacingVars['--spacing-4'],
+  },
+  /** The Word Translation sits a step under the body text. */
+  translation: {
+    fontSize: '0.8125rem',
+    lineHeight: 1.9,
   },
   /** The Transliteration of the Recited Word: this is what you hear. */
   recited: {
@@ -87,12 +97,18 @@ export default function WordButton({ word }: { word: Data.Word }) {
             // The popover reports its controlled opening too; only a close is the reader's.
             if (!open) onOpenChange(word.location, false)
           }}
+          xstyle={wordStyles.popover}
           hasAutoFocus={!isRecited}
           isModal={!isRecited}
           hasLightDismiss={!isRecited}
           content={
             <VStack gap={1} hAlign="center">
-              <Text type="supporting" color="secondary" justify="center">
+              <Text
+                type="supporting"
+                color="secondary"
+                justify="center"
+                xstyle={wordStyles.translation}
+              >
                 {word.translation}
               </Text>
               <Text

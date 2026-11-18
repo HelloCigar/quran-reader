@@ -1,26 +1,22 @@
 import { Head } from '@inertiajs/react'
 import { Form } from '@adonisjs/inertia/react'
 import { VStack } from '@astryxdesign/core/VStack'
-import { Heading } from '@astryxdesign/core/Heading'
-import { Text } from '@astryxdesign/core/Text'
-import { Button } from '@astryxdesign/core/Button'
 import AuthLayout from '~/components/auth/auth_layout'
+import AuthHeading from '~/components/auth/auth_heading'
+import { AuthButton } from '~/components/auth/auth_controls'
+import { entranceStyles, ENTRANCE_DELAYS } from '~/components/quran/entrance_styles'
 import type { InertiaProps } from '~/types'
 
 type PageProps = InertiaProps<{ token: string }>
 
 export default function VerifyEmail({ token }: PageProps) {
   return (
-    <VStack gap={4} hAlign="stretch" width="100%">
+    <>
       <Head title="Verify your email" />
-      <VStack gap={2}>
-        <Heading level={1} type="display-2" textWrap="balance">
-          Verify your email
-        </Heading>
-        <Text type="body" color="secondary" size="sm">
-          Click the button below to confirm your email address.
-        </Text>
-      </VStack>
+      <AuthHeading
+        title="Verify your email"
+        description="Click the button below to confirm your email address."
+      />
 
       <Form
         options={{ preserveScroll: true }}
@@ -28,18 +24,16 @@ export default function VerifyEmail({ token }: PageProps) {
         routeParams={[token]}
       >
         {({ processing }) => (
-          <VStack hAlign="stretch">
-            <Button
+          <VStack hAlign="stretch" xstyle={[entranceStyles.fadeUp, ENTRANCE_DELAYS[2]]}>
+            <AuthButton
               type="submit"
               label={processing ? 'Verifying…' : 'Verify my email'}
-              variant="primary"
-              size="lg"
               isLoading={processing}
             />
           </VStack>
         )}
       </Form>
-    </VStack>
+    </>
   )
 }
 

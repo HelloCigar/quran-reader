@@ -1,6 +1,13 @@
+import * as stylex from '@stylexjs/stylex'
 import { type ReactNode } from 'react'
 import { usePage } from '@inertiajs/react'
 import { Drawer } from '@astryxdesign/core/Drawer'
+import {
+  colorVars,
+  radiusVars,
+  shadowVars,
+  spacingVars,
+} from '@astryxdesign/core/theme/tokens.stylex'
 import type { Data } from '@generated/data'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
 import { useRecitation } from '~/components/quran/recitation'
@@ -9,6 +16,28 @@ import {
   useReaderSidebar,
   useReaderSidebarState,
 } from '~/components/quran/use_reader_sidebar'
+
+/** 400px, or the screen less the drawer's 12px margins on both sides, if that is narrower. */
+const DRAWER_WIDTH = `min(25rem, calc(100vw - 2 * ${spacingVars['--spacing-3']}))`
+
+/** The drawer floats 12px in from the screen's edges, in a white card with soft 24px corners. */
+const styles = stylex.create({
+  drawer: {
+    insetBlock: spacingVars['--spacing-3'],
+    insetInlineStart: spacingVars['--spacing-3'],
+    height: 'auto',
+    maxWidth: 'none',
+    width: DRAWER_WIDTH,
+    borderRadius: `calc(${radiusVars['--radius-page']} + ${spacingVars['--spacing-1']})`,
+    backgroundColor: colorVars['--color-background-card'],
+    // The drawer's content area paints the surface colour; here it is the card's.
+    '--color-background-surface': colorVars['--color-background-card'],
+    boxShadow: shadowVars['--shadow-high'],
+    '::backdrop': {
+      backgroundColor: `color-mix(in srgb, ${colorVars['--color-text-primary']} 32%, transparent)`,
+    },
+  },
+})
 
 /** Holds the Surah and Ayah sidebar for every page inside the app layout. */
 export function ReaderSidebarProvider({ children }: { children: ReactNode }) {
@@ -38,9 +67,9 @@ export default function ReaderSidebarDrawer({
       isOpen={sidebar.isDrawerOpen}
       onOpenChange={sidebar.setDrawerOpen}
       side="start"
-      width={420}
-      experimental={{ isFullWidthOnMobile: true }}
+      width={DRAWER_WIDTH}
       label="Quran"
+      xstyle={styles.drawer}
     >
       <ReaderSidebar
         surahs={surahs}

@@ -13,6 +13,17 @@ export default class SurahTransformer extends BaseTransformer<SurahSummary> {
   }
 
   /**
+   * A Surah's row in the surah list: its names, where it was revealed and
+   * how many ayahs it has.
+   */
+  async forIndex() {
+    return {
+      ...(await this.toObject()),
+      ...this.pick(this.resource, ['arabicName', 'revelation']),
+    }
+  }
+
+  /**
    * The surah heading on the reading page.
    */
   async forReading() {
@@ -27,6 +38,6 @@ export default class SurahTransformer extends BaseTransformer<SurahSummary> {
    * listed beside it.
    */
   async forNavigation() {
-    return this.pick(this.resource, ['number', 'name', 'ayahCount'])
+    return this.pick(this.resource, ['number', 'name', 'arabicName', 'ayahCount'])
   }
 }

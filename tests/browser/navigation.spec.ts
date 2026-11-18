@@ -9,7 +9,7 @@ test.group('Navigation', (group) => {
 
   test('guests can go from the home page to signup and login', async ({ visit, route }) => {
     const page = await visit(route('home'))
-    await page.assertTextContains('h1', 'Read the Quran in Arabic and English')
+    await page.assertTextContains('h1', 'Read the Quran, word by word')
 
     await page
       .getByRole('navigation', { name: 'Main navigation', exact: true })
@@ -26,29 +26,45 @@ test.group('Navigation', (group) => {
       .getByRole('link', { name: 'Sign in', exact: true })
       .click()
     await page.waitForURL(route('session.create'))
-    await page.assertTextContains('h1', 'Welcome back')
+    await page.assertTextContains('h1', 'Sign in')
   })
 
-  test('guests reach the login page from the menu on a phone', async ({ visit, route }) => {
+  test('guests reach the login page from the bar on a phone', async ({ visit, route }) => {
     const page = await visit(route('home'))
     await page.setViewportSize({ width: 390, height: 844 })
 
-    await page.getByRole('button', { name: 'Open navigation', exact: true }).click()
-    await page.getByRole('link', { name: 'Sign in', exact: true }).click()
+    await page.assertNotExists(page.getByRole('button', { name: 'Open navigation', exact: true }))
+    await page
+      .getByRole('navigation', { name: 'Main navigation', exact: true })
+      .getByRole('link', { name: 'Sign in', exact: true })
+      .click()
 
     await page.waitForURL(route('session.create'))
-    await page.assertTextContains('h1', 'Welcome back')
+    await page.assertTextContains('h1', 'Sign in')
   })
 
-  test('guests reach the signup page from the menu on a phone', async ({ visit, route }) => {
+  test('guests reach the signup page from the home page on a phone', async ({ visit, route }) => {
     const page = await visit(route('home'))
     await page.setViewportSize({ width: 390, height: 844 })
 
-    await page.getByRole('button', { name: 'Open navigation', exact: true }).click()
-    await page.getByRole('link', { name: 'Get started', exact: true }).click()
+    await page.getByRole('link', { name: 'Create an account', exact: true }).click()
 
     await page.waitForURL(route('new_account.create'))
     await page.assertTextContains('h1', 'Create your account')
+  })
+
+  test('a tap on a word of the home page shows its meaning on a phone', async ({
+    visit,
+    route,
+  }) => {
+    const page = await visit(route('home'))
+    await page.setViewportSize({ width: 390, height: 844 })
+
+    await page.getByRole('button', { name: 'ٱلرَّحِيمِ', exact: true }).click()
+
+    const meaning = page.getByRole('status').filter({ hasText: 'Tap a word' })
+    await page.assertTextContains(meaning, 'the Most Merciful')
+    await page.assertTextContains(meaning, 'l-raḥīmi')
   })
 
   test('sends a signed-in reader from the home page to the dashboard', async ({

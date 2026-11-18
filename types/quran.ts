@@ -36,6 +36,13 @@ export type Surah = SurahSummary & {
 }
 
 /**
+ * What the dashboard's card says of a Surah: its names and length, and its
+ * Ayahs when the card shows the Arabic of the one the reader left at.
+ */
+export type ContinuingSurah = Pick<SurahSummary, 'name' | 'meaning' | 'ayahCount'> &
+  Partial<Pick<Surah, 'ayahs'>>
+
+/**
  * When one Word is heard within the Surah's audio file.
  */
 export type WordTiming = {

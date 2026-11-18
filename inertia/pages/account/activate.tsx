@@ -2,34 +2,34 @@ import { Head } from '@inertiajs/react'
 import { Form } from '@adonisjs/inertia/react'
 import { VStack } from '@astryxdesign/core/VStack'
 import { HStack } from '@astryxdesign/core/HStack'
-import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
 import { Button } from '@astryxdesign/core/Button'
 import AuthLayout from '~/components/auth/auth_layout'
+import AuthHeading from '~/components/auth/auth_heading'
+import { AuthButton } from '~/components/auth/auth_controls'
+import { entranceStyles, ENTRANCE_DELAYS } from '~/components/quran/entrance_styles'
 import type { InertiaProps } from '~/types'
 
 export default function Activate({ user }: InertiaProps) {
   return (
-    <VStack gap={4} hAlign="stretch" width="100%">
+    <>
       <Head title="Verify your account" />
-      <VStack gap={2}>
-        <Heading level={1} type="display-2" textWrap="balance">
-          Verify your account
-        </Heading>
-        <Text type="body" color="secondary" size="sm">
-          Check <Text weight="bold">{user?.unverifiedEmail}</Text> inbox for instructions from us on
-          how to verify your account.
-        </Text>
-      </VStack>
+      <AuthHeading
+        title="Verify your account"
+        description={
+          <>
+            Check <Text weight="bold">{user?.unverifiedEmail}</Text> inbox for instructions from us
+            on how to verify your account.
+          </>
+        }
+      />
 
       <Form options={{ preserveScroll: true }} route="email_verifications.store">
         {({ processing }) => (
-          <VStack hAlign="stretch">
-            <Button
+          <VStack hAlign="stretch" xstyle={[entranceStyles.fadeUp, ENTRANCE_DELAYS[2]]}>
+            <AuthButton
               type="submit"
               label={processing ? 'Sending…' : 'Resend activation link'}
-              variant="primary"
-              size="lg"
               isLoading={processing}
             />
           </VStack>
@@ -38,7 +38,7 @@ export default function Activate({ user }: InertiaProps) {
 
       <Form route="session.destroy">
         {({ processing }) => (
-          <HStack gap={2} vAlign="center">
+          <HStack gap={2} vAlign="center" xstyle={[entranceStyles.fadeUp, ENTRANCE_DELAYS[4]]}>
             <Text type="supporting" color="secondary">
               Wrong account?
             </Text>
@@ -52,7 +52,7 @@ export default function Activate({ user }: InertiaProps) {
           </HStack>
         )}
       </Form>
-    </VStack>
+    </>
   )
 }
 

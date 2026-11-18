@@ -16,7 +16,7 @@ test.group('Quran surah list', () => {
     )
   })
 
-  test("shows a surah's number, name, meaning and ayah count in its row", async ({
+  test("shows a surah's number, name, meaning, revelation, ayah count and Arabic name in its row", async ({
     visit,
     route,
     swap,
@@ -29,10 +29,11 @@ test.group('Quran surah list', () => {
     const row = page
       .getByRole('list', { name: 'Surahs', exact: true })
       .getByRole('listitem')
-      .filter({ has: page.getByText('1 · Al-Fatihah', { exact: true }) })
-    await page.assertVisible(row.getByText('1 · Al-Fatihah', { exact: true }))
-    await page.assertVisible(row.getByText('The Opener', { exact: true }))
-    await page.assertVisible(row.getByText('7 ayahs', { exact: true }))
+      .filter({ has: page.getByText('Al-Fatihah', { exact: true }) })
+    await page.assertVisible(row.getByText('1', { exact: true }))
+    await page.assertVisible(row.getByText('Al-Fatihah', { exact: true }))
+    await page.assertVisible(row.getByText('The Opener · Meccan · 7 ayahs', { exact: true }))
+    await page.assertVisible(row.getByText('الفاتحة', { exact: true }))
   })
 
   test('opens a surah from the list', async ({ visit, route, swap }) => {
@@ -42,7 +43,7 @@ test.group('Quran surah list', () => {
     await page
       .getByRole('list', { name: 'Surahs', exact: true })
       .getByRole('link')
-      .filter({ hasText: '2 · Al-Baqarah' })
+      .filter({ hasText: 'Al-Baqarah' })
       .click()
 
     await page.assertPath(route('surahs.show', { number: 2 }))

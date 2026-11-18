@@ -1,14 +1,11 @@
 import { Head } from '@inertiajs/react'
-import { VStack } from '@astryxdesign/core/VStack'
-import { Heading } from '@astryxdesign/core/Heading'
-import { Text } from '@astryxdesign/core/Text'
-import { TextInput } from '@astryxdesign/core/TextInput'
-import { FormLayout } from '@astryxdesign/core/FormLayout'
-import { Button } from '@astryxdesign/core/Button'
 import { Link } from '@astryxdesign/core/Link'
 import { urlFor } from '~/client'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import AuthLayout from '~/components/auth/auth_layout'
+import AuthHeading from '~/components/auth/auth_heading'
+import AuthForm from '~/components/auth/auth_form'
+import { AuthButton, AuthTextInput } from '~/components/auth/auth_controls'
 import PasswordStrength from '~/components/auth/password_strength'
 import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
 import type { InertiaProps } from '~/types'
@@ -29,71 +26,55 @@ export default function Signup({ bookmark, passwordPolicy }: PageProps) {
   form.transform((data) => (bookmark ? { ...data, bookmark } : data))
 
   return (
-    <VStack gap={4} hAlign="stretch" width="100%">
+    <>
       <Head title="Create account" />
-      <VStack gap={2}>
-        <Heading level={1} type="display-2" textWrap="balance">
-          Create your account
-        </Heading>
-        <Text type="body" color="secondary" size="sm">
-          {bookmark
+      <AuthHeading
+        title="Create your account"
+        description={
+          bookmark
             ? `Create an account to bookmark ${bookmark.surah}:${bookmark.ayah}`
-            : 'Bookmark ayahs and keep a note on each.'}
-        </Text>
-      </VStack>
-
-      <form onSubmit={form.submit}>
-        <VStack gap={4} hAlign="stretch">
-          <FormLayout>
-            <TextInput
-              label="Full name"
-              autoComplete="name"
-              placeholder="Ada Lovelace"
-              size="lg"
-              {...form.field('fullName')}
-            />
-            <TextInput
-              label="Email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              size="lg"
-              {...form.field('email')}
-            />
-            <PasswordStrength policy={passwordPolicy} password={form.data.password}>
-              <TextInput
-                label="Password"
-                type="password"
-                autoComplete="new-password"
-                size="lg"
-                {...form.field('password')}
-              />
-            </PasswordStrength>
-            <TextInput
-              label="Confirm password"
-              type="password"
-              autoComplete="new-password"
-              size="lg"
-              {...form.field('passwordConfirmation')}
-            />
-          </FormLayout>
-          <Button
-            type="submit"
-            label="Create account"
-            variant="primary"
-            size="lg"
-            isLoading={form.processing}
-          />
-        </VStack>
-      </form>
-
-      <Text type="supporting" color="secondary">
+            : 'Bookmark ayahs and keep a note on each.'
+        }
+      >
         Already have an account?{' '}
-        <Link href={urlFor('session.create', [], { qs: { bookmark } })} type="supporting">
+        <Link href={urlFor('session.create', [], { qs: { bookmark } })} weight="semibold">
           Sign in
         </Link>
-      </Text>
-    </VStack>
+      </AuthHeading>
+
+      <AuthForm
+        onSubmit={form.submit}
+        actions={<AuthButton type="submit" label="Create account" isLoading={form.processing} />}
+      >
+        <AuthTextInput
+          label="Full name"
+          autoComplete="name"
+          placeholder="Ada Lovelace"
+          {...form.field('fullName')}
+        />
+        <AuthTextInput
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          {...form.field('email')}
+        />
+        <PasswordStrength policy={passwordPolicy} password={form.data.password}>
+          <AuthTextInput
+            label="Password"
+            type="password"
+            autoComplete="new-password"
+            {...form.field('password')}
+          />
+        </PasswordStrength>
+        <AuthTextInput
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          {...form.field('passwordConfirmation')}
+        />
+      </AuthForm>
+    </>
   )
 }
 

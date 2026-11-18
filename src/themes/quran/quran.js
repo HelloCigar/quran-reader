@@ -353,7 +353,7 @@ export const quranTheme = {
     },
     "button": {
       "variant:destructive": {
-        "backgroundColor": "var(--color-error-muted)",
+        "backgroundColor": "light-dark(#ffece9, #74040f)",
         "color": "var(--color-on-error-muted)"
       }
     },
@@ -448,6 +448,59 @@ export const quranTheme = {
     "slider-thumb": {
       "base": {
         "scale": "0.6"
+      }
+    },
+    "popover": {
+      "base": {
+        "borderRadius": "1rem",
+        "boxShadow": "0 0 0 1px light-dark(#14100a0F, #ffffff14), 0 18px 40px -16px light-dark(#14100a59, #000000B3)"
+      }
+    },
+    "dropdown-menu": {
+      "base": {
+        "padding": "var(--spacing-1-5)",
+        "gap": "var(--spacing-0)"
+      }
+    },
+    "dropdown-menu-item": {
+      "base": {
+        "minHeight": "var(--spacing-10)",
+        "--color-icon-secondary": "var(--color-icon-primary)",
+        "paddingBlock": "var(--spacing-0)",
+        "paddingInline": "var(--spacing-3)",
+        "gap": "calc(var(--spacing-2) + var(--spacing-0-5))",
+        "borderRadius": "var(--radius-container)"
+      }
+    },
+    "text-area": {
+      "base": {
+        "borderRadius": "0.875rem"
+      }
+    },
+    "text-area-control": {
+      "base": {
+        "paddingBlockStart": "var(--spacing-3)",
+        "paddingInline": "calc(var(--spacing-3) + var(--spacing-0-5))",
+        "fontSize": "0.9375rem",
+        "lineHeight": "1.5"
+      }
+    },
+    "toast": {
+      "base": {
+        "position": "relative",
+        "overflow": "hidden",
+        "width": "auto",
+        "maxWidth": "28.75rem",
+        "paddingBlock": "calc(var(--spacing-2) + var(--spacing-0-5))",
+        "paddingInlineStart": "calc(var(--spacing-3) + var(--spacing-0-5))",
+        "paddingInlineEnd": "var(--spacing-2)",
+        "borderRadius": "1rem",
+        "backgroundColor": "var(--color-text-primary)",
+        "boxShadow": "0 18px 40px -16px light-dark(#14100a80, #000000B3)"
+      },
+      "type:error": {
+        "backgroundColor": "light-dark(#ffece9, #74040f)",
+        "boxShadow": "0 0 0 1px light-dark(#c0262c40, #ff989040), 0 18px 40px -18px light-dark(#76000c73, #000000B3)"
       }
     },
     "layout-content": {

@@ -87,7 +87,7 @@ test.group('Login and logout', (group) => {
     await logOut(page)
 
     await page.waitForURL(route('session.create'))
-    await page.assertTextContains('h1', 'Welcome back')
+    await page.assertTextContains('h1', 'Sign in')
 
     await page.goto(route('dashboard'))
     await page.assertPath(route('session.create'))

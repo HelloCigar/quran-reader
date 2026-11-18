@@ -1,12 +1,9 @@
 import { Head } from '@inertiajs/react'
-import { VStack } from '@astryxdesign/core/VStack'
-import { Heading } from '@astryxdesign/core/Heading'
-import { Text } from '@astryxdesign/core/Text'
-import { TextInput } from '@astryxdesign/core/TextInput'
-import { FormLayout } from '@astryxdesign/core/FormLayout'
-import { Button } from '@astryxdesign/core/Button'
 import type { PasswordPolicy } from '@adonisplus/persona/password_policy/types'
 import AuthLayout from '~/components/auth/auth_layout'
+import AuthHeading from '~/components/auth/auth_heading'
+import AuthForm from '~/components/auth/auth_form'
+import { AuthButton, AuthTextInput } from '~/components/auth/auth_controls'
 import PasswordStrength from '~/components/auth/password_strength'
 import { useRouteForm } from '~/components/forms/use_route_form'
 import type { InertiaProps } from '~/types'
@@ -21,47 +18,36 @@ export default function ResetPassword({ token, passwordPolicy }: PageProps) {
   )
 
   return (
-    <VStack gap={4} hAlign="stretch" width="100%">
+    <>
       <Head title="Reset password" />
-      <VStack gap={2}>
-        <Heading level={1} type="display-2" textWrap="balance">
-          Reset password
-        </Heading>
-        <Text type="body" color="secondary" size="sm">
-          Choose a new password for your account
-        </Text>
-      </VStack>
+      <AuthHeading title="Reset password" description="Choose a new password for your account" />
 
-      <form onSubmit={form.submit}>
-        <VStack gap={4} hAlign="stretch">
-          <FormLayout>
-            <PasswordStrength policy={passwordPolicy} password={form.data.password}>
-              <TextInput
-                label="Password"
-                type="password"
-                autoComplete="new-password"
-                size="lg"
-                {...form.field('password')}
-              />
-            </PasswordStrength>
-            <TextInput
-              label="Confirm password"
-              type="password"
-              autoComplete="new-password"
-              size="lg"
-              {...form.field('passwordConfirmation')}
-            />
-          </FormLayout>
-          <Button
+      <AuthForm
+        onSubmit={form.submit}
+        actions={
+          <AuthButton
             type="submit"
             label={form.processing ? 'Resetting…' : 'Reset password'}
-            variant="primary"
-            size="lg"
             isLoading={form.processing}
           />
-        </VStack>
-      </form>
-    </VStack>
+        }
+      >
+        <PasswordStrength policy={passwordPolicy} password={form.data.password}>
+          <AuthTextInput
+            label="Password"
+            type="password"
+            autoComplete="new-password"
+            {...form.field('password')}
+          />
+        </PasswordStrength>
+        <AuthTextInput
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          {...form.field('passwordConfirmation')}
+        />
+      </AuthForm>
+    </>
   )
 }
 

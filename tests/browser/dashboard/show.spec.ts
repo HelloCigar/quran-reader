@@ -27,7 +27,10 @@ test.group('Dashboard', (group) => {
     const card = page.getByRole('link', { name: 'Continue reading at 18:10', exact: true })
     await page.assertVisible(card)
     // A reader clicks anywhere on the card; its text sits over the link.
-    await page.getByText('Al-Kahf · Ayah 18:10', { exact: true }).click()
+    await page.assertVisible(page.getByText('Ayah 18:10 · The Cave', { exact: true }))
+    await page.assertVisible(page.getByText('10 of 110 ayahs', { exact: true }))
+    await page.assertVisible(page.getByText('آية 10', { exact: true }))
+    await page.getByText('Al-Kahf', { exact: true }).click()
 
     await page.assertPath('/quran/18')
     await waitForAyahInView(page, 10)
@@ -47,7 +50,9 @@ test.group('Dashboard', (group) => {
 
     const page = await visit(route('dashboard'))
 
-    await page.assertVisible(page.getByText('Surah 18 · Ayah 18:10', { exact: true }))
+    await page.assertVisible(page.getByText('Surah 18', { exact: true }))
+    await page.assertVisible(page.getByText('Ayah 18:10', { exact: true }))
+    await page.assertNotExists(page.getByText(/ of d+ ayahs$/))
   })
 
   test('titles a recent Bookmark by its reference when the Quran text is unavailable', async ({
@@ -77,7 +82,10 @@ test.group('Dashboard', (group) => {
     const card = page.getByRole('link', { name: 'Start reading at 1:1', exact: true })
     await page.assertVisible(card)
     // A reader clicks anywhere on the card; its text sits over the link.
-    await page.getByText('Al-Fatihah · Ayah 1:1', { exact: true }).click()
+    await page.assertVisible(page.getByText('Ayah 1:1 · The Opener', { exact: true }))
+    // A reader who hasn't read yet has no progress through the Surah.
+    await page.assertNotExists(page.getByText(/ of d+ ayahs$/))
+    await page.getByText('Al-Fatihah', { exact: true }).click()
 
     await page.assertPath('/quran/1')
     await waitForAyahInView(page, 1)
@@ -100,7 +108,7 @@ test.group('Dashboard', (group) => {
         { exact: true }
       )
     )
-    await page.assertNotExists(page.getByRole('link', { name: 'See all', exact: true }))
+    await page.assertNotExists(page.getByRole('link', { name: 'View all', exact: true }))
   })
 
   test('shows the 5 newest Bookmarks with their notes', async ({
@@ -130,6 +138,24 @@ test.group('Dashboard', (group) => {
     await page.assertNotExists(list.getByText('2:2 · Al-Baqarah', { exact: true }))
   })
 
+  test("shows a recent Bookmark's Ayah text when it has no note", async ({
+    visit,
+    route,
+    swap,
+    browserContext,
+  }) => {
+    // Stands in for the Quran Foundation Content API.
+    swap(QuranTextService, new FakeQuranTextService())
+    const reader = await User.create(credentials)
+    await reader.related('bookmarks').create({ surahNumber: 2, ayahNumber: 255, note: null })
+    await browserContext.loginAs(reader)
+
+    const page = await visit(route('dashboard'))
+
+    const list = page.getByRole('list', { name: 'Recent bookmarks', exact: true })
+    await page.assertVisible(list.getByText('Ayah 2:255', { exact: true }))
+  })
+
   test('opens a recent Bookmark at its Ayah', async ({ visit, route, swap, browserContext }) => {
     // Stands in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())
@@ -138,13 +164,13 @@ test.group('Dashboard', (group) => {
     await browserContext.loginAs(reader)
 
     const page = await visit(route('dashboard'))
-    await page.getByRole('link', { name: '2:255 · Al-Baqarah', exact: true }).click()
+    await page.getByRole('link', { name: /^2:255 · Al-Baqarah/ }).click()
 
     await page.assertPath('/quran/2')
     await waitForAyahInView(page, 255)
   })
 
-  test('opens every Bookmark from "See all"', async ({ visit, route, swap, browserContext }) => {
+  test('opens every Bookmark from "View all"', async ({ visit, route, swap, browserContext }) => {
     // Stands in for the Quran Foundation Content API.
     swap(QuranTextService, new FakeQuranTextService())
     const reader = await User.create(credentials)
@@ -152,7 +178,7 @@ test.group('Dashboard', (group) => {
     await browserContext.loginAs(reader)
 
     const page = await visit(route('dashboard'))
-    await page.getByRole('link', { name: 'See all', exact: true }).click()
+    await page.getByRole('link', { name: 'View all', exact: true }).click()
 
     await page.assertPath('/bookmarks')
     await page.assertVisible(
