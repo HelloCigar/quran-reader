@@ -26,6 +26,8 @@ const CORRECTIONS = 5
  */
 export async function holdRecitationThumbAt(page: Page, fraction: number): Promise<string> {
   const thumb = recitationThumb(page)
+  // The bar rises into place as it appears: hovering waits until the thumb holds still.
+  await thumb.hover()
   const from = await thumb.boundingBox()
   // The track is the thumb's parent: the thumb travels from one end of it to the other.
   const track = await thumb.locator('xpath=..').boundingBox()

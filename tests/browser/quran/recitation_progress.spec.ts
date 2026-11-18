@@ -290,7 +290,8 @@ test.group('Dragging through the Recitation', () => {
     await recitationThumb(page).focus()
     await page.keyboard.press('End')
 
-    await page.assertText(page.getByTestId('recited-ayah'), '36:83')
+    // 36:83 is beyond the loaded Ayahs: its popover shows once the page has opened there.
+    await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:83:1', exact: true }))
   })
 
   test('sits at the first Ayah in view before the first Play', async ({ visit, route, swap }) => {
@@ -317,6 +318,8 @@ test.group('Dragging through the Recitation', () => {
     const page = await visit(route('surahs.show', { number: 36 }))
     await recitationThumb(page).focus()
     await page.keyboard.press('ArrowRight')
+    // The Recitation loads first: it is not part of the wait for the popover.
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
 
     // One Ayah on from 36:1, the first Ayah in view.
     await page.assertVisible(page.getByRole('dialog', { name: 'Word 36:2:1', exact: true }))
@@ -335,6 +338,8 @@ test.group('Dragging through the Recitation', () => {
     // A tenth of the way through: among the first 20 Ayahs, which are loaded.
     const reference = await holdRecitationThumbAt(page, 0.1)
     await page.mouse.up()
+    // The Recitation loads first: it is not part of the wait for the popover.
+    await page.assertVisible(page.getByRole('button', { name: 'Pause Recitation', exact: true }))
 
     await page.assertVisible(page.getByRole('dialog', { name: `Word ${reference}:1`, exact: true }))
   })
