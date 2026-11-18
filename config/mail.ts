@@ -46,6 +46,15 @@ const mailConfig = defineConfig({
           }
         : undefined,
     }),
+
+    /**
+     * Production sends through Resend's HTTPS API: Railway blocks
+     * outbound SMTP below the Pro plan.
+     */
+    resend: transports.resend({
+      key: env.get('RESEND_API_KEY')?.release() ?? '',
+      baseUrl: 'https://api.resend.com',
+    }),
   },
 })
 

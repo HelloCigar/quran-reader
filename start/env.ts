@@ -43,7 +43,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   | Variables for configuring the mail package
   |----------------------------------------------------------
   */
-  MAIL_MAILER: Env.schema.enum(['smtp'] as const),
+  MAIL_MAILER: Env.schema.enum(['smtp', 'resend'] as const),
   MAIL_FROM_NAME: Env.schema.string(),
   MAIL_FROM_ADDRESS: Env.schema.string(),
   MAIL_BRAND_NAME: Env.schema.string.optional(),
@@ -51,6 +51,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_PORT: Env.schema.number(),
   SMTP_USERNAME: Env.schema.string.optional(),
   SMTP_PASSWORD: Env.schema.secret.optional(),
+  RESEND_API_KEY: Env.schema.secret.optional(),
 
   /*
   |----------------------------------------------------------
