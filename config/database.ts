@@ -4,13 +4,14 @@ import { defineConfig } from '@adonisjs/lucid'
 
 const dbConfig = defineConfig({
   /**
-   * Default connection used for all queries.
+   * Default connection used for all queries: a local SQLite file in
+   * development and tests, Turso (libSQL) in production.
    */
-  connection: 'sqlite',
+  connection: env.get('DB_CONNECTION', 'sqlite'),
 
   connections: {
     /**
-     * SQLite connection (default).
+     * SQLite connection (development and tests).
      */
     sqlite: {
       client: 'better-sqlite3',
@@ -125,26 +126,27 @@ const dbConfig = defineConfig({
     // },
 
     /**
-     * libSQL (Turso) connection.
-     * Install package to switch: npm install @libsql/client
+     * libSQL (Turso) connection, used in production. The driver
+     * (`@libsql/sqlite3`) takes the auth token in the URL. The connection
+     * opens on first use, so the URL may be unset when it is not the default.
      */
-    // libsql: {
-    //   client: 'libsql',
-    //   connection: {
-    //     url: env.get('LIBSQL_URL'),
-    //     authToken: env.get('LIBSQL_AUTH_TOKEN'),
-    //   },
-    //   useNullAsDefault: true,
-    //   migrations: {
-    //     naturalSort: true,
-    //     paths: ['database/migrations'],
-    //   },
-    //   schemaGeneration: {
-    //     enabled: true,
-    //     rulesPaths: ['./database/schema_rules.js'],
-    //   },
-    //   debug: app.inDev,
-    // },
+    libsql: {
+      client: 'libsql',
+      connection: {
+        filename: `${env.get('LIBSQL_URL', '')}?authToken=${env.get('LIBSQL_AUTH_TOKEN')?.release() ?? ''}`,
+      },
+      useNullAsDefault: true,
+      migrations: {
+        naturalSort: true,
+        paths: ['database/migrations'],
+      },
+      /**
+       * `database/schema.ts` is generated from the local SQLite database.
+       */
+      schemaGeneration: {
+        enabled: false,
+      },
+    },
   },
 })
 
