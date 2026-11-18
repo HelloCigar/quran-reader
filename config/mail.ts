@@ -23,6 +23,11 @@ const mailConfig = defineConfig({
    */
   globals: {
     brandName: env.get('MAIL_BRAND_NAME', 'Quran Reader'),
+    /**
+     * Absolute base for links and images in the emails: mail clients
+     * cannot resolve relative URLs.
+     */
+    appUrl: env.get('APP_URL'),
   },
 
   /**

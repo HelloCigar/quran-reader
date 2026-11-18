@@ -1,19 +1,96 @@
+{{--
+  The branded frame of every email: the Quran Reader mark and name, a white
+  card for the message, and a footer that links back to the app.
+
+  Mail clients cannot read theme tokens or SVG, so the colours are copied from
+  the Quran theme (src/themes/quran/quran.css, light mode) and the mark is
+  public/email/logo.png (the shape of QuranMark in
+  inertia/components/brand/logo.tsx, in the accent colour, at 3x):
+    page     #f6f0e7  --color-background-body
+    accent   #076c4f  --color-accent
+    text     #14100a  --color-text-primary
+    muted    #4e4538  --color-text-secondary
+    border   #e9e1d6  --color-border-emphasized
+  Fraunces and Figtree load where the client allows web fonts; the rest fall
+  back to Georgia and Arial, as the theme's stacks do.
+--}}
 @mjml()
   <mjml>
     <mj-head>
       <mj-preview>{{ title }}</mj-preview>
       <mj-title>{{ title }}</mj-title>
+      <mj-font name="Figtree" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&display=swap" />
+      <mj-font name="Fraunces" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600&display=swap" />
       <mj-attributes>
-        <mj-text padding="0" color="#202020" />
-        <mj-divider padding="0" border-width="2px" border-color="#cecece" />
-        <mj-button padding="0" align="left" />
-        <mj-class name="title" font-size="28px" font-weight="600" />
-        <mj-class name="text" font-size="16px" line-height="22px" />
-        <mj-class name="help" font-size="14px" line-height="18px" color="#646464" />
-        <mj-class name="footer" font-size="14px" line-height="18px" color="#8d8d8d" />
-        <mj-all font-family="Arial" />
+        <mj-all font-family="Figtree, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" />
+        <mj-section padding="0" />
+        <mj-text padding="0" color="#14100a" />
+        <mj-divider padding="0" border-width="1px" border-color="#e9e1d6" />
+        <mj-button
+          padding="0"
+          align="left"
+          background-color="#076c4f"
+          color="#ffffff"
+          border-radius="8px"
+          font-size="16px"
+          font-weight="600"
+          inner-padding="12px 20px"
+        />
+        <mj-class
+          name="title"
+          font-family="Fraunces, Georgia, 'Times New Roman', serif"
+          font-size="28px"
+          line-height="34px"
+          font-weight="600"
+        />
+        <mj-class name="text" font-size="16px" line-height="24px" />
+        <mj-class name="help" font-size="14px" line-height="20px" color="#4e4538" />
+        <mj-class name="footer" font-size="13px" line-height="20px" color="#4e4538" align="center" />
       </mj-attributes>
     </mj-head>
-    <mj-body>{{{ await $slots.main() }}}</mj-body>
+    <mj-body background-color="#f6f0e7" width="560px">
+      <mj-section padding="32px 33px 20px">
+        <mj-column>
+          <mj-text
+            font-family="Fraunces, Georgia, 'Times New Roman', serif"
+            font-size="20px"
+            line-height="28px"
+            font-weight="600"
+          >
+            <a href="{{ appUrl }}" style="color: #14100a; text-decoration: none;">
+              <img
+                src="{{ appUrl }}/email/logo.png"
+                width="28"
+                height="28"
+                alt=""
+                style="vertical-align: middle; border: 0; margin-right: 8px;"
+              />
+              <span style="vertical-align: middle;">{{ brandName }}</span>
+            </a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+      <mj-wrapper
+        padding="32px"
+        background-color="#ffffff"
+        border="1px solid #e9e1d6"
+        border-radius="10px"
+      >
+        {{{ await $slots.main() }}}
+      </mj-wrapper>
+      <mj-section padding="24px 16px 40px">
+        <mj-column>
+          <mj-text mj-class="footer">
+            You're receiving this email because of activity on your {{ brandName }} account.
+          </mj-text>
+          <mj-spacer height="8px" />
+          <mj-text mj-class="footer">
+            <a href="{{ appUrl }}" style="color: #076c4f; text-decoration: none; font-weight: 600;">
+              {{ brandName }}
+            </a>
+          </mj-text>
+        </mj-column>
+      </mj-section>
+    </mj-body>
   </mjml>
 @end
