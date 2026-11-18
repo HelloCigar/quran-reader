@@ -43,6 +43,8 @@ export default defineRailway(() => {
       MAIL_FROM_ADDRESS: preserve(),
       SMTP_HOST: preserve(),
       SMTP_PORT: preserve(),
+      SMTP_USERNAME: preserve(),
+      SMTP_PASSWORD: preserve(),
       PASSKEY_RP_ID: preserve(),
       PASSKEY_ORIGINS: preserve(),
     },
