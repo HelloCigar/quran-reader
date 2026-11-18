@@ -1,3 +1,4 @@
+import env from '#start/env'
 import { defineConfig, store, drivers } from '@adonisjs/cache'
 
 const cacheConfig = defineConfig({
@@ -7,14 +8,15 @@ const cacheConfig = defineConfig({
     memoryOnly: store().useL1Layer(drivers.memory()),
 
     /**
-     * Memory L1 in front of a SQLite L2. The `cache` table is created by a
-     * migration, never by the driver. No bus: the app runs in one process.
+     * Memory L1 in front of a database L2 on the app's database connection.
+     * The `cache` table is created by a migration, never by the driver.
+     * No bus: the app runs in one process.
      */
     default: store()
       .useL1Layer(drivers.memory())
       .useL2Layer(
         drivers.database({
-          connectionName: 'sqlite',
+          connectionName: env.get('DB_CONNECTION', 'sqlite'),
           autoCreateTable: false,
           tableName: 'cache',
         })

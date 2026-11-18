@@ -25,6 +25,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   APP_KEY: Env.schema.secret(),
   APP_URL: Env.schema.string({ format: 'url', tld: false }),
 
+  // Database: `sqlite` (local file, the default) or `libsql` (Turso)
+  DB_CONNECTION: Env.schema.enum.optional(['sqlite', 'libsql'] as const),
+  LIBSQL_URL: Env.schema.string.optional(),
+  LIBSQL_AUTH_TOKEN: Env.schema.secret.optional(),
+
   // Session
   SESSION_DRIVER: Env.schema.enum(['cookie', 'memory', 'database'] as const),
 
@@ -44,6 +49,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   MAIL_BRAND_NAME: Env.schema.string.optional(),
   SMTP_HOST: Env.schema.string(),
   SMTP_PORT: Env.schema.number(),
+  SMTP_USERNAME: Env.schema.string.optional(),
+  SMTP_PASSWORD: Env.schema.secret.optional(),
 
   /*
   |----------------------------------------------------------

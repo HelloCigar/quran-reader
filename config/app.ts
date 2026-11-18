@@ -20,6 +20,15 @@ export const http = defineConfig({
   generateRequestId: true,
 
   /**
+   * The client IP. Railway's edge sets `X-Real-IP` to the client address and
+   * replaces any copy the client sends. Without the header (local
+   * development, tests) the socket address is used.
+   */
+  getIp(request, originalFn) {
+    return request.header('x-real-ip') ?? originalFn()
+  },
+
+  /**
    * Allow HTTP method spoofing via the "_method" form/query parameter.
    * This lets HTML forms target PUT/PATCH/DELETE routes while still
    * submitting with POST.

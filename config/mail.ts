@@ -35,14 +35,16 @@ const mailConfig = defineConfig({
       host: env.get('SMTP_HOST'),
       port: env.get('SMTP_PORT'),
       /**
-       * Uncomment the auth block if your SMTP
-       * server needs authentication
+       * Sign in when credentials are set (production); the local
+       * catcher on port 1025 needs none.
        */
-      /* auth: {
-        type: 'login',
-        user: env.get('SMTP_USERNAME'),
-        pass: env.get('SMTP_PASSWORD'),
-      }, */
+      auth: env.get('SMTP_USERNAME')
+        ? {
+            type: 'login',
+            user: env.get('SMTP_USERNAME', ''),
+            pass: env.get('SMTP_PASSWORD')?.release() ?? '',
+          }
+        : undefined,
     }),
   },
 })
