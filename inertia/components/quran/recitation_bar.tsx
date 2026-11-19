@@ -58,6 +58,8 @@ const SLIDER_KEYS = new Set([
 /** The widest the bar gets on a wide screen, in px. */
 const BAR_WIDTH = 820
 
+/** AppShell's `md` breakpoint: below it the bar is the phone's bar. */
+const PHONE = '@media (max-width: 768px)'
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 
 /** The bar comes up from below as it appears. */
@@ -92,7 +94,31 @@ const bounce = stylex.keyframes({
   '100%': { transform: 'scaleY(0.3)' },
 })
 
+/** The band's height on a wide screen: 4px, the 60px bar, 20px. */
+const BAND_HEIGHT: string = `calc(${spacingVars['--spacing-1']} + ${spacingVars['--spacing-11']} + 2 * ${spacingVars['--spacing-2']} + ${spacingVars['--spacing-5']})`
+
+/** The band's height on a phone: 4px, the 64px card, 14px. */
+const PHONE_BAND_HEIGHT: string = `calc(${spacingVars['--spacing-1']} + ${spacingVars['--spacing-11']} + 2 * (${spacingVars['--spacing-2']} + ${spacingVars['--spacing-0-5']}) + ${spacingVars['--spacing-3']} + ${spacingVars['--spacing-0-5']})`
+
 const styles = stylex.create({
+  /** The frame holds the band over the bottom of the page. */
+  frame: { position: 'relative' },
+  /**
+   * How far the band reaches up from the bottom of the frame. The page's
+   * scroll regions pad their end by it, so their last line scrolls clear of
+   * the bar.
+   */
+  frameWithBar: {
+    position: 'relative',
+    '--recitation-clearance': { default: BAND_HEIGHT, [PHONE]: PHONE_BAND_HEIGHT },
+  },
+  /** The band lies over the bottom of the page, which runs on beneath it. */
+  overlay: {
+    position: 'absolute',
+    insetInline: 0,
+    insetBlockEnd: 0,
+    pointerEvents: 'none',
+  },
   /** The band the bar floats in: the page's own background shows around the bar. */
   band: {
     paddingBlockStart: spacingVars['--spacing-1'],
@@ -105,6 +131,7 @@ const styles = stylex.create({
     paddingInline: `calc(${spacingVars['--spacing-2']} + ${spacingVars['--spacing-0-5']})`,
   },
   bar: {
+    pointerEvents: 'auto',
     boxSizing: 'border-box',
     backgroundColor: colorVars['--color-background-card'],
     borderRadius: radiusVars['--radius-full'],
@@ -125,6 +152,8 @@ const styles = stylex.create({
     paddingInlineStart: spacingVars['--spacing-1-5'],
     paddingInlineEnd: spacingVars['--spacing-2'],
   },
+  /** A scroll into view stops short of the bar. */
+  scrollClear: { scrollPaddingBlockEnd: 'var(--recitation-clearance, 0px)' },
   /** Lets the Surah's name truncate instead of pushing the controls out. */
   shrinks: { minWidth: 0 },
   fixed: { flexShrink: 0 },
@@ -233,7 +262,12 @@ export default function RecitationFrame({ children }: { children: ReactNode }) {
 
   return (
     <Layout
-      content={<LayoutContent padding={0}>{children}</LayoutContent>}
+      xstyle={hasBar ? styles.frameWithBar : styles.frame}
+      content={
+        <LayoutContent padding={0} xstyle={styles.scrollClear}>
+          {children}
+        </LayoutContent>
+      }
       footer={hasBar && <RecitationBar />}
     />
   )
@@ -243,10 +277,12 @@ export default function RecitationFrame({ children }: { children: ReactNode }) {
  * The Recitation's controls, and the Surah and Ayah Reference of the Recited
  * Ayah, which link to that Ayah.
  *
- * The bar is a rounded card that floats in the footer of the frame, which has
- * no background or divider of its own, so the page shows around the bar. The
- * page still ends above the footer: the region the Ayahs scroll in never runs
- * under the bar, so no Ayah or Recited Word hides behind it.
+ * The bar is a rounded card that floats over the bottom of the page, in a band
+ * with no background or divider of its own: the page, the Surah and Ayah
+ * sidebar among it, runs on beneath it and shows around the bar. The frame
+ * sets `--recitation-clearance` to the band's height, and each region that scrolls
+ * pads its end by it and stops a scroll into view short of it, so the last
+ * line scrolls clear of the bar and no Recited Word stays behind it.
  *
  * Responsive contract. Wide: one line in a pill, capped at `BAR_WIDTH` and
  * centered: the sidebar toggle, Previous Ayah, Play and Next Ayah, then the
@@ -301,7 +337,7 @@ function RecitationBar() {
   )
 
   return (
-    <LayoutFooter role="region" label="Recitation" padding={0}>
+    <LayoutFooter role="region" label="Recitation" padding={0} xstyle={styles.overlay}>
       <HStack hAlign="center" xstyle={[styles.band, isMobile && styles.phoneBand]}>
         {isMobile ? (
           <VStack width="100%" xstyle={[styles.bar, styles.phoneBar]}>

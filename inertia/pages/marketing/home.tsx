@@ -74,7 +74,11 @@ const styles = stylex.create({
     alignItems: { default: 'center', [PHONE]: 'stretch' },
     minHeight: { default: null, [PHONE]: `calc(100dvh - ${SPACE_56})` },
     paddingBlockStart: { default: '5.5rem', [PHONE]: spacingVars['--spacing-9'] },
-    paddingBlockEnd: { default: '6rem', [PHONE]: spacingVars['--spacing-8'] },
+    // The page scrolls on under the Recitation bar: its end clears the bar's band.
+    paddingBlockEnd: {
+      default: 'calc(6rem + var(--recitation-clearance, 0px))',
+      [PHONE]: `calc(${spacingVars['--spacing-8']} + var(--recitation-clearance, 0px))`,
+    },
     paddingInline: { default: spacingVars['--spacing-6'], [PHONE]: spacingVars['--spacing-5'] },
     textAlign: { default: 'center', [PHONE]: 'start' },
     rowGap: { default: '3.5rem', [PHONE]: SPACE_14 },
