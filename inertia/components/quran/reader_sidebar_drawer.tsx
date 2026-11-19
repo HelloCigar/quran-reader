@@ -10,7 +10,7 @@ import {
 } from '@astryxdesign/core/theme/tokens.stylex'
 import type { Data } from '@generated/data'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
-import { useRecitation } from '~/components/quran/recitation'
+import { useRecitation } from '~/components/quran/use_recitation'
 import {
   ReaderSidebarContext,
   useReaderSidebar,

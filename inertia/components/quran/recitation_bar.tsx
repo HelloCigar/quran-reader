@@ -33,7 +33,7 @@ import {
   useRecitationPosition,
   type ReadingPage,
   type Recited,
-} from '~/components/quran/recitation'
+} from '~/components/quran/use_recitation'
 import { useReaderSidebar } from '~/components/quran/use_reader_sidebar'
 
 /**

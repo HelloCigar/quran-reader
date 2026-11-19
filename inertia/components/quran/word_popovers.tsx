@@ -8,7 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
-import type { ShownWord } from '~/components/quran/recitation'
+import type { ShownWord } from '~/components/quran/use_recitation'
 
 type WordPopovers = {
   /** Hears when the popover of the Word at `location` opens or closes. */

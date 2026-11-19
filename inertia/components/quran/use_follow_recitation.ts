@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useEffectEvent, useRef, type RefObject } from 'react'
 import { ayahsInView, regionView, scrollRegion } from '~/components/quran/ayahs_in_view'
-import type { ShownWord } from '~/components/quran/recitation'
+import type { ShownWord } from '~/components/quran/use_recitation'
 
 /**
  * How long (in ms) after the reader's last wheel, touch or key a scroll still
