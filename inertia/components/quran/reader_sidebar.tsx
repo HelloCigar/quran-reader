@@ -38,6 +38,11 @@ const NUMBER_SIZE = `calc((${textSizeVars['--font-size-sm']} + ${textSizeVars['-
 const ACCENT_WASH = `color-mix(in srgb, ${colorVars['--color-accent']} 10%, transparent)`
 
 const styles = stylex.create({
+  /** A list scrolls on under the Recitation bar, and its last row scrolls clear of it. */
+  list: {
+    paddingBlockEnd: 'var(--recitation-clearance, 0px)',
+    scrollPaddingBlockEnd: 'var(--recitation-clearance, 0px)',
+  },
   /** The Surah's Arabic name at the end of its row, at 17px. */
   surahArabic: {
     fontSize: textSizeVars['--font-size-lg'],
@@ -272,7 +277,7 @@ export default function ReaderSidebar({
       </HStack>
       <StackItem size="fill">
         <HStack gap={2} height="100%">
-          <StackItem size="fill" isScrollable aria-label="Surahs list">
+          <StackItem size="fill" isScrollable aria-label="Surahs list" xstyle={styles.list}>
             {shownSurahs.length === 0 ? (
               <Text type="supporting">No surah matches &ldquo;{query}&rdquo;.</Text>
             ) : (
@@ -305,7 +310,11 @@ export default function ReaderSidebar({
             )}
           </StackItem>
           {mode === 'verse' && (
-            <StackItem xstyle={styles.ayahColumn} isScrollable aria-label="Ayahs list">
+            <StackItem
+              xstyle={[styles.ayahColumn, styles.list]}
+              isScrollable
+              aria-label="Ayahs list"
+            >
               {shownAyahs.length === 0 ? (
                 <Text type="supporting">No such ayah.</Text>
               ) : (

@@ -135,6 +135,23 @@ test.group('Navigation', (group) => {
     await page.assertPath(route('session.create'))
   })
 
+  test('takes a signed-out reader home from the bar while reading', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page
+      .getByRole('navigation', { name: 'Main navigation', exact: true })
+      .getByRole('link', { name: 'Home', exact: true })
+      .click()
+
+    await page.waitForURL(route('home'))
+    await page.assertTextContains('h1', 'Read the Quran, word by word')
+  })
+
   test('navigates between pages without a full reload', async ({ visit, route, assert }) => {
     const page = await visit(route('home'))
     await page.evaluate(() => Object.assign(globalThis, { __sameDocument: true }))

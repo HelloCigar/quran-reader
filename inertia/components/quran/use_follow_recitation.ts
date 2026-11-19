@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useEffectEvent, useRef, type RefObject } from 'react'
-import { ayahsInView, scrollRegion } from '~/components/quran/ayahs_in_view'
+import { ayahsInView, regionView, scrollRegion } from '~/components/quran/ayahs_in_view'
 import type { ShownWord } from '~/components/quran/recitation'
 
 /**
@@ -69,8 +69,7 @@ export function useFollowRecitation({
       `[data-word-location="${recitedWord}"]`
     )
     if (!element) return
-    const region = scrollRegion(element)
-    const view = region?.getBoundingClientRect() ?? { top: 0, bottom: window.innerHeight }
+    const view = regionView(scrollRegion(element))
     const rect = element.getBoundingClientRect()
     if (rect.top < view.top || rect.bottom > view.bottom) {
       element.scrollIntoView({ block: 'center', behavior: 'smooth' })

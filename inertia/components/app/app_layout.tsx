@@ -45,6 +45,9 @@ import {
 /** The areas everyone can open. */
 const publicNav: NavItem[] = [{ label: 'Quran', route: 'surahs.index', icon: BookOpenIcon }]
 
+/** The areas only a signed-out visitor sees: the home page sends a reader to the dashboard. */
+const visitorNav: NavItem[] = [{ label: 'Home', route: 'home', icon: HomeIcon }]
+
 /** The areas added for a signed-in reader. */
 const readerNav: NavItem[] = [
   { label: 'Dashboard', route: 'dashboard', icon: HomeIcon },
@@ -177,7 +180,7 @@ const styles = stylex.create({
  * The frame of every page except sign-in and sign-up (Astryx
  * `AppShellTopNavOnly` block). The bar has three zones: the logo, the areas,
  * and the theme toggle with the account. It changes with sign-in: everyone
- * sees Quran, a signed-in reader also sees Dashboard, Bookmarks, Settings and
+ * sees Quran, a signed-out visitor also sees Home, a signed-in reader also sees Dashboard, Bookmarks, Settings and
  * the Account menu, which holds Log out, and a signed-out visitor sees Sign in
  * and Get started. Pages render their own `Layout` inside it, which owns the
  * page header and padding.
@@ -239,7 +242,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 /** The areas of a wide screen's bar: one segmented group. A phone lists them in its menu. */
 function Areas({ signedIn }: { signedIn: boolean }) {
   const { isMobile } = useAppShellMobile()
-  const items = useNavItems(signedIn ? [...publicNav, ...readerNav] : publicNav)
+  const items = useNavItems(signedIn ? [...publicNav, ...readerNav] : [...visitorNav, ...publicNav])
 
   return isMobile ? null : <SegmentedNav items={items} />
 }
@@ -258,7 +261,7 @@ function BarActions({
   onMenuOpenChange: (isOpen: boolean) => void
 }) {
   const { isMobile } = useAppShellMobile()
-  const items = useNavItems(signedIn ? [...publicNav, ...readerNav] : publicNav)
+  const items = useNavItems(signedIn ? [...publicNav, ...readerNav] : [...visitorNav, ...publicNav])
 
   return (
     <HStack gap={isMobile ? 0 : 1} vAlign="center">
