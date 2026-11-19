@@ -102,6 +102,7 @@ test.group('Navigation', (group) => {
     const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true })
 
     await page.assertVisible(nav.getByRole('link', { name: 'Dashboard', exact: true }))
+    await page.assertNotExists(nav.getByRole('link', { name: 'Home', exact: true }))
     await page.assertVisible(nav.getByRole('button', { name: 'Account menu', exact: true }))
     await nav.getByRole('link', { name: 'Bookmarks', exact: true }).click()
     await page.assertPath(route('bookmarks.index'))
