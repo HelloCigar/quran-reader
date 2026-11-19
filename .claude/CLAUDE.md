@@ -1,7 +1,3 @@
-# CLAUDE
-
-Project-specific guidance for AI coding agents.
-
 ## Project conventions
 
 AdonisJS 7 + Inertia + React. The frontend lives in `inertia/` and is built with Astryx (rules in the Astryx block of the root `CLAUDE.md`).

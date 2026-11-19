@@ -66,15 +66,12 @@ Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/ag
 
 ### Which skills own what
 
-The mattpocock skills own planning and the work around code. The Flow skills and the harness docs own the code itself. When the two disagree about code, the Flow rule wins.
+The mattpocock skills own planning and the work around code. The Flow skills and the harness docs own the code itself, and the Flow rule wins when they disagree. `docs/adr/0003-adonisjs-work-follows-the-flow-harness.md` lists the Flow part each mattpocock skill must use.
 
-- **Planning and process: mattpocock.** `grilling`, `grill-me`, `grill-with-docs`, `domain-modeling`, `to-spec`, `to-tickets`, `wayfinder`, `triage`, `research`, `prototype`, `to-questionnaire`, `handoff`, `retro`, `pr`, `wizard`, `teach`.
-- **Code: Flow.** Use the Flow skills in the table at the top of this file to design, place, test and review code.
-- **Don't use these mattpocock skills in this repo:**
-  - `codebase-design`, `improve-codebase-architecture`: use `flow-code-placement` and `flow-pattern-object-design`.
-  - `tdd`: use `flow-design-tests` and `<harness>/testing.md`.
-  - `mattpocock-skills:code-review`: use `flow-code-review`.
-  - `setup-pre-commit`: this repo uses Oxfmt and Oxlint, not Prettier.
-  - `setup-ts-deep-modules`, `migrate-to-shoehorn`: they don't fit this stack.
-- **`implement` and `implement-spec`** can drive the tickets, but follow Flow inside each ticket. Where they say to call `tdd`, use `flow-design-tests` and the other Flow skills the work triggers. Where they say to call `code-review`, use `flow-code-review`.
-- **`diagnosing-bugs`** can run the diagnosis loop. The fix follows the Flow skills.
+Don't use these mattpocock skills in this repo, including when another skill (such as `implement` or `implement-spec`) calls for them:
+
+- `codebase-design`, `improve-codebase-architecture`: use `flow-code-placement` and `flow-pattern-object-design`.
+- `tdd`: use `flow-design-tests` and `.flow/docs/testing.md`.
+- `mattpocock-skills:code-review`: use `flow-code-review`.
+- `setup-pre-commit`: this repo uses Oxfmt and Oxlint, not Prettier.
+- `setup-ts-deep-modules`, `migrate-to-shoehorn`: they don't fit this stack.
