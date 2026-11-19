@@ -10,7 +10,7 @@ import {
 import { usePage } from '@inertiajs/react'
 import { useReaderPreference } from '~/components/quran/use_reader_preference'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
-import { useRecitation } from '~/components/quran/recitation'
+import { useRecitation } from '~/components/quran/use_recitation'
 
 const NARROW = '(max-width: 768px)'
 

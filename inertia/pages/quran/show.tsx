@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
+import * as stylex from '@stylexjs/stylex'
+import { spacingVars } from '@astryxdesign/core/theme/tokens.stylex'
 import { useRouter } from '@adonisjs/inertia/react'
 import { Head, InfiniteScroll } from '@inertiajs/react'
 import type { Scroll } from '@adonisjs/inertia/types'
@@ -22,7 +24,7 @@ import NoteDialog from '~/components/bookmarks/note_dialog'
 import RemoveBookmarkDialog from '~/components/bookmarks/remove_bookmark_dialog'
 import { useNotePrompt } from '~/components/bookmarks/use_note_prompt'
 import { useRemoveBookmark } from '~/components/bookmarks/use_remove_bookmark'
-import { useReadingPage, useRecitation } from '~/components/quran/recitation'
+import { useReadingPage, useRecitation } from '~/components/quran/use_recitation'
 import { WordPopoversProvider } from '~/components/quran/word_popovers'
 import { useNavigationEvent } from '~/components/navigation/navigation_events'
 import ReaderLayout from '~/components/quran/reader_layout'
@@ -43,6 +45,17 @@ const LOAD_AHEAD = 1600
  * the next block loads, so the Recited Word is loaded before it is heard.
  */
 const RECITATION_LOAD_AHEAD = 5
+
+const styles = stylex.create({
+  /**
+   * The Ayahs scroll on under the Recitation bar: their region pads its end
+   * by the bar's band, and a scroll into view stops short of it.
+   */
+  content: {
+    paddingBlockEnd: `calc(${spacingVars['--spacing-4']} + var(--recitation-clearance, 0px))`,
+    scrollPaddingBlockEnd: 'var(--recitation-clearance, 0px)',
+  },
+})
 
 /** An old link to an Ayah, from before a Surah loaded in blocks: `#ayah-255`. */
 const AYAH_HASH = /^#ayah-(\d+)$/
@@ -293,7 +306,7 @@ export default function Show({
         ref={pageRef}
         contentWidth={PAGE_WIDTH}
         content={
-          <LayoutContent padding={PAGE_INSET}>
+          <LayoutContent padding={PAGE_INSET} xstyle={styles.content}>
             <Head title={surah.name} />
             <InfiniteScroll
               ref={scrollRef}

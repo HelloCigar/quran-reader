@@ -10,9 +10,7 @@ const IN_VIEW_MIN = 24
  */
 export function ayahsInView(list: HTMLElement | null): { first: number; last: number } | null {
   if (!list) return null
-  const region = scrollRegion(list)
-  const top = region?.getBoundingClientRect().top ?? 0
-  const bottom = region?.getBoundingClientRect().bottom ?? window.innerHeight
+  const { top, bottom } = regionView(scrollRegion(list))
   const items = Array.from(list.querySelectorAll<HTMLElement>('[id^="ayah-"]'))
   const firstIndex = items.findIndex(
     (item) => item.getBoundingClientRect().bottom > top + IN_VIEW_MIN
@@ -35,6 +33,17 @@ export function scrollRegion(element: HTMLElement | null): HTMLElement | null {
     region = region.parentElement
   }
   return region
+}
+
+/**
+ * The part of `region` (or of the window, for `null`) the reader can see: its
+ * box less its scroll padding at the end, where the Recitation bar lies over it.
+ */
+export function regionView(region: HTMLElement | null): { top: number; bottom: number } {
+  if (!region) return { top: 0, bottom: window.innerHeight }
+  const box = region.getBoundingClientRect()
+  const covered = Number.parseFloat(getComputedStyle(region).scrollPaddingBottom) || 0
+  return { top: box.top, bottom: box.bottom - covered }
 }
 
 function ayahNumber(item: HTMLElement) {

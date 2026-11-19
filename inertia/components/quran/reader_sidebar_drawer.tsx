@@ -10,7 +10,7 @@ import {
 } from '@astryxdesign/core/theme/tokens.stylex'
 import type { Data } from '@generated/data'
 import ReaderSidebar from '~/components/quran/reader_sidebar'
-import { useRecitation } from '~/components/quran/recitation'
+import { useRecitation } from '~/components/quran/use_recitation'
 import {
   ReaderSidebarContext,
   useReaderSidebar,
@@ -33,6 +33,8 @@ const styles = stylex.create({
     // The drawer's content area paints the surface colour; here it is the card's.
     '--color-background-surface': colorVars['--color-background-card'],
     boxShadow: shadowVars['--shadow-high'],
+    // The drawer lies over the Recitation bar, so its lists need no room for it.
+    '--recitation-clearance': '0px',
     '::backdrop': {
       backgroundColor: `color-mix(in srgb, ${colorVars['--color-text-primary']} 32%, transparent)`,
     },

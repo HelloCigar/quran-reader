@@ -102,6 +102,7 @@ test.group('Navigation', (group) => {
     const nav = page.getByRole('navigation', { name: 'Main navigation', exact: true })
 
     await page.assertVisible(nav.getByRole('link', { name: 'Dashboard', exact: true }))
+    await page.assertNotExists(nav.getByRole('link', { name: 'Home', exact: true }))
     await page.assertVisible(nav.getByRole('button', { name: 'Account menu', exact: true }))
     await nav.getByRole('link', { name: 'Bookmarks', exact: true }).click()
     await page.assertPath(route('bookmarks.index'))
@@ -133,6 +134,23 @@ test.group('Navigation', (group) => {
     await page.assertNotExists(nav.getByRole('link', { name: 'Bookmarks', exact: true }))
     await nav.getByRole('link', { name: 'Sign in', exact: true }).click()
     await page.assertPath(route('session.create'))
+  })
+
+  test('takes a signed-out reader home from the bar while reading', async ({
+    visit,
+    route,
+    swap,
+  }) => {
+    swap(QuranTextService, new FakeQuranTextService())
+
+    const page = await visit(route('surahs.show', { number: 2 }))
+    await page
+      .getByRole('navigation', { name: 'Main navigation', exact: true })
+      .getByRole('link', { name: 'Home', exact: true })
+      .click()
+
+    await page.waitForURL(route('home'))
+    await page.assertTextContains('h1', 'Read the Quran, word by word')
   })
 
   test('navigates between pages without a full reload', async ({ visit, route, assert }) => {

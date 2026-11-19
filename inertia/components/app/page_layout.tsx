@@ -43,7 +43,8 @@ const styles = stylex.create({
     width: '100%',
     marginInline: 'auto',
     paddingBlockStart: { default: SPACE_56, [PHONE]: spacingVars['--spacing-5'] },
-    paddingBlockEnd: SPACE_96,
+    // The page scrolls on under the Recitation bar: its end clears the bar's band.
+    paddingBlockEnd: `calc(${SPACE_96} + var(--recitation-clearance, 0px))`,
     paddingInline: {
       default: spacingVars['--spacing-6'],
       [PHONE]: spacingVars['--spacing-3'],

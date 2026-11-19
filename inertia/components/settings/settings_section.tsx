@@ -14,7 +14,7 @@ import { Heading } from '@astryxdesign/core/Heading'
 import { Text } from '@astryxdesign/core/Text'
 import { Icon } from '@astryxdesign/core/Icon'
 import { entranceStyles } from '~/components/quran/entrance_styles'
-import { useRecitation } from '~/components/quran/recitation'
+import { useRecitation } from '~/components/quran/use_recitation'
 import { SaveBarHost } from '~/components/settings/save_bar_host'
 import { SettingsButton } from '~/components/settings/settings_controls'
 
